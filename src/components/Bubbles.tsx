@@ -17,7 +17,8 @@ const Bubbles = () => {
             left: bubble.left,
             width: bubble.size,
             height: bubble.size,
-            background: "radial-gradient(circle, hsl(175, 65%, 70%, 0.4) 0%, transparent 70%)",
+            background: "radial-gradient(circle, hsl(180, 85%, 55%, 0.25) 0%, hsl(170, 75%, 45%, 0.1) 50%, transparent 70%)",
+            boxShadow: "0 0 15px hsl(180, 85%, 55%, 0.3)",
             animation: `bubble-rise ${bubble.duration} ease-in-out ${bubble.delay} infinite`,
           }}
         />
