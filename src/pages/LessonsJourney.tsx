@@ -24,9 +24,9 @@ const LessonsJourney = () => {
       style={{
         background: `linear-gradient(180deg, 
           hsl(var(--background)) 0%, 
-          hsl(var(--card)) ${Math.max(30, 50 - scrollProgress * 30)}%, 
-          hsl(var(--muted)) ${Math.max(60, 80 - scrollProgress * 40)}%, 
-          hsl(220, 40%, ${Math.max(5, 15 - scrollProgress * 10)}%) 100%)`,
+          hsl(var(--card)) 40%, 
+          hsl(var(--muted)) ${60 + scrollProgress * 20}%, 
+          hsl(220 40% ${Math.max(5, 8 - scrollProgress * 3)}%) 100%)`,
       }}
     >
       <Navigation />
@@ -76,14 +76,14 @@ const LessonsJourney = () => {
           {/* Title */}
           <div className="text-center space-y-4 sticky top-24 z-20 py-4">
             <h1 
-              className="text-5xl md:text-6xl font-bold text-background drop-shadow-[0_2px_10px_hsl(var(--primary)/0.5)]"
+              className="text-5xl md:text-6xl font-bold text-foreground drop-shadow-[0_2px_10px_hsl(var(--primary)/0.5)]"
               style={{
                 textShadow: '0 0 20px hsl(var(--primary) / 0.5)',
               }}
             >
               Your Typing Journey
             </h1>
-            <p className="text-lg text-background/80 drop-shadow-lg">
+            <p className="text-lg text-foreground/80 drop-shadow-lg">
               Descend into the depths and master each key
             </p>
           </div>
