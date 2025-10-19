@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import Bubbles from "@/components/Bubbles";
+import LightRays from "@/components/LightRays";
+import FloatingParticles from "@/components/FloatingParticles";
+import SwimmingFish from "@/components/SwimmingFish";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -8,7 +11,10 @@ const Intro = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden pt-24 pb-12">
+      <LightRays />
       <Bubbles />
+      <FloatingParticles />
+      <SwimmingFish />
       
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="animate-fade-in space-y-12">

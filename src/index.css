@@ -119,6 +119,51 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes light-shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes particle-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(100px, -50px) rotate(90deg);
+  }
+  50% {
+    transform: translate(200px, 0) rotate(180deg);
+  }
+  75% {
+    transform: translate(300px, 50px) rotate(270deg);
+  }
+  100% {
+    transform: translate(400px, 0) rotate(360deg);
+  }
+}
+
+@keyframes fish-swim {
+  0% {
+    transform: translateX(-100px) translateY(0);
+  }
+  25% {
+    transform: translateX(25vw) translateY(-30px);
+  }
+  50% {
+    transform: translateX(50vw) translateY(0);
+  }
+  75% {
+    transform: translateX(75vw) translateY(30px);
+  }
+  100% {
+    transform: translateX(calc(100vw + 100px)) translateY(0);
+  }
+}
+
 /* Utility Classes */
 .animate-float {
   animation: float 4s ease-in-out infinite;

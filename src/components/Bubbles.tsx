@@ -1,10 +1,10 @@
 const Bubbles = () => {
-  const bubbles = Array.from({ length: 15 }, (_, i) => ({
+  const bubbles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 8}s`,
-    duration: `${8 + Math.random() * 4}s`,
-    size: `${10 + Math.random() * 30}px`,
+    delay: `${Math.random() * 10}s`,
+    duration: `${6 + Math.random() * 8}s`,
+    size: `${5 + Math.random() * 40}px`,
   }));
 
   return (

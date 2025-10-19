@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Bubbles from "@/components/Bubbles";
+import LightRays from "@/components/LightRays";
+import FloatingParticles from "@/components/FloatingParticles";
+import SwimmingFish from "@/components/SwimmingFish";
 
 const Landing = () => {
   const [showLogo, setShowLogo] = useState(true);
@@ -19,7 +22,10 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <LightRays />
       <Bubbles />
+      <FloatingParticles />
+      <SwimmingFish />
       
       <div
         className={`text-center transition-all duration-1000 ${

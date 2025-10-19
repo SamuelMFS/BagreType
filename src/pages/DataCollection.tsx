@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
+import LightRays from "@/components/LightRays";
+import FloatingParticles from "@/components/FloatingParticles";
+import SwimmingFish from "@/components/SwimmingFish";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -34,7 +37,10 @@ const DataCollection = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
+      <LightRays />
       <Bubbles />
+      <FloatingParticles />
+      <SwimmingFish />
       
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
         <div className="animate-fade-in space-y-12">
