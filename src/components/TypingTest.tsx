@@ -40,13 +40,10 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+  const [displayOffset, setDisplayOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-
-  const CHARS_PER_ROW = 60; // Approximate characters per row
-  const VISIBLE_ROWS = 2;
 
   useEffect(() => {
     resetTest();
@@ -99,10 +96,10 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
         } else {
           setCurrentIndex(newIndex);
           
-          // Update visible window - scroll when we're past the first row
-          const charsPerWindow = CHARS_PER_ROW * VISIBLE_ROWS;
-          if (newIndex >= visibleStartIndex + CHARS_PER_ROW && newIndex < fullText.length) {
-            setVisibleStartIndex(Math.floor(newIndex / CHARS_PER_ROW) * CHARS_PER_ROW - CHARS_PER_ROW);
+          // Update display offset - show current row and next row
+          const currentRow = getCurrentRow();
+          if (currentRow > displayOffset) {
+            setDisplayOffset(currentRow);
           }
         }
       }
@@ -120,7 +117,61 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
     setStartTime(null);
     setEndTime(null);
     setIsComplete(false);
-    setVisibleStartIndex(0);
+    setDisplayOffset(0);
+  };
+
+  // Build rows of words that fit within a reasonable character limit
+  const buildRows = () => {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentRowLength = 0;
+    const maxRowLength = 50; // Characters per row
+
+    words.forEach(word => {
+      const wordWithSpace = word + ' ';
+      if (currentRowLength + wordWithSpace.length > maxRowLength && currentRow.length > 0) {
+        rows.push(currentRow);
+        currentRow = [word];
+        currentRowLength = word.length + 1;
+      } else {
+        currentRow.push(word);
+        currentRowLength += wordWithSpace.length;
+      }
+    });
+
+    if (currentRow.length > 0) {
+      rows.push(currentRow);
+    }
+
+    return rows;
+  };
+
+  const rows = buildRows();
+  
+  // Get character index for a specific row and word position
+  const getCharIndex = (rowIndex: number, wordIndex: number, charOffset: number = 0): number => {
+    let index = 0;
+    for (let r = 0; r < rowIndex; r++) {
+      index += rows[r].join(' ').length + 1; // +1 for space after row
+    }
+    for (let w = 0; w < wordIndex; w++) {
+      index += rows[rowIndex][w].length + 1; // +1 for space
+    }
+    return index + charOffset;
+  };
+
+  // Find which row the current character index is in
+  const getCurrentRow = (): number => {
+    const fullText = words.join(' ');
+    let charCount = 0;
+    for (let r = 0; r < rows.length; r++) {
+      const rowText = rows[r].join(' ');
+      if (currentIndex < charCount + rowText.length + 1) {
+        return r;
+      }
+      charCount += rowText.length + 1;
+    }
+    return rows.length - 1;
   };
 
 
@@ -260,42 +311,83 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
       {/* Words Display */}
       <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
         <div ref={containerRef} tabIndex={0} className="text-center space-y-6 focus:outline-none">
-          <div className="text-3xl leading-relaxed font-mono select-none overflow-hidden" style={{ height: '6.5rem' }}>
-            {words.join(' ').split('').slice(visibleStartIndex, visibleStartIndex + (CHARS_PER_ROW * VISIBLE_ROWS)).map((char, displayIndex) => {
-              const index = visibleStartIndex + displayIndex;
-              let className = 'transition-wave ';
-              const isSpace = char === ' ';
+          <div className="text-3xl leading-[3rem] font-mono select-none overflow-hidden h-[6rem]">
+            {rows.slice(displayOffset, displayOffset + 2).map((row, rowIndex) => {
+              const actualRowIndex = displayOffset + rowIndex;
+              let charIndex = 0;
               
-              if (index < currentIndex) {
-                // Already typed
-                if (errors.has(index)) {
-                  className += 'text-destructive font-bold';
-                } else {
-                  className += 'text-primary font-semibold';
-                }
-              } else if (index === currentIndex) {
-                // Current character - show underscore
-                className += 'text-foreground border-b-2 border-primary animate-pulse';
-              } else {
-                // Not yet typed
-                className += 'text-foreground/40';
+              // Calculate starting character index for this row
+              for (let r = 0; r < actualRowIndex; r++) {
+                charIndex += rows[r].join(' ').length + 1;
               }
 
-              // Show space character as a visible dot when it's current or has error
-              const displayChar = isSpace && (index === currentIndex || (index < currentIndex && errors.has(index)))
-                ? '·'
-                : char;
-
-              // Add line break after each row
-              const shouldBreak = displayIndex > 0 && displayIndex % CHARS_PER_ROW === 0;
-
               return (
-                <span key={index}>
-                  {shouldBreak && <br />}
-                  <span className={className}>
-                    {displayChar}
-                  </span>
-                </span>
+                <div key={actualRowIndex} className="whitespace-nowrap">
+                  {row.map((word, wordIndex) => {
+                    const wordChars = word.split('');
+                    const wordStartIndex = charIndex;
+                    
+                    const wordElement = wordChars.map((char, charOffset) => {
+                      const index = charIndex + charOffset;
+                      let className = 'transition-wave ';
+                      
+                      if (index < currentIndex) {
+                        // Already typed
+                        if (errors.has(index)) {
+                          className += 'text-destructive font-bold';
+                        } else {
+                          className += 'text-primary font-semibold';
+                        }
+                      } else if (index === currentIndex) {
+                        // Current character
+                        className += 'text-foreground border-b-2 border-primary';
+                      } else {
+                        // Not yet typed
+                        className += 'text-foreground/40';
+                      }
+
+                      return (
+                        <span key={charOffset} className={className}>
+                          {char}
+                        </span>
+                      );
+                    });
+
+                    charIndex += word.length;
+
+                    // Handle space after word
+                    const spaceIndex = charIndex;
+                    let spaceClassName = 'transition-wave ';
+                    const isLastWordInRow = wordIndex === row.length - 1;
+                    
+                    if (!isLastWordInRow) {
+                      if (spaceIndex < currentIndex) {
+                        if (errors.has(spaceIndex)) {
+                          spaceClassName += 'text-destructive font-bold';
+                        } else {
+                          spaceClassName += 'text-primary font-semibold';
+                        }
+                      } else if (spaceIndex === currentIndex) {
+                        spaceClassName += 'text-foreground border-b-2 border-primary';
+                      } else {
+                        spaceClassName += 'text-foreground/40';
+                      }
+
+                      charIndex += 1; // Move past the space
+                    }
+
+                    return (
+                      <span key={wordIndex}>
+                        {wordElement}
+                        {!isLastWordInRow && (
+                          <span className={spaceClassName}>
+                            {spaceIndex === currentIndex || (spaceIndex < currentIndex && errors.has(spaceIndex)) ? '·' : ' '}
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
               );
             })}
           </div>
