@@ -40,9 +40,13 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const CHARS_PER_ROW = 60; // Approximate characters per row
+  const VISIBLE_ROWS = 2;
 
   useEffect(() => {
     resetTest();
@@ -88,10 +92,18 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
           setErrors(new Set([...errors, currentIndex]));
         }
 
-        if (currentIndex === fullText.length - 1) {
+        const newIndex = currentIndex + 1;
+        
+        if (newIndex === fullText.length) {
           finishTest();
         } else {
-          setCurrentIndex(currentIndex + 1);
+          setCurrentIndex(newIndex);
+          
+          // Update visible window - scroll when we're past the first row
+          const charsPerWindow = CHARS_PER_ROW * VISIBLE_ROWS;
+          if (newIndex >= visibleStartIndex + CHARS_PER_ROW && newIndex < fullText.length) {
+            setVisibleStartIndex(Math.floor(newIndex / CHARS_PER_ROW) * CHARS_PER_ROW - CHARS_PER_ROW);
+          }
         }
       }
     };
@@ -108,6 +120,7 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
     setStartTime(null);
     setEndTime(null);
     setIsComplete(false);
+    setVisibleStartIndex(0);
   };
 
 
@@ -247,8 +260,9 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
       {/* Words Display */}
       <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
         <div ref={containerRef} tabIndex={0} className="text-center space-y-6 focus:outline-none">
-          <div className="text-3xl leading-relaxed font-mono select-none">
-            {words.join(' ').split('').map((char, index) => {
+          <div className="text-3xl leading-relaxed font-mono select-none overflow-hidden" style={{ height: '6.5rem' }}>
+            {words.join(' ').split('').slice(visibleStartIndex, visibleStartIndex + (CHARS_PER_ROW * VISIBLE_ROWS)).map((char, displayIndex) => {
+              const index = visibleStartIndex + displayIndex;
               let className = 'transition-wave ';
               const isSpace = char === ' ';
               
@@ -261,7 +275,7 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
                 }
               } else if (index === currentIndex) {
                 // Current character - show underscore
-                className += 'text-foreground border-b-2 border-primary';
+                className += 'text-foreground border-b-2 border-primary animate-pulse';
               } else {
                 // Not yet typed
                 className += 'text-foreground/40';
@@ -272,9 +286,15 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
                 ? '·'
                 : char;
 
+              // Add line break after each row
+              const shouldBreak = displayIndex > 0 && displayIndex % CHARS_PER_ROW === 0;
+
               return (
-                <span key={index} className={className}>
-                  {displayChar}
+                <span key={index}>
+                  {shouldBreak && <br />}
+                  <span className={className}>
+                    {displayChar}
+                  </span>
                 </span>
               );
             })}
