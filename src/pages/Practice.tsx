@@ -39,12 +39,6 @@ const Practice = () => {
 
   const testRef = useRef<{ reset: () => void }>(null);
 
-  const handleResetTest = () => {
-    if (testRef.current) {
-      testRef.current.reset();
-    }
-  };
-
   const getTestProps = () => {
     switch (mode) {
       case "words":
@@ -71,7 +65,7 @@ const Practice = () => {
             {/* Mode Selection */}
             <Select value={mode} onValueChange={(value) => {
               setMode(value as Mode);
-              handleResetTest();
+              if (testRef.current) testRef.current.reset();
             }}>
               <SelectTrigger className="w-32 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
                 <SelectValue />
@@ -98,7 +92,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setWordCount(count);
-                      handleResetTest();
+                      if (testRef.current) testRef.current.reset();
                     }}
                   >
                     {count}
@@ -119,7 +113,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setTimeLimit(time);
-                      handleResetTest();
+                      if (testRef.current) testRef.current.reset();
                     }}
                   >
                     {time}
@@ -140,7 +134,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setQuoteLength(length);
-                      handleResetTest();
+                      if (testRef.current) testRef.current.reset();
                     }}
                   >
                     {length}
@@ -154,7 +148,7 @@ const Practice = () => {
                 {savedTexts.length > 0 && (
                   <Select onValueChange={(value) => {
                     setCustomText(value);
-                    handleResetTest();
+                    if (testRef.current) testRef.current.reset();
                   }}>
                     <SelectTrigger className="w-40 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
                       <SelectValue placeholder="saved texts" />
@@ -177,7 +171,7 @@ const Practice = () => {
                       const newTexts = [...savedTexts, text];
                       setSavedTexts(newTexts);
                       localStorage.setItem("customTexts", JSON.stringify(newTexts));
-                      handleResetTest();
+                      if (testRef.current) testRef.current.reset();
                     }
                   }}
                 >
@@ -191,8 +185,6 @@ const Practice = () => {
           <TypingTest 
             ref={testRef}
             {...getTestProps()}
-            onComplete={handleResetTest}
-            onRestart={handleResetTest}
           />
         </div>
       </div>
