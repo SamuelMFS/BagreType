@@ -1,4 +1,21 @@
+import { useEffect, useState } from "react";
+
 const DeepFish = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = window.scrollY;
+      const progress = scrollHeight > 0 ? scrolled / scrollHeight : 0;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const fish = Array.from({ length: 3 }, (_, i) => ({
     id: i,
     bottom: `${10 + i * 15}%`,
@@ -7,8 +24,14 @@ const DeepFish = () => {
     scale: 1.8 + Math.random() * 0.8,
   }));
 
+  // Only show when scrolled past 40%
+  const opacity = scrollProgress > 0.4 ? Math.min((scrollProgress - 0.4) / 0.3, 1) * 0.35 : 0;
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 3 }}>
+    <div 
+      className="fixed inset-0 pointer-events-none overflow-hidden transition-opacity duration-500" 
+      style={{ zIndex: 3 }}
+    >
       {fish.map((f) => (
         <div
           key={f.id}
@@ -18,6 +41,7 @@ const DeepFish = () => {
             left: '-150px',
             animation: `fish-swim ${f.duration} linear ${f.delay} infinite`,
             transform: `scale(${f.scale})`,
+            opacity,
           }}
         >
           <svg
@@ -26,7 +50,6 @@ const DeepFish = () => {
             viewBox="0 0 60 30"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ opacity: 0.35 }}
           >
             <path
               d="M50 15C50 15 45 10 35 10C25 10 15 12 10 15C15 18 25 20 35 20C45 20 50 15 50 15Z"
