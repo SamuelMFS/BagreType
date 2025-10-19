@@ -59,9 +59,9 @@ const LessonRoadmap = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto py-12">
+    <div className="relative w-full max-w-3xl mx-auto py-12">
       {chapters.map((chapter, chapterIdx) => (
-        <div key={chapter.id} className="relative mb-20">
+        <div key={chapter.id} className="relative mb-20" style={{ minHeight: `${chapter.nodes.length * 100 + 100}px` }}>
           {/* Chapter Divider */}
           {chapterIdx > 0 && (
             <div className="mb-12 animate-fade-in">
@@ -73,50 +73,67 @@ const LessonRoadmap = () => {
             </div>
           )}
 
-          {/* Nodes in zigzag pattern */}
-          <div className="space-y-6">
+          {/* SVG Path for the entire chapter curve */}
+          <svg 
+            className="absolute top-0 left-0 w-full pointer-events-none"
+            viewBox="0 0 800 800"
+            preserveAspectRatio="xMidYMin meet"
+            style={{ 
+              height: `${chapter.nodes.length * 100}px`,
+              zIndex: 0,
+            }}
+          >
+            <defs>
+              <linearGradient id={`path-gradient-${chapter.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.4" />
+              </linearGradient>
+            </defs>
+            <path
+              d={chapter.nodes.map((node, idx) => {
+                const progress = idx / Math.max(chapter.nodes.length - 1, 1);
+                const xOffset = Math.sin(progress * Math.PI * 3) * 150;
+                const x = 400 + xOffset;
+                const y = idx * 100 + 50;
+                
+                if (idx === 0) {
+                  return `M ${x} ${y}`;
+                }
+                
+                const prevProgress = (idx - 1) / Math.max(chapter.nodes.length - 1, 1);
+                const prevXOffset = Math.sin(prevProgress * Math.PI * 3) * 150;
+                const prevX = 400 + prevXOffset;
+                const prevY = (idx - 1) * 100 + 50;
+                
+                const controlY = (prevY + y) / 2;
+                return `Q ${prevX} ${controlY}, ${x} ${y}`;
+              }).join(' ')}
+              stroke={`url(#path-gradient-${chapter.id})`}
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+
+          {/* Nodes positioned along the curve */}
+          <div className="relative" style={{ zIndex: 1 }}>
             {chapter.nodes.map((node, nodeIdx) => {
-              // Create smooth sine wave pattern
-              const totalNodes = chapter.nodes.length;
-              const progress = nodeIdx / Math.max(totalNodes - 1, 1);
-              const xOffset = Math.sin(progress * Math.PI * 2) * 120; // Wider curve
+              // Calculate position along sine wave
+              const progress = nodeIdx / Math.max(chapter.nodes.length - 1, 1);
+              const xOffset = Math.sin(progress * Math.PI * 3) * 150;
               
               return (
                 <div
                   key={node.id}
-                  className="relative animate-fade-in"
+                  className="absolute w-20 h-20 animate-fade-in"
                   style={{ 
                     animationDelay: `${nodeIdx * 0.1}s`,
-                    marginLeft: `calc(50% + ${xOffset}px)`,
-                    transform: 'translateX(-50%)',
+                    left: `calc(50% + ${xOffset}px)`,
+                    top: `${nodeIdx * 100}px`,
+                    transform: 'translate(-50%, 0)',
                   }}
                 >
-                  {/* Curved connecting line to next node */}
-                  {nodeIdx < chapter.nodes.length - 1 && (
-                    <svg
-                      className="absolute top-10 left-1/2 -translate-x-1/2 pointer-events-none"
-                      width="200"
-                      height="80"
-                      style={{
-                        overflow: 'visible',
-                      }}
-                    >
-                      <defs>
-                        <linearGradient id={`gradient-${chapter.id}-${nodeIdx}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d={`M 100 0 Q 100 40, ${100 + (Math.sin((progress + 0.05) * Math.PI * 2) - Math.sin(progress * Math.PI * 2)) * 120} 80`}
-                        stroke={`url(#gradient-${chapter.id}-${nodeIdx})`}
-                        strokeWidth="2"
-                        fill="none"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  )}
-
                   {/* Node circle */}
                   <div className="relative group cursor-pointer">
                     <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:blur-2xl transition-all duration-700" 
