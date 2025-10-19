@@ -1,11 +1,45 @@
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import { Button } from "@/components/ui/button";
+import TypingTest from "@/components/TypingTest";
 
 const Learn = () => {
+  const [showTest, setShowTest] = useState(false);
+
+  if (showTest) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <Navigation />
+        <LightRays />
+        <Bubbles />
+        <FloatingParticles />
+        <SwimmingFish />
+        
+        <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
+          <div className="animate-fade-in space-y-8">
+            <div className="text-center space-y-2">
+              <h1 className="text-4xl font-bold text-primary">
+                Baseline Test
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Type the words as quickly and accurately as you can
+              </p>
+            </div>
+            
+            <TypingTest 
+              wordCount={30}
+              onComplete={() => setShowTest(false)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
@@ -76,7 +110,9 @@ const Learn = () => {
               </p>
               <Button 
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-underwater text-lg px-8 py-6"
+                variant="ocean"
+                className="text-lg px-8 py-6"
+                onClick={() => setShowTest(true)}
               >
                 Start Baseline Test
               </Button>
