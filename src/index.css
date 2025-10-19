@@ -8,17 +8,13 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Deep Ocean Abyss Theme - Dark depths with bioluminescence */
-    --abyss: 220 40% 8%;
-    --deep-navy: 215 35% 12%;
-    --ocean-floor: 210 30% 18%;
-    --biolume-cyan: 180 85% 55%;
-    --biolume-teal: 170 75% 45%;
-    --deep-teal: 185 60% 25%;
-    --surface-glow: 190 70% 75%;
-    --coral-accent: 12 90% 60%;
-    
-    /* Semantic Tokens */
+    --radius: 1rem;
+    --transition-wave: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bubble: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Deep Ocean Abyss Theme - Dark depths with bioluminescence */
+  .deep {
     --background: 220 40% 8%;
     --foreground: 190 70% 90%;
 
@@ -47,21 +43,52 @@ All colors MUST be HSL.
     --input: 210 30% 15%;
     --ring: 180 85% 55%;
 
-    --radius: 1rem;
-
-    /* Gradients - Deep ocean abyss */
     --gradient-ocean: linear-gradient(180deg, hsl(220, 40%, 8%) 0%, hsl(215, 35%, 12%) 50%, hsl(210, 30%, 15%) 100%);
     --gradient-aqua: linear-gradient(135deg, hsl(180, 85%, 55%) 0%, hsl(170, 75%, 45%) 100%);
     --gradient-glow: radial-gradient(circle, hsl(180, 85%, 55%, 0.15) 0%, transparent 70%);
     
-    /* Shadows & Glows - Bioluminescent */
     --shadow-underwater: 0 10px 40px -10px hsl(180, 85%, 55%, 0.3);
     --glow-aqua: 0 0 40px hsl(180, 85%, 55%, 0.6), 0 0 80px hsl(180, 85%, 55%, 0.3);
     --glow-soft: 0 0 25px hsl(170, 75%, 45%, 0.4);
+  }
+
+  /* Shallow Waters Theme - Sunlit tropical waters */
+  .shallow {
+    --background: 195 80% 92%;
+    --foreground: 200 50% 15%;
+
+    --card: 190 75% 88%;
+    --card-foreground: 200 50% 15%;
+
+    --popover: 190 75% 90%;
+    --popover-foreground: 200 50% 15%;
+
+    --primary: 185 75% 45%;
+    --primary-foreground: 195 80% 95%;
+
+    --secondary: 180 60% 65%;
+    --secondary-foreground: 200 50% 15%;
+
+    --muted: 190 60% 80%;
+    --muted-foreground: 200 30% 40%;
+
+    --accent: 175 70% 55%;
+    --accent-foreground: 200 50% 15%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 195 80% 95%;
+
+    --border: 185 60% 70%;
+    --input: 190 70% 85%;
+    --ring: 185 75% 45%;
+
+    --gradient-ocean: linear-gradient(180deg, hsl(195, 80%, 92%) 0%, hsl(190, 75%, 88%) 50%, hsl(185, 70%, 85%) 100%);
+    --gradient-aqua: linear-gradient(135deg, hsl(185, 75%, 45%) 0%, hsl(175, 70%, 55%) 100%);
+    --gradient-glow: radial-gradient(circle, hsl(185, 75%, 45%, 0.2) 0%, transparent 70%);
     
-    /* Animation Timing */
-    --transition-wave: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bubble: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --shadow-underwater: 0 10px 40px -10px hsl(185, 75%, 45%, 0.4);
+    --glow-aqua: 0 0 30px hsl(185, 75%, 45%, 0.5), 0 0 60px hsl(185, 75%, 45%, 0.2);
+    --glow-soft: 0 0 20px hsl(175, 70%, 55%, 0.3);
   }
 }
 
@@ -74,6 +101,11 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     background: var(--gradient-ocean);
     min-height: 100vh;
+  }
+  
+  /* Set default theme */
+  html {
+    @apply deep;
   }
 }
 

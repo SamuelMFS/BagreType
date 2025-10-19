@@ -24,17 +24,17 @@ const SwimmingFish = () => {
             viewBox="0 0 60 30"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ opacity: 0.15 }}
+            style={{ opacity: 0.2 }}
           >
             <path
               d="M50 15C50 15 45 10 35 10C25 10 15 12 10 15C15 18 25 20 35 20C45 20 50 15 50 15Z"
-              fill="hsl(180, 85%, 55%)"
+              fill="hsl(var(--primary))"
             />
             <path
               d="M10 15L0 10L5 15L0 20L10 15Z"
-              fill="hsl(180, 85%, 55%)"
+              fill="hsl(var(--primary))"
             />
-            <circle cx="38" cy="13" r="2" fill="hsl(220, 40%, 8%)" />
+            <circle cx="38" cy="13" r="2" fill="hsl(var(--background))" />
           </svg>
         </div>
       ))}
