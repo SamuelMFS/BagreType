@@ -10,6 +10,7 @@ interface TypingTestProps {
   wordCount?: number;
   customText?: string;
   onComplete?: (wpm: number, accuracy: number) => void;
+  onRestart?: () => void;
 }
 
 const commonWords = [
@@ -33,7 +34,7 @@ const generateWords = (count: number): string[] => {
   return words;
 };
 
-const TypingTest = ({ wordCount = 30, customText, onComplete }: TypingTestProps) => {
+const TypingTest = ({ wordCount = 30, customText, onComplete, onRestart }: TypingTestProps) => {
   const [words, setWords] = useState<string[]>([]);
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -111,18 +112,22 @@ const TypingTest = ({ wordCount = 30, customText, onComplete }: TypingTestProps)
   }, [currentIndex, userInput, words, startTime, isComplete, errors]);
 
   const resetTest = () => {
-    if (customText) {
-      setWords(customText.trim().split(/\s+/));
+    if (onRestart) {
+      onRestart();
     } else {
-      setWords(generateWords(wordCount));
+      if (customText) {
+        setWords(customText.trim().split(/\s+/));
+      } else {
+        setWords(generateWords(wordCount));
+      }
+      setUserInput('');
+      setCurrentIndex(0);
+      setErrors(new Set());
+      setStartTime(null);
+      setEndTime(null);
+      setIsComplete(false);
+      setDisplayOffset(0);
     }
-    setUserInput('');
-    setCurrentIndex(0);
-    setErrors(new Set());
-    setStartTime(null);
-    setEndTime(null);
-    setIsComplete(false);
-    setDisplayOffset(0);
   };
 
   // Build rows of words that fit within a reasonable character limit
