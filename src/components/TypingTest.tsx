@@ -34,14 +34,13 @@ const generateWords = (count: number): string[] => {
 
 const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
   const [words, setWords] = useState<string[]>([]);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [currentInput, setCurrentInput] = useState('');
-  const [completedWords, setCompletedWords] = useState<string[]>([]);
-  const [incorrectWords, setIncorrectWords] = useState<Set<number>>(new Set());
+  const [userInput, setUserInput] = useState<string>('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [errors, setErrors] = useState<Set<number>>(new Set());
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -50,49 +49,67 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
   }, [wordCount]);
 
   useEffect(() => {
-    if (inputRef.current && !isComplete) {
-      inputRef.current.focus();
-    }
-  }, [isComplete]);
+    if (isComplete) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent default for space to avoid page scroll
+      if (e.key === ' ') {
+        e.preventDefault();
+      }
+
+      // Start timer on first keypress
+      if (!startTime && e.key.length === 1) {
+        setStartTime(Date.now());
+      }
+
+      const fullText = words.join(' ');
+
+      // Handle backspace
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          setCurrentIndex(currentIndex - 1);
+          setUserInput(userInput.slice(0, -1));
+          const newErrors = new Set(errors);
+          newErrors.delete(currentIndex - 1);
+          setErrors(newErrors);
+        }
+        return;
+      }
+
+      // Handle regular character input
+      if (e.key.length === 1) {
+        const expectedChar = fullText[currentIndex];
+        const typedChar = e.key;
+
+        setUserInput(userInput + typedChar);
+
+        if (typedChar !== expectedChar) {
+          setErrors(new Set([...errors, currentIndex]));
+        }
+
+        if (currentIndex === fullText.length - 1) {
+          finishTest();
+        } else {
+          setCurrentIndex(currentIndex + 1);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, userInput, words, startTime, isComplete, errors]);
 
   const resetTest = () => {
     setWords(generateWords(wordCount));
-    setCurrentWordIndex(0);
-    setCurrentInput('');
-    setCompletedWords([]);
-    setIncorrectWords(new Set());
+    setUserInput('');
+    setCurrentIndex(0);
+    setErrors(new Set());
     setStartTime(null);
     setEndTime(null);
     setIsComplete(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    
-    if (!startTime) {
-      setStartTime(Date.now());
-    }
-
-    if (value.endsWith(' ')) {
-      const typedWord = value.trim();
-      const currentWord = words[currentWordIndex];
-      
-      setCompletedWords([...completedWords, typedWord]);
-      
-      if (typedWord !== currentWord) {
-        setIncorrectWords(new Set([...incorrectWords, currentWordIndex]));
-      }
-      
-      if (currentWordIndex === words.length - 1) {
-        finishTest();
-      } else {
-        setCurrentWordIndex(currentWordIndex + 1);
-        setCurrentInput('');
-      }
-    } else {
-      setCurrentInput(value);
-    }
-  };
 
   const finishTest = async () => {
     const end = Date.now();
@@ -101,12 +118,12 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
 
     if (user && startTime) {
       const timeSeconds = Math.floor((end - startTime) / 1000);
-      const correctWords = completedWords.filter((_, i) => !incorrectWords.has(i)).length + 
-                          (currentInput === words[currentWordIndex] ? 1 : 0);
-      const totalWords = words.length;
-      const wpm = Math.round((correctWords / timeSeconds) * 60);
-      const rawWpm = Math.round((totalWords / timeSeconds) * 60);
-      const accuracy = Math.round((correctWords / totalWords) * 100);
+      const fullText = words.join(' ');
+      const correctChars = fullText.length - errors.size;
+      const totalChars = fullText.length;
+      const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+      const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
+      const accuracy = Math.round((correctChars / totalChars) * 100);
 
       try {
         const { error } = await supabase.from('typing_sessions').insert({
@@ -135,26 +152,27 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
     if (!startTime || !endTime) return null;
 
     const timeSeconds = (endTime - startTime) / 1000;
-    const correctWords = completedWords.filter((_, i) => !incorrectWords.has(i)).length;
-    const totalWords = words.length;
-    const wpm = Math.round((correctWords / timeSeconds) * 60);
-    const rawWpm = Math.round((totalWords / timeSeconds) * 60);
-    const accuracy = Math.round((correctWords / totalWords) * 100);
+    const fullText = words.join(' ');
+    const correctChars = fullText.length - errors.size;
+    const totalChars = fullText.length;
+    const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+    const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
+    const accuracy = Math.round((correctChars / totalChars) * 100);
 
     return { wpm, rawWpm, accuracy, timeSeconds: Math.round(timeSeconds) };
   };
 
   const getCurrentWPM = () => {
-    if (!startTime) return 0;
+    if (!startTime || currentIndex === 0) return 0;
     const timeSeconds = (Date.now() - startTime) / 1000;
-    const correctWords = completedWords.filter((_, i) => !incorrectWords.has(i)).length;
-    return Math.round((correctWords / timeSeconds) * 60);
+    const correctChars = currentIndex - errors.size;
+    return Math.round(((correctChars / 5) / timeSeconds) * 60);
   };
 
   const getCurrentAccuracy = () => {
-    if (completedWords.length === 0) return 100;
-    const correctWords = completedWords.filter((_, i) => !incorrectWords.has(i)).length;
-    return Math.round((correctWords / completedWords.length) * 100);
+    if (currentIndex === 0) return 100;
+    const correctChars = currentIndex - errors.size;
+    return Math.round((correctChars / currentIndex) * 100);
   };
 
   const stats = calculateStats();
@@ -228,42 +246,35 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
 
       {/* Words Display */}
       <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
-        <div className="text-center space-y-6">
-          <div className="text-2xl leading-relaxed font-mono">
-            {words.map((word, index) => {
-              let className = 'inline-block mx-1 transition-wave ';
+        <div ref={containerRef} tabIndex={0} className="text-center space-y-6 focus:outline-none">
+          <div className="text-3xl leading-relaxed font-mono select-none">
+            {words.join(' ').split('').map((char, index) => {
+              let className = 'transition-wave ';
               
-              if (index < currentWordIndex) {
-                className += incorrectWords.has(index)
-                  ? 'text-destructive line-through'
+              if (index < currentIndex) {
+                // Already typed
+                className += errors.has(index)
+                  ? 'text-destructive'
                   : 'text-muted-foreground';
-              } else if (index === currentWordIndex) {
-                className += 'text-primary font-bold border-b-2 border-primary';
+              } else if (index === currentIndex) {
+                // Current character - show underscore
+                className += 'text-foreground border-b-2 border-primary';
               } else {
-                className += 'text-foreground';
+                // Not yet typed
+                className += 'text-foreground/50';
               }
 
               return (
                 <span key={index} className={className}>
-                  {word}
+                  {char}
                 </span>
               );
             })}
           </div>
 
-          {/* Input Field */}
-          <input
-            ref={inputRef}
-            type="text"
-            value={currentInput}
-            onChange={handleInputChange}
-            className="w-full max-w-md mx-auto px-6 py-4 text-2xl text-center bg-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-wave font-mono"
-            placeholder={startTime ? "Type here..." : "Start typing to begin..."}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck="false"
-          />
+          <div className="text-center text-muted-foreground text-sm">
+            {!startTime && "Start typing to begin..."}
+          </div>
 
           <div className="flex justify-center gap-4">
             <Button
