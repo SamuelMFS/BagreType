@@ -1,4 +1,5 @@
 import { useScrollProgress } from "@/contexts/ScrollContext";
+import { useNavigate } from "react-router-dom";
 
 interface LessonNode {
   id: string;
@@ -9,6 +10,7 @@ interface LessonNode {
 
 const LessonRoadmap = () => {
   const scrollProgress = useScrollProgress();
+  const navigate = useNavigate();
 
   // Sample data - will be replaced with actual lesson data
   const chapters = [
@@ -138,7 +140,7 @@ const LessonRoadmap = () => {
                   }}
                 >
                   {/* Node circle */}
-                  <div className="relative group cursor-pointer">
+                  <div className="relative group cursor-pointer" onClick={() => navigate(`/lesson/${chapter.id}/${node.id}`)}>
                     <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:blur-2xl transition-all duration-700" 
                       style={{
                         animation: 'glow-pulse 3s ease-in-out infinite',

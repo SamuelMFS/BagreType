@@ -12,6 +12,7 @@ import Intro from "./pages/Intro";
 import DataCollection from "./pages/DataCollection";
 import Learn from "./pages/Learn";
 import LessonsJourney from "./pages/LessonsJourney";
+import Lesson from "./pages/Lesson";
 import Practice from "./pages/Practice";
 import Generate from "./pages/Generate";
 import Auth from "./pages/Auth";
@@ -29,15 +30,16 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/intro" element={<Intro />} />
-                <Route path="/collect" element={<DataCollection />} />
-                <Route path="/learn" element={<Learn />} />
-                <Route path="/lessons" element={<LessonsJourney />} />
-                <Route path="/practice" element={<Practice />} />
-                <Route path="/generate" element={<Generate />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/intro" element={<Intro />} />
+              <Route path="/collect" element={<DataCollection />} />
+              <Route path="/learn" element={<Learn />} />
+              <Route path="/lessons" element={<LessonsJourney />} />
+              <Route path="/lesson/:chapterId/:lessonId" element={<Lesson />} />
+              <Route path="/practice" element={<Practice />} />
+              <Route path="/generate" element={<Generate />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="*" element={<NotFound />} />
               </Routes>
               <ThemeToggle />
             </BrowserRouter>

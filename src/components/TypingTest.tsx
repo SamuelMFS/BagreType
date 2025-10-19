@@ -8,7 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 
 interface TypingTestProps {
   wordCount?: number;
-  onComplete?: () => void;
+  customText?: string;
+  onComplete?: (wpm: number, accuracy: number) => void;
 }
 
 const commonWords = [
@@ -32,7 +33,7 @@ const generateWords = (count: number): string[] => {
   return words;
 };
 
-const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
+const TypingTest = ({ wordCount = 30, customText, onComplete }: TypingTestProps) => {
   const [words, setWords] = useState<string[]>([]);
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,7 +48,7 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
 
   useEffect(() => {
     resetTest();
-  }, [wordCount]);
+  }, [wordCount, customText]);
 
   useEffect(() => {
     if (isComplete) return;
@@ -110,7 +111,11 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
   }, [currentIndex, userInput, words, startTime, isComplete, errors]);
 
   const resetTest = () => {
-    setWords(generateWords(wordCount));
+    if (customText) {
+      setWords(customText.trim().split(/\s+/));
+    } else {
+      setWords(generateWords(wordCount));
+    }
     setUserInput('');
     setCurrentIndex(0);
     setErrors(new Set());
@@ -180,7 +185,7 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
     setEndTime(end);
     setIsComplete(true);
 
-    if (user && startTime) {
+    if (startTime) {
       const timeSeconds = Math.floor((end - startTime) / 1000);
       const fullText = words.join(' ');
       const correctChars = fullText.length - errors.size;
@@ -189,25 +194,32 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
       const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
       const accuracy = Math.round((correctChars / totalChars) * 100);
 
-      try {
-        const { error } = await supabase.from('typing_sessions').insert({
-          user_id: user.id,
-          wpm,
-          raw_wpm: rawWpm,
-          accuracy,
-          consistency: 0,
-          time_seconds: timeSeconds,
-          mode: `words-${wordCount}`
-        });
+      // Call onComplete callback if provided
+      if (onComplete) {
+        onComplete(wpm, accuracy);
+      }
 
-        if (error) throw error;
+      if (user) {
+        try {
+          const { error } = await supabase.from('typing_sessions').insert({
+            user_id: user.id,
+            wpm,
+            raw_wpm: rawWpm,
+            accuracy,
+            consistency: 0,
+            time_seconds: timeSeconds,
+            mode: customText ? 'lesson' : `words-${wordCount}`
+          });
 
-        toast({
-          title: 'Progress Saved!',
-          description: 'Your typing session has been recorded.',
-        });
-      } catch (error) {
-        console.error('Error saving session:', error);
+          if (error) throw error;
+
+          toast({
+            title: 'Progress Saved!',
+            description: 'Your typing session has been recorded.',
+          });
+        } catch (error) {
+          console.error('Error saving session:', error);
+        }
       }
     }
   };
@@ -282,11 +294,11 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
 
           {onComplete && (
             <Button
-              onClick={onComplete}
+              onClick={() => onComplete(stats.wpm, stats.accuracy)}
               variant="outline"
               size="lg"
             >
-              Continue to Lessons
+              Continue
             </Button>
           )}
         </div>
