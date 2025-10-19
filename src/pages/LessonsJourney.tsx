@@ -13,10 +13,6 @@ import { useScrollProgress } from "@/contexts/ScrollContext";
 const LessonsJourney = () => {
   const scrollProgress = useScrollProgress();
 
-  // Calculate background darkness based on scroll
-  const bgLightness = Math.max(25, 60 - scrollProgress * 35);
-  const bgSaturation = Math.max(40, 70 - scrollProgress * 30);
-
   useEffect(() => {
     // Ensure we start at the top when component mounts
     window.scrollTo(0, 0);
@@ -26,7 +22,11 @@ const LessonsJourney = () => {
     <div 
       className="min-h-[300vh] relative overflow-hidden transition-colors duration-700"
       style={{
-        background: `hsl(200, ${bgSaturation}%, ${bgLightness}%)`,
+        background: `linear-gradient(180deg, 
+          hsl(var(--background)) 0%, 
+          hsl(var(--card)) ${Math.max(30, 50 - scrollProgress * 30)}%, 
+          hsl(var(--muted)) ${Math.max(60, 80 - scrollProgress * 40)}%, 
+          hsl(220, 40%, ${Math.max(5, 15 - scrollProgress * 10)}%) 100%)`,
       }}
     >
       <Navigation />
