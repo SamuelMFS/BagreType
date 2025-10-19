@@ -3,6 +3,9 @@ import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
+import ScrollDepthGradient from "@/components/ScrollDepthGradient";
+import OceanFloor from "@/components/OceanFloor";
+import DeepFish from "@/components/DeepFish";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -15,8 +18,11 @@ const Intro = () => {
       <Bubbles />
       <FloatingParticles />
       <SwimmingFish />
+      <ScrollDepthGradient />
+      <DeepFish />
+      <OceanFloor />
       
-      <div className="container mx-auto px-4 max-w-3xl">
+      <div className="container mx-auto px-4 max-w-3xl relative" style={{ zIndex: 10 }}>
         <div className="animate-fade-in space-y-12">
           <div className="text-center space-y-6">
             <h1 className="text-7xl font-bold text-primary animate-float">
