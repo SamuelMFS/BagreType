@@ -9,11 +9,6 @@ interface LessonNode {
 
 const LessonRoadmap = () => {
   const scrollProgress = useScrollProgress();
-  
-  // Calculate color values based on scroll depth
-  const hue = 200; // Blue hue
-  const saturation = Math.max(40, 90 - scrollProgress * 50); // Less saturated as we go deeper
-  const lightness = Math.max(35, 65 - scrollProgress * 30); // Darker as we go deeper
 
   // Sample data - will be replaced with actual lesson data
   const chapters = [
@@ -105,19 +100,12 @@ const LessonRoadmap = () => {
                   <div
                     className="relative group cursor-pointer"
                   >
+                    <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:blur-2xl transition-all duration-700 animate-glow-pulse" />
                     <div 
-                      className="absolute inset-0 rounded-full blur-xl group-hover:blur-2xl transition-all duration-700 animate-glow-pulse"
+                      className="relative w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold border-2 border-primary/30 shadow-underwater group-hover:scale-110 group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)] transition-all duration-700"
                       style={{
-                        background: `hsl(${hue}, ${saturation}%, ${lightness}%, 0.3)`,
-                      }}
-                    />
-                    <div 
-                      className="relative w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold border-2 shadow-underwater group-hover:scale-110 transition-all duration-700"
-                      style={{
-                        background: `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness + 5}%) 0%, hsl(${hue + 20}, ${saturation - 10}%, ${lightness - 5}%) 100%)`,
-                        borderColor: `hsl(${hue}, ${saturation}%, ${lightness - 10}%, 0.5)`,
-                        color: lightness > 50 ? 'hsl(var(--background))' : 'hsl(var(--foreground))',
-                        boxShadow: `0 0 20px hsl(${hue}, ${saturation}%, ${lightness}%, 0.4), inset 0 2px 8px hsl(${hue}, ${saturation}%, ${lightness + 10}%, 0.3)`,
+                        background: `linear-gradient(135deg, hsl(var(--primary) / ${1 - scrollProgress * 0.3}) 0%, hsl(var(--accent) / ${1 - scrollProgress * 0.2}) 100%)`,
+                        color: 'hsl(var(--primary-foreground))',
                       }}
                     >
                       {node.key}
