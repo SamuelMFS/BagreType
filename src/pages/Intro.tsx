@@ -1,12 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ScrollProvider } from "@/contexts/ScrollContext";
 import Bubbles from "@/components/Bubbles";
-import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
-import SwimmingFish from "@/components/SwimmingFish";
-import ScrollDepthGradient from "@/components/ScrollDepthGradient";
-import OceanFloor from "@/components/OceanFloor";
-import DeepFish from "@/components/DeepFish";
+import OceanDepthBackground from "@/components/OceanDepthBackground";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -14,15 +9,10 @@ const Intro = () => {
   const navigate = useNavigate();
 
   return (
-    <ScrollProvider>
-      <div className="min-h-screen relative overflow-hidden pt-24 pb-12">
-      <LightRays />
+    <div className="min-h-screen relative overflow-hidden pt-24 pb-12">
+      <OceanDepthBackground />
       <Bubbles />
       <FloatingParticles />
-      <SwimmingFish />
-      <ScrollDepthGradient />
-      <DeepFish />
-      <OceanFloor />
       
       <div className="container mx-auto px-4 max-w-3xl relative" style={{ zIndex: 10 }}>
         <div className="animate-fade-in space-y-12">
@@ -100,8 +90,7 @@ const Intro = () => {
           </div>
         </div>
       </div>
-      </div>
-    </ScrollProvider>
+    </div>
   );
 };
 
