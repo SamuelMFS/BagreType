@@ -1,20 +1,7 @@
-import { useEffect, useState } from "react";
+import { useScrollProgress } from "@/contexts/ScrollContext";
 
 const DeepFish = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrolled = window.scrollY;
-      const progress = scrollHeight > 0 ? scrolled / scrollHeight : 0;
-      setScrollProgress(progress);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const scrollProgress = useScrollProgress();
 
   const fish = Array.from({ length: 3 }, (_, i) => ({
     id: i,

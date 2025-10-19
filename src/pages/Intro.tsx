@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { ScrollProvider } from "@/contexts/ScrollContext";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
@@ -13,7 +14,8 @@ const Intro = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-24 pb-12">
+    <ScrollProvider>
+      <div className="min-h-screen relative overflow-hidden pt-24 pb-12">
       <LightRays />
       <Bubbles />
       <FloatingParticles />
@@ -98,7 +100,8 @@ const Intro = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </ScrollProvider>
   );
 };
 
