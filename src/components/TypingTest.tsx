@@ -35,7 +35,13 @@ const generateWords = (count: number): string[] => {
 };
 
 const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, onComplete, onRestart }, ref) => {
-  const [words, setWords] = useState<string[]>([]);
+  const [words, setWords] = useState<string[]>(() => {
+    // Initialize words on first render
+    if (customText) {
+      return customText.trim().split(/\s+/);
+    }
+    return generateWords(wordCount);
+  });
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [errors, setErrors] = useState<Set<number>>(new Set());
@@ -46,6 +52,21 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const resetTest = () => {
+    if (customText) {
+      setWords(customText.trim().split(/\s+/));
+    } else {
+      setWords(generateWords(wordCount));
+    }
+    setUserInput('');
+    setCurrentIndex(0);
+    setErrors(new Set());
+    setStartTime(null);
+    setEndTime(null);
+    setIsComplete(false);
+    setDisplayOffset(0);
+  };
 
   // Expose reset method via ref
   useImperativeHandle(ref, () => ({
@@ -116,24 +137,6 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, userInput, words, startTime, isComplete, errors]);
 
-  const resetTest = () => {
-    if (onRestart) {
-      onRestart();
-    } else {
-      if (customText) {
-        setWords(customText.trim().split(/\s+/));
-      } else {
-        setWords(generateWords(wordCount));
-      }
-      setUserInput('');
-      setCurrentIndex(0);
-      setErrors(new Set());
-      setStartTime(null);
-      setEndTime(null);
-      setIsComplete(false);
-      setDisplayOffset(0);
-    }
-  };
 
   // Build rows of words that fit within a reasonable character limit
   const buildRows = () => {
