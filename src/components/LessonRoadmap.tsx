@@ -74,11 +74,16 @@ const LessonRoadmap = () => {
           )}
 
           {/* Chapter content with curve */}
-          <div className="relative" style={{ minHeight: `${chapter.nodes.length * 100}px` }}>
+          <div className="relative" style={{ height: `${chapter.nodes.length * 100}px` }}>
             {/* Draw the curve path */}
             <svg 
-              className="absolute top-0 left-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 0 }}
+              className="absolute top-0 left-0 w-full pointer-events-none"
+              style={{ 
+                height: `${chapter.nodes.length * 100}px`,
+                zIndex: 0 
+              }}
+              viewBox={`0 0 800 ${chapter.nodes.length * 100}`}
+              preserveAspectRatio="none"
             >
               <defs>
                 <linearGradient id={`path-gradient-${chapter.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -89,24 +94,24 @@ const LessonRoadmap = () => {
               <path
                 d={chapter.nodes.map((_, idx) => {
                   const progress = idx / Math.max(chapter.nodes.length - 1, 1);
-                  const xPercent = 50 + Math.sin(progress * Math.PI * 2.5) * 12; // 12% amplitude
-                  const yPos = (idx * 100 + 50) / (chapter.nodes.length * 100) * 100; // percentage
+                  const xPos = 400 + Math.sin(progress * Math.PI * 2.5) * 80; // 80px amplitude from center
+                  const yPos = idx * 100 + 50;
                   
                   if (idx === 0) {
-                    return `M ${xPercent}% ${yPos}%`;
+                    return `M ${xPos} ${yPos}`;
                   }
                   
                   const prevProgress = (idx - 1) / Math.max(chapter.nodes.length - 1, 1);
-                  const prevXPercent = 50 + Math.sin(prevProgress * Math.PI * 2.5) * 12;
-                  const prevYPos = ((idx - 1) * 100 + 50) / (chapter.nodes.length * 100) * 100;
+                  const prevX = 400 + Math.sin(prevProgress * Math.PI * 2.5) * 80;
+                  const prevY = (idx - 1) * 100 + 50;
                   
                   // Smooth cubic bezier curve
-                  const cp1X = prevXPercent + (xPercent - prevXPercent) * 0.33;
-                  const cp1Y = prevYPos + (yPos - prevYPos) * 0.33;
-                  const cp2X = prevXPercent + (xPercent - prevXPercent) * 0.66;
-                  const cp2Y = prevYPos + (yPos - prevYPos) * 0.66;
+                  const cp1X = prevX + (xPos - prevX) * 0.33;
+                  const cp1Y = prevY + (yPos - prevY) * 0.33;
+                  const cp2X = prevX + (xPos - prevX) * 0.66;
+                  const cp2Y = prevY + (yPos - prevY) * 0.66;
                   
-                  return `C ${cp1X}% ${cp1Y}%, ${cp2X}% ${cp2Y}%, ${xPercent}% ${yPos}%`;
+                  return `C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${xPos} ${yPos}`;
                 }).join(' ')}
                 stroke={`url(#path-gradient-${chapter.id})`}
                 strokeWidth="3"
@@ -118,7 +123,7 @@ const LessonRoadmap = () => {
             {/* Nodes positioned along the curve */}
             {chapter.nodes.map((node, nodeIdx) => {
               const progress = nodeIdx / Math.max(chapter.nodes.length - 1, 1);
-              const xPercent = 50 + Math.sin(progress * Math.PI * 2.5) * 12; // Match curve exactly
+              const xOffset = Math.sin(progress * Math.PI * 2.5) * 80; // Match 80px amplitude
               
               return (
                 <div
@@ -126,7 +131,7 @@ const LessonRoadmap = () => {
                   className="absolute animate-fade-in"
                   style={{ 
                     animationDelay: `${nodeIdx * 0.1}s`,
-                    left: `${xPercent}%`,
+                    left: `calc(50% + ${xOffset}px)`,
                     top: `${nodeIdx * 100 + 50}px`,
                     transform: 'translate(-50%, -50%)',
                     zIndex: 1,
