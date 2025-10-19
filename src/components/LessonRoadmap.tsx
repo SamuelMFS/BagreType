@@ -92,7 +92,7 @@ const LessonRoadmap = () => {
             <path
               d={chapter.nodes.map((node, idx) => {
                 const progress = idx / Math.max(chapter.nodes.length - 1, 1);
-                const xOffset = Math.sin(progress * Math.PI * 3) * 150;
+                const xOffset = Math.sin(progress * Math.PI * 2.5) * 100; // Gentle curve
                 const x = 400 + xOffset;
                 const y = idx * 100 + 50;
                 
@@ -101,12 +101,17 @@ const LessonRoadmap = () => {
                 }
                 
                 const prevProgress = (idx - 1) / Math.max(chapter.nodes.length - 1, 1);
-                const prevXOffset = Math.sin(prevProgress * Math.PI * 3) * 150;
+                const prevXOffset = Math.sin(prevProgress * Math.PI * 2.5) * 100;
                 const prevX = 400 + prevXOffset;
                 const prevY = (idx - 1) * 100 + 50;
                 
-                const controlY = (prevY + y) / 2;
-                return `Q ${prevX} ${controlY}, ${x} ${y}`;
+                // Create smooth curve with control points
+                const controlY1 = prevY + 30;
+                const controlY2 = y - 30;
+                const controlX1 = prevX + (x - prevX) * 0.3;
+                const controlX2 = prevX + (x - prevX) * 0.7;
+                
+                return `C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x} ${y}`;
               }).join(' ')}
               stroke={`url(#path-gradient-${chapter.id})`}
               strokeWidth="3"
@@ -121,7 +126,7 @@ const LessonRoadmap = () => {
             {chapter.nodes.map((node, nodeIdx) => {
               // Calculate position along sine wave
               const progress = nodeIdx / Math.max(chapter.nodes.length - 1, 1);
-              const xOffset = Math.sin(progress * Math.PI * 3) * 150;
+              const xOffset = Math.sin(progress * Math.PI * 2.5) * 100; // Match the curve amplitude
               
               return (
                 <div
