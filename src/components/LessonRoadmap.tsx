@@ -74,26 +74,47 @@ const LessonRoadmap = () => {
           )}
 
           {/* Nodes in zigzag pattern */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {chapter.nodes.map((node, nodeIdx) => {
-              const isLeft = nodeIdx % 2 === 0;
-              const offsetClass = isLeft ? "mr-auto ml-8" : "ml-auto mr-8";
+              // Create smooth sine wave pattern
+              const totalNodes = chapter.nodes.length;
+              const progress = nodeIdx / Math.max(totalNodes - 1, 1);
+              const xOffset = Math.sin(progress * Math.PI * 2) * 120; // Wider curve
               
               return (
                 <div
                   key={node.id}
-                  className={`relative ${offsetClass} w-fit animate-fade-in`}
-                  style={{ animationDelay: `${nodeIdx * 0.1}s` }}
+                  className="relative animate-fade-in"
+                  style={{ 
+                    animationDelay: `${nodeIdx * 0.1}s`,
+                    marginLeft: `calc(50% + ${xOffset}px)`,
+                    transform: 'translateX(-50%)',
+                  }}
                 >
-                  {/* Connecting line to next node */}
+                  {/* Curved connecting line to next node */}
                   {nodeIdx < chapter.nodes.length - 1 && (
-                    <div
-                      className="absolute top-1/2 h-20 w-px bg-gradient-to-b from-primary/40 to-accent/40"
+                    <svg
+                      className="absolute top-10 left-1/2 -translate-x-1/2 pointer-events-none"
+                      width="200"
+                      height="80"
                       style={{
-                        left: isLeft ? "50%" : "50%",
-                        transform: `translateX(-50%) translateY(50%) rotate(${isLeft ? "15deg" : "-15deg"})`,
+                        overflow: 'visible',
                       }}
-                    />
+                    >
+                      <defs>
+                        <linearGradient id={`gradient-${chapter.id}-${nodeIdx}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d={`M 100 0 Q 100 40, ${100 + (Math.sin((progress + 0.05) * Math.PI * 2) - Math.sin(progress * Math.PI * 2)) * 120} 80`}
+                        stroke={`url(#gradient-${chapter.id}-${nodeIdx})`}
+                        strokeWidth="2"
+                        fill="none"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   )}
 
                   {/* Node circle */}
