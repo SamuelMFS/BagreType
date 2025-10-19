@@ -19,8 +19,7 @@ const Practice = () => {
   const [quoteLength, setQuoteLength] = useState(100);
   const [customText, setCustomText] = useState("");
   const [savedTexts, setSavedTexts] = useState<string[]>([]);
-  const [showTest, setShowTest] = useState(false);
-  const [showSettings, setShowSettings] = useState(true);
+  const [testKey, setTestKey] = useState(0);
 
   // Load saved custom texts from localStorage
   useEffect(() => {
@@ -38,14 +37,8 @@ const Practice = () => {
     }
   };
 
-  const handleStartTest = () => {
-    setShowTest(true);
-    setShowSettings(false);
-  };
-
   const handleResetTest = () => {
-    setShowTest(false);
-    setShowSettings(true);
+    setTestKey(prev => prev + 1);
   };
 
   const getTestProps = () => {
@@ -69,163 +62,134 @@ const Practice = () => {
       
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
         <div className="animate-fade-in space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-5xl font-bold text-primary animate-float">
-              Typing Practice
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Improve your skills with customizable practice sessions
-            </p>
+          {/* Settings bar above typing test */}
+          <div className="flex items-center justify-center gap-4 flex-wrap text-muted-foreground">
+            {/* Mode Selection */}
+            <Select value={mode} onValueChange={(value) => {
+              setMode(value as Mode);
+              setTestKey(prev => prev + 1);
+            }}>
+              <SelectTrigger className="w-32 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background border-border z-50">
+                <SelectItem value="words">words</SelectItem>
+                <SelectItem value="time">time</SelectItem>
+                <SelectItem value="quote">quote</SelectItem>
+                <SelectItem value="zen">zen</SelectItem>
+                <SelectItem value="custom">custom</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Mode-specific configurations */}
+            {mode === "words" && (
+              <>
+                {[10, 25, 50, 100, 250].map((count) => (
+                  <button
+                    key={count}
+                    className={`text-sm transition-colors ${
+                      wordCount === count
+                        ? "text-primary font-semibold"
+                        : "text-foreground/50 hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setWordCount(count);
+                      setTestKey(prev => prev + 1);
+                    }}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {mode === "time" && (
+              <>
+                {[15, 30, 60, 120].map((time) => (
+                  <button
+                    key={time}
+                    className={`text-sm transition-colors ${
+                      timeLimit === time
+                        ? "text-primary font-semibold"
+                        : "text-foreground/50 hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setTimeLimit(time);
+                      setTestKey(prev => prev + 1);
+                    }}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {mode === "quote" && (
+              <>
+                {[50, 100, 200, 500].map((length) => (
+                  <button
+                    key={length}
+                    className={`text-sm transition-colors ${
+                      quoteLength === length
+                        ? "text-primary font-semibold"
+                        : "text-foreground/50 hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setQuoteLength(length);
+                      setTestKey(prev => prev + 1);
+                    }}
+                  >
+                    {length}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {mode === "custom" && (
+              <div className="flex items-center gap-2">
+                {savedTexts.length > 0 && (
+                  <Select onValueChange={(value) => {
+                    setCustomText(value);
+                    setTestKey(prev => prev + 1);
+                  }}>
+                    <SelectTrigger className="w-40 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
+                      <SelectValue placeholder="saved texts" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border z-50">
+                      {savedTexts.map((text, index) => (
+                        <SelectItem key={index} value={text}>
+                          {text.slice(0, 30)}...
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <button
+                  className="text-sm text-foreground/50 hover:text-foreground"
+                  onClick={() => {
+                    const text = prompt("Enter your custom text:");
+                    if (text?.trim()) {
+                      setCustomText(text);
+                      const newTexts = [...savedTexts, text];
+                      setSavedTexts(newTexts);
+                      localStorage.setItem("customTexts", JSON.stringify(newTexts));
+                      setTestKey(prev => prev + 1);
+                    }
+                  }}
+                >
+                  + new text
+                </button>
+              </div>
+            )}
           </div>
 
-          {showSettings && (
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-6 space-y-6">
-              <div className="flex items-center gap-2 text-accent">
-                <Settings className="w-5 h-5" />
-                <h2 className="text-xl font-semibold">Practice Settings</h2>
-              </div>
-
-              {/* Mode Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Mode</label>
-                <Select value={mode} onValueChange={(value) => setMode(value as Mode)}>
-                  <SelectTrigger className="bg-background/80 border-border z-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border z-50">
-                    <SelectItem value="words">Words</SelectItem>
-                    <SelectItem value="time">Time</SelectItem>
-                    <SelectItem value="quote">Quote</SelectItem>
-                    <SelectItem value="zen">Zen</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Mode-specific configurations */}
-              {mode === "words" && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">Word Count</label>
-                  <div className="flex gap-2 flex-wrap">
-                    {[10, 25, 50, 100, 250].map((count) => (
-                      <Button
-                        key={count}
-                        variant={wordCount === count ? "ocean" : "outline"}
-                        size="sm"
-                        onClick={() => setWordCount(count)}
-                      >
-                        {count}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {mode === "time" && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">Time (seconds)</label>
-                  <div className="flex gap-2 flex-wrap">
-                    {[15, 30, 60, 120].map((time) => (
-                      <Button
-                        key={time}
-                        variant={timeLimit === time ? "ocean" : "outline"}
-                        size="sm"
-                        onClick={() => setTimeLimit(time)}
-                      >
-                        {time}s
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {mode === "quote" && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">Quote Length</label>
-                  <div className="flex gap-2 flex-wrap">
-                    {[50, 100, 200, 500].map((length) => (
-                      <Button
-                        key={length}
-                        variant={quoteLength === length ? "ocean" : "outline"}
-                        size="sm"
-                        onClick={() => setQuoteLength(length)}
-                      >
-                        {length}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {mode === "zen" && (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground">
-                    Zen mode - Type as long as you want with no limits
-                  </p>
-                </div>
-              )}
-
-              {mode === "custom" && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">Custom Text</label>
-                  
-                  {savedTexts.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Previously saved:</p>
-                      <Select onValueChange={(value) => setCustomText(value)}>
-                        <SelectTrigger className="bg-background/80 border-border z-50">
-                          <SelectValue placeholder="Select a saved text" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background border-border z-50">
-                          {savedTexts.map((text, index) => (
-                            <SelectItem key={index} value={text}>
-                              {text.slice(0, 50)}...
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  <Textarea
-                    placeholder="Enter your custom text here..."
-                    value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
-                    className="min-h-[120px] bg-background/80 border-border"
-                  />
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSaveCustomText}
-                    disabled={!customText.trim()}
-                  >
-                    Save Text for Later
-                  </Button>
-                </div>
-              )}
-
-              <div className="pt-4">
-                <Button
-                  variant="ocean"
-                  size="lg"
-                  className="w-full"
-                  onClick={handleStartTest}
-                  disabled={mode === "custom" && !customText.trim()}
-                >
-                  Start Practice
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {showTest && (
-            <TypingTest 
-              {...getTestProps()}
-              onComplete={handleResetTest}
-              onRestart={handleResetTest}
-            />
-          )}
+          {/* Typing Test */}
+          <TypingTest 
+            key={testKey}
+            {...getTestProps()}
+            onComplete={handleResetTest}
+            onRestart={handleResetTest}
+          />
         </div>
       </div>
     </div>
