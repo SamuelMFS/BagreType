@@ -19,8 +19,8 @@ const FloatingParticles = () => {
             top: particle.top,
             width: particle.size,
             height: particle.size,
-            background: 'hsl(var(--primary) / 0.4)',
-            boxShadow: '0 0 4px hsl(var(--primary) / 0.6)',
+            background: 'hsl(var(--primary) / 0.5)',
+            boxShadow: '0 0 6px hsl(var(--primary) / 0.7)',
             animation: `particle-drift ${particle.duration} linear ${particle.delay} infinite`,
           }}
         />

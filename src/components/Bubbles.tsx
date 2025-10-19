@@ -12,13 +12,13 @@ const Bubbles = () => {
       {bubbles.map((bubble) => (
         <div
           key={bubble.id}
-          className="absolute bottom-0 rounded-full opacity-30"
+          className="absolute bottom-0 rounded-full opacity-40"
           style={{
             left: bubble.left,
             width: bubble.size,
             height: bubble.size,
-            background: "radial-gradient(circle, hsl(var(--primary) / 0.25) 0%, hsl(var(--accent) / 0.1) 50%, transparent 70%)",
-            boxShadow: "0 0 15px hsl(var(--primary) / 0.3)",
+            background: "radial-gradient(circle, hsl(var(--primary) / 0.35) 0%, hsl(var(--accent) / 0.15) 50%, transparent 70%)",
+            boxShadow: "0 0 20px hsl(var(--primary) / 0.4)",
             animation: `bubble-rise ${bubble.duration} ease-in-out ${bubble.delay} infinite`,
           }}
         />
