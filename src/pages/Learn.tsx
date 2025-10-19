@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -9,6 +10,7 @@ import TypingTest from "@/components/TypingTest";
 
 const Learn = () => {
   const [showTest, setShowTest] = useState(false);
+  const navigate = useNavigate();
 
   if (showTest) {
     return (
@@ -32,7 +34,7 @@ const Learn = () => {
             
             <TypingTest 
               wordCount={30}
-              onComplete={() => setShowTest(false)}
+              onComplete={() => navigate("/lessons")}
             />
           </div>
         </div>
