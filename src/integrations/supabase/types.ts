@@ -14,7 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      typing_sessions: {
+        Row: {
+          accuracy: number
+          consistency: number | null
+          created_at: string
+          id: string
+          mode: string
+          raw_wpm: number
+          time_seconds: number
+          user_id: string | null
+          wpm: number
+        }
+        Insert: {
+          accuracy: number
+          consistency?: number | null
+          created_at?: string
+          id?: string
+          mode: string
+          raw_wpm: number
+          time_seconds: number
+          user_id?: string | null
+          wpm: number
+        }
+        Update: {
+          accuracy?: number
+          consistency?: number | null
+          created_at?: string
+          id?: string
+          mode?: string
+          raw_wpm?: number
+          time_seconds?: number
+          user_id?: string | null
+          wpm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "typing_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
