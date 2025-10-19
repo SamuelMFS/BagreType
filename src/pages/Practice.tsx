@@ -1,6 +1,5 @@
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Practice = () => {
   return (
@@ -8,48 +7,49 @@ const Practice = () => {
       <Navigation />
       <Bubbles />
       
-      <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
-        <div className="animate-fade-in">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold text-primary mb-4 animate-float">
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
+        <div className="animate-fade-in space-y-12">
+          <div className="text-center space-y-4">
+            <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
               Typing Practice
             </h1>
-            <p className="text-xl text-aqua-light">
+            <p className="text-2xl text-aqua-light">
               Improve your skills with free practice sessions
             </p>
           </div>
 
-          <Card className="bg-card/60 backdrop-blur-sm border-border shadow-underwater">
-            <CardHeader>
-              <CardTitle className="text-accent">Practice Mode</CardTitle>
-              <CardDescription className="text-muted-foreground">
+          <div className="space-y-8">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl font-semibold text-accent">Practice Mode</h2>
+              <p className="text-lg text-muted-foreground">
                 Coming soon - A Monkeytype-style practice environment with BagreType's underwater theme
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-foreground/90">
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-lg text-foreground/90">
                 Practice mode will include:
               </p>
-              <ul className="space-y-2 text-foreground/80">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+              <ul className="space-y-3 text-lg text-foreground/80 pl-4">
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-semibold">•</span>
                   <span>Real-time WPM and accuracy tracking</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-semibold">•</span>
                   <span>Various text options (quotes, code, custom text)</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-semibold">•</span>
                   <span>Upload your own documents to practice</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">•</span>
+                <li className="flex items-start gap-3">
+                  <span className="text-primary font-semibold">•</span>
                   <span>Beautiful underwater-themed interface</span>
                 </li>
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
