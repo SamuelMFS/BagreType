@@ -61,9 +61,10 @@ const Intro = () => {
 
             <div className="flex justify-center pt-8">
               <Button
+                variant="ocean"
                 size="lg"
                 onClick={() => navigate("/collect")}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-underwater group text-lg px-8 py-6"
+                className="group text-lg px-8 py-6 hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)]"
               >
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-wave" />
