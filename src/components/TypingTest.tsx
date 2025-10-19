@@ -250,23 +250,31 @@ const TypingTest = ({ wordCount = 30, onComplete }: TypingTestProps) => {
           <div className="text-3xl leading-relaxed font-mono select-none">
             {words.join(' ').split('').map((char, index) => {
               let className = 'transition-wave ';
+              const isSpace = char === ' ';
               
               if (index < currentIndex) {
                 // Already typed
-                className += errors.has(index)
-                  ? 'text-destructive'
-                  : 'text-muted-foreground';
+                if (errors.has(index)) {
+                  className += 'text-destructive font-bold';
+                } else {
+                  className += 'text-primary font-semibold';
+                }
               } else if (index === currentIndex) {
                 // Current character - show underscore
                 className += 'text-foreground border-b-2 border-primary';
               } else {
                 // Not yet typed
-                className += 'text-foreground/50';
+                className += 'text-foreground/40';
               }
+
+              // Show space character as a visible dot when it's current or has error
+              const displayChar = isSpace && (index === currentIndex || (index < currentIndex && errors.has(index)))
+                ? '·'
+                : char;
 
               return (
                 <span key={index} className={className}>
-                  {char}
+                  {displayChar}
                 </span>
               );
             })}
