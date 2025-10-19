@@ -97,15 +97,17 @@ const LessonRoadmap = () => {
                   )}
 
                   {/* Node circle */}
-                  <div
-                    className="relative group cursor-pointer"
-                  >
-                    <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:blur-2xl transition-all duration-700 animate-glow-pulse" />
-                    <div 
-                      className="relative w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold border-2 border-primary/30 shadow-underwater group-hover:scale-110 group-hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)] transition-all duration-700"
+                  <div className="relative group cursor-pointer">
+                    <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl group-hover:blur-2xl transition-all duration-700" 
                       style={{
-                        background: `linear-gradient(135deg, hsl(var(--primary) / ${1 - scrollProgress * 0.3}) 0%, hsl(var(--accent) / ${1 - scrollProgress * 0.2}) 100%)`,
-                        color: 'hsl(var(--primary-foreground))',
+                        animation: 'glow-pulse 3s ease-in-out infinite',
+                      }}
+                    />
+                    <div 
+                      className="relative w-20 h-20 rounded-full gradient-aqua flex items-center justify-center text-2xl font-bold text-primary-foreground border-2 border-primary/40 shadow-underwater group-hover:scale-110 transition-all duration-700"
+                      style={{
+                        boxShadow: 'var(--shadow-underwater)',
+                        opacity: 1 - scrollProgress * 0.4,
                       }}
                     >
                       {node.key}
