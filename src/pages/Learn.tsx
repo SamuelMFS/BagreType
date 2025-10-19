@@ -10,7 +10,59 @@ import TypingTest from "@/components/TypingTest";
 
 const Learn = () => {
   const [showTest, setShowTest] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [testResults, setTestResults] = useState<{ wpm: number; accuracy: number } | null>(null);
   const navigate = useNavigate();
+
+  if (showResults && testResults) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <Navigation />
+        <LightRays />
+        <Bubbles />
+        <FloatingParticles />
+        <SwimmingFish />
+        
+        <div className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
+          <div className="animate-fade-in space-y-12">
+            <div className="text-center space-y-4">
+              <h1 className="text-5xl font-bold text-primary mb-4">
+                Baseline Test Results
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Here's how you did!
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+              <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-8 text-center space-y-2">
+                <p className="text-6xl font-bold text-primary">{testResults.wpm}</p>
+                <p className="text-lg text-muted-foreground">Words Per Minute</p>
+              </div>
+              <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-8 text-center space-y-2">
+                <p className="text-6xl font-bold text-accent">{testResults.accuracy}%</p>
+                <p className="text-lg text-muted-foreground">Accuracy</p>
+              </div>
+            </div>
+
+            <div className="text-center space-y-6">
+              <p className="text-lg text-foreground/90">
+                Great job! Now let's begin your personalized learning journey.
+              </p>
+              <Button 
+                size="lg"
+                variant="ocean"
+                className="text-lg px-8 py-6"
+                onClick={() => navigate("/lessons")}
+              >
+                Continue to Lessons
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showTest) {
     return (
@@ -34,7 +86,11 @@ const Learn = () => {
             
             <TypingTest 
               wordCount={30}
-              onComplete={() => navigate("/lessons")}
+              onComplete={(wpm, accuracy) => {
+                setTestResults({ wpm, accuracy });
+                setShowTest(false);
+                setShowResults(true);
+              }}
             />
           </div>
         </div>
