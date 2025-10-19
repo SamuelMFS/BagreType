@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RotateCcw, Trophy } from 'lucide-react';
@@ -34,7 +34,7 @@ const generateWords = (count: number): string[] => {
   return words;
 };
 
-const TypingTest = ({ wordCount = 30, customText, onComplete, onRestart }: TypingTestProps) => {
+const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, onComplete, onRestart }, ref) => {
   const [words, setWords] = useState<string[]>([]);
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -46,6 +46,11 @@ const TypingTest = ({ wordCount = 30, customText, onComplete, onRestart }: Typin
   const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Expose reset method via ref
+  useImperativeHandle(ref, () => ({
+    reset: resetTest
+  }));
 
   useEffect(() => {
     resetTest();
@@ -434,6 +439,6 @@ const TypingTest = ({ wordCount = 30, customText, onComplete, onRestart }: Typin
       )}
     </div>
   );
-};
+});
 
 export default TypingTest;

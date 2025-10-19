@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -19,7 +19,7 @@ const Practice = () => {
   const [quoteLength, setQuoteLength] = useState(100);
   const [customText, setCustomText] = useState("");
   const [savedTexts, setSavedTexts] = useState<string[]>([]);
-  const [testKey, setTestKey] = useState(0);
+  
 
   // Load saved custom texts from localStorage
   useEffect(() => {
@@ -37,8 +37,12 @@ const Practice = () => {
     }
   };
 
+  const testRef = useRef<{ reset: () => void }>(null);
+
   const handleResetTest = () => {
-    setTestKey(prev => prev + 1);
+    if (testRef.current) {
+      testRef.current.reset();
+    }
   };
 
   const getTestProps = () => {
@@ -67,7 +71,7 @@ const Practice = () => {
             {/* Mode Selection */}
             <Select value={mode} onValueChange={(value) => {
               setMode(value as Mode);
-              setTestKey(prev => prev + 1);
+              handleResetTest();
             }}>
               <SelectTrigger className="w-32 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
                 <SelectValue />
@@ -94,7 +98,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setWordCount(count);
-                      setTestKey(prev => prev + 1);
+                      handleResetTest();
                     }}
                   >
                     {count}
@@ -115,7 +119,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setTimeLimit(time);
-                      setTestKey(prev => prev + 1);
+                      handleResetTest();
                     }}
                   >
                     {time}
@@ -136,7 +140,7 @@ const Practice = () => {
                     }`}
                     onClick={() => {
                       setQuoteLength(length);
-                      setTestKey(prev => prev + 1);
+                      handleResetTest();
                     }}
                   >
                     {length}
@@ -150,7 +154,7 @@ const Practice = () => {
                 {savedTexts.length > 0 && (
                   <Select onValueChange={(value) => {
                     setCustomText(value);
-                    setTestKey(prev => prev + 1);
+                    handleResetTest();
                   }}>
                     <SelectTrigger className="w-40 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
                       <SelectValue placeholder="saved texts" />
@@ -173,7 +177,7 @@ const Practice = () => {
                       const newTexts = [...savedTexts, text];
                       setSavedTexts(newTexts);
                       localStorage.setItem("customTexts", JSON.stringify(newTexts));
-                      setTestKey(prev => prev + 1);
+                      handleResetTest();
                     }
                   }}
                 >
@@ -185,7 +189,7 @@ const Practice = () => {
 
           {/* Typing Test */}
           <TypingTest 
-            key={testKey}
+            ref={testRef}
             {...getTestProps()}
             onComplete={handleResetTest}
             onRestart={handleResetTest}
