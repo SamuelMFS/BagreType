@@ -73,70 +73,63 @@ const LessonRoadmap = () => {
             </div>
           )}
 
-          {/* SVG Path for the entire chapter curve */}
-          <svg 
-            className="absolute top-0 left-0 w-full pointer-events-none"
-            viewBox="0 0 800 800"
-            preserveAspectRatio="xMidYMin meet"
-            style={{ 
-              height: `${chapter.nodes.length * 100}px`,
-              zIndex: 0,
-            }}
-          >
-            <defs>
-              <linearGradient id={`path-gradient-${chapter.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.4" />
-              </linearGradient>
-            </defs>
-            <path
-              d={chapter.nodes.map((node, idx) => {
-                const progress = idx / Math.max(chapter.nodes.length - 1, 1);
-                const xOffset = Math.sin(progress * Math.PI * 2.5) * 100; // Gentle curve
-                const x = 400 + xOffset;
-                const y = idx * 100 + 50;
-                
-                if (idx === 0) {
-                  return `M ${x} ${y}`;
-                }
-                
-                const prevProgress = (idx - 1) / Math.max(chapter.nodes.length - 1, 1);
-                const prevXOffset = Math.sin(prevProgress * Math.PI * 2.5) * 100;
-                const prevX = 400 + prevXOffset;
-                const prevY = (idx - 1) * 100 + 50;
-                
-                // Create smooth curve with control points
-                const controlY1 = prevY + 30;
-                const controlY2 = y - 30;
-                const controlX1 = prevX + (x - prevX) * 0.3;
-                const controlX2 = prevX + (x - prevX) * 0.7;
-                
-                return `C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x} ${y}`;
-              }).join(' ')}
-              stroke={`url(#path-gradient-${chapter.id})`}
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {/* Chapter content with curve */}
+          <div className="relative" style={{ minHeight: `${chapter.nodes.length * 100}px` }}>
+            {/* Draw the curve path */}
+            <svg 
+              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+              style={{ zIndex: 0 }}
+            >
+              <defs>
+                <linearGradient id={`path-gradient-${chapter.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.4" />
+                </linearGradient>
+              </defs>
+              <path
+                d={chapter.nodes.map((_, idx) => {
+                  const progress = idx / Math.max(chapter.nodes.length - 1, 1);
+                  const xPercent = 50 + Math.sin(progress * Math.PI * 2.5) * 12; // 12% amplitude
+                  const yPos = (idx * 100 + 50) / (chapter.nodes.length * 100) * 100; // percentage
+                  
+                  if (idx === 0) {
+                    return `M ${xPercent}% ${yPos}%`;
+                  }
+                  
+                  const prevProgress = (idx - 1) / Math.max(chapter.nodes.length - 1, 1);
+                  const prevXPercent = 50 + Math.sin(prevProgress * Math.PI * 2.5) * 12;
+                  const prevYPos = ((idx - 1) * 100 + 50) / (chapter.nodes.length * 100) * 100;
+                  
+                  // Smooth cubic bezier curve
+                  const cp1X = prevXPercent + (xPercent - prevXPercent) * 0.33;
+                  const cp1Y = prevYPos + (yPos - prevYPos) * 0.33;
+                  const cp2X = prevXPercent + (xPercent - prevXPercent) * 0.66;
+                  const cp2Y = prevYPos + (yPos - prevYPos) * 0.66;
+                  
+                  return `C ${cp1X}% ${cp1Y}%, ${cp2X}% ${cp2Y}%, ${xPercent}% ${yPos}%`;
+                }).join(' ')}
+                stroke={`url(#path-gradient-${chapter.id})`}
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+              />
+            </svg>
 
-          {/* Nodes positioned along the curve */}
-          <div className="relative" style={{ zIndex: 1 }}>
+            {/* Nodes positioned along the curve */}
             {chapter.nodes.map((node, nodeIdx) => {
-              // Calculate position along sine wave
               const progress = nodeIdx / Math.max(chapter.nodes.length - 1, 1);
-              const xOffset = Math.sin(progress * Math.PI * 2.5) * 100; // Match the curve amplitude
+              const xPercent = 50 + Math.sin(progress * Math.PI * 2.5) * 12; // Match curve exactly
               
               return (
                 <div
                   key={node.id}
-                  className="absolute w-20 h-20 animate-fade-in"
+                  className="absolute animate-fade-in"
                   style={{ 
                     animationDelay: `${nodeIdx * 0.1}s`,
-                    left: `calc(50% + ${xOffset}px)`,
-                    top: `${nodeIdx * 100}px`,
-                    transform: 'translate(-50%, 0)',
+                    left: `${xPercent}%`,
+                    top: `${nodeIdx * 100 + 50}px`,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 1,
                   }}
                 >
                   {/* Node circle */}
@@ -158,7 +151,7 @@ const LessonRoadmap = () => {
                   </div>
 
                   {/* Optional label */}
-                  <p className="text-center text-xs text-muted-foreground mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="text-center text-xs text-muted-foreground mt-24 opacity-0 group-hover:opacity-100 transition-opacity">
                     Learn {node.key}
                   </p>
                 </div>
