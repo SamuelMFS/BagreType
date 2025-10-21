@@ -143,7 +143,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     const rows: string[][] = [];
     let currentRow: string[] = [];
     let currentRowLength = 0;
-    const maxRowLength = 50; // Characters per row
+    const maxRowLength = 40; // Reduced characters per row for better fit
 
     words.forEach(word => {
       const wordWithSpace = word + ' ';
@@ -336,7 +336,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       {/* Words Display */}
       <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
         <div ref={containerRef} tabIndex={0} className="text-center space-y-6 focus:outline-none">
-          <div className="text-3xl leading-[3rem] font-mono select-none overflow-hidden h-[6rem]">
+          <div className="text-3xl leading-[3rem] font-mono select-none min-h-[6rem] max-w-full overflow-hidden">
             {rows.slice(displayOffset, displayOffset + 2).map((row, rowIndex) => {
               const actualRowIndex = displayOffset + rowIndex;
               let charIndex = 0;
@@ -347,14 +347,14 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
               }
 
               return (
-                <div key={actualRowIndex} className="whitespace-nowrap">
+                <div key={actualRowIndex} className="break-words hyphens-auto">
                   {row.map((word, wordIndex) => {
                     const wordChars = word.split('');
                     const wordStartIndex = charIndex;
                     
                     const wordElement = wordChars.map((char, charOffset) => {
                       const index = charIndex + charOffset;
-                      let className = 'transition-wave ';
+                      let className = '';
                       
                       if (index < currentIndex) {
                         // Already typed
@@ -382,7 +382,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
                     // Handle space after word
                     const spaceIndex = charIndex;
-                    let spaceClassName = 'transition-wave ';
+                    let spaceClassName = '';
                     const isLastWordInRow = wordIndex === row.length - 1;
                     
                     if (!isLastWordInRow) {

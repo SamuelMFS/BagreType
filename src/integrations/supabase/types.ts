@@ -192,6 +192,44 @@ export type Database = {
           }
         ]
       }
+      user_progress: {
+        Row: {
+          baseline_accuracy: number | null
+          baseline_completed: boolean
+          baseline_wpm: number | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baseline_accuracy?: number | null
+          baseline_completed?: boolean
+          baseline_wpm?: number | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baseline_accuracy?: number | null
+          baseline_completed?: boolean
+          baseline_wpm?: number | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
