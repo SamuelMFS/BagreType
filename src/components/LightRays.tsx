@@ -1,10 +1,14 @@
+import { useMemo } from 'react';
+
 const LightRays = () => {
-  const rays = Array.from({ length: 5 }, (_, i) => ({
-    id: i,
-    left: `${15 + i * 20}%`,
-    delay: `${i * 2}s`,
-    opacity: 0.05 + Math.random() * 0.08,
-  }));
+  const rays = useMemo(() => 
+    Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      left: `${15 + i * 20}%`,
+      delay: `${i * 2}s`,
+      opacity: 0.05 + Math.random() * 0.08,
+    })), []
+  );
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">

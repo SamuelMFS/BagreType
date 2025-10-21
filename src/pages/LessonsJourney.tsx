@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import LessonRoadmap from "@/components/LessonRoadmap";
 import Bubbles from "@/components/Bubbles";
@@ -18,16 +18,18 @@ const LessonsJourney = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const backgroundStyle = useMemo(() => ({
+    background: `linear-gradient(180deg, 
+      hsl(var(--background)) 0%, 
+      hsl(var(--card)) 40%, 
+      hsl(var(--muted)) ${60 + scrollProgress * 20}%, 
+      hsl(220 40% ${Math.max(5, 8 - scrollProgress * 3)}%) 100%)`,
+  }), [scrollProgress]);
+
   return (
     <div 
       className="min-h-[300vh] relative overflow-hidden transition-colors duration-700"
-      style={{
-        background: `linear-gradient(180deg, 
-          hsl(var(--background)) 0%, 
-          hsl(var(--card)) 40%, 
-          hsl(var(--muted)) ${60 + scrollProgress * 20}%, 
-          hsl(220 40% ${Math.max(5, 8 - scrollProgress * 3)}%) 100%)`,
-      }}
+      style={backgroundStyle}
     >
       <Navigation />
       
@@ -51,19 +53,29 @@ const LessonsJourney = () => {
       {/* Bioluminescent particles for deep ocean */}
       {scrollProgress > 0.5 && (
         <div className="fixed inset-0 pointer-events-none" style={{ opacity: (scrollProgress - 0.5) * 2 }}>
-          {Array.from({ length: 15 }, (_, i) => (
+          {useMemo(() => 
+            Array.from({ length: 15 }, (_, i) => ({
+              id: i,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: `${2 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 3}px`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`,
+            })), []
+          ).map((particle) => (
             <div
-              key={`glow-${i}`}
+              key={`glow-${particle.id}`}
               className="absolute rounded-full animate-glow-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                width: `${2 + Math.random() * 3}px`,
-                height: `${2 + Math.random() * 3}px`,
+                left: particle.left,
+                top: particle.top,
+                width: particle.width,
+                height: particle.height,
                 background: 'hsl(var(--accent))',
                 boxShadow: '0 0 10px hsl(var(--accent))',
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
+                animationDelay: particle.animationDelay,
+                animationDuration: particle.animationDuration,
               }}
             />
           ))}

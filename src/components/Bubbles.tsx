@@ -1,11 +1,15 @@
+import { useMemo } from 'react';
+
 const Bubbles = () => {
-  const bubbles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 10}s`,
-    duration: `${6 + Math.random() * 8}s`,
-    size: `${5 + Math.random() * 40}px`,
-  }));
+  const bubbles = useMemo(() => 
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 10}s`,
+      duration: `${6 + Math.random() * 8}s`,
+      size: `${5 + Math.random() * 40}px`,
+    })), []
+  );
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">

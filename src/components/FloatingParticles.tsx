@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
+
 const FloatingParticles = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 10}s`,
-    duration: `${15 + Math.random() * 15}s`,
-    size: `${1 + Math.random() * 2}px`,
-  }));
+  const particles = useMemo(() => 
+    Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 10}s`,
+      duration: `${15 + Math.random() * 15}s`,
+      size: `${1 + Math.random() * 2}px`,
+    })), []
+  );
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">

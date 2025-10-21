@@ -1,10 +1,14 @@
+import { useMemo } from 'react';
+
 const SwimmingFish = () => {
-  const fish = Array.from({ length: 3 }, (_, i) => ({
-    id: i,
-    top: `${20 + i * 25}%`,
-    delay: `${i * 8}s`,
-    duration: `${20 + Math.random() * 10}s`,
-  }));
+  const fish = useMemo(() => 
+    Array.from({ length: 3 }, (_, i) => ({
+      id: i,
+      top: `${20 + i * 25}%`,
+      delay: `${i * 8}s`,
+      duration: `${20 + Math.random() * 10}s`,
+    })), []
+  );
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">

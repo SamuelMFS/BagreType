@@ -76,6 +76,122 @@ export type Database = {
           },
         ]
       }
+      questionnaire_responses: {
+        Row: {
+          can_touch_type: string
+          created_at: string
+          current_step: string
+          id: string
+          keyboard_layout: string
+          session_id: string | null
+          share_data: string
+          updated_at: string
+          user_id: string | null
+          want_to_learn: string | null
+        }
+        Insert: {
+          can_touch_type: string
+          created_at?: string
+          current_step: string
+          id?: string
+          keyboard_layout: string
+          session_id?: string | null
+          share_data: string
+          updated_at?: string
+          user_id?: string | null
+          want_to_learn?: string | null
+        }
+        Update: {
+          can_touch_type?: string
+          created_at?: string
+          current_step?: string
+          id?: string
+          keyboard_layout?: string
+          session_id?: string | null
+          share_data?: string
+          updated_at?: string
+          user_id?: string | null
+          want_to_learn?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      typing_test_data: {
+        Row: {
+          accuracy_percentage: number | null
+          average_reaction_time_ms: number | null
+          can_touch_type: string
+          completed_at: string | null
+          completed_letters: number
+          created_at: string
+          id: string
+          keyboard_layout: string
+          questionnaire_response_id: string | null
+          session_id: string | null
+          started_at: string
+          test_duration_ms: number
+          total_letters: number
+          typing_data: Json
+          user_id: string | null
+        }
+        Insert: {
+          accuracy_percentage?: number | null
+          average_reaction_time_ms?: number | null
+          can_touch_type: string
+          completed_at?: string | null
+          completed_letters: number
+          created_at?: string
+          id?: string
+          keyboard_layout: string
+          questionnaire_response_id?: string | null
+          session_id?: string | null
+          started_at?: string
+          test_duration_ms: number
+          total_letters: number
+          typing_data: Json
+          user_id?: string | null
+        }
+        Update: {
+          accuracy_percentage?: number | null
+          average_reaction_time_ms?: number | null
+          can_touch_type?: string
+          completed_at?: string | null
+          completed_letters?: number
+          created_at?: string
+          id?: string
+          keyboard_layout?: string
+          questionnaire_response_id?: string | null
+          session_id?: string | null
+          started_at?: string
+          test_duration_ms?: number
+          total_letters?: number
+          typing_data?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "typing_test_data_questionnaire_response_id_fkey"
+            columns: ["questionnaire_response_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "typing_test_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
