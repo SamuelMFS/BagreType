@@ -6,6 +6,7 @@ import OceanDepthBackground from "@/components/OceanDepthBackground";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Target, Brain, Keyboard, GraduationCap, Database, Zap } from "lucide-react";
+import ScrollIndicator from "@/components/ScrollIndicator";
 
 const Intro = () => {
   const navigate = useNavigate();
@@ -224,6 +225,9 @@ const Intro = () => {
 
         </div>
       </div>
+      
+      {/* Scroll Indicator */}
+      <ScrollIndicator />
     </div>
   );
 };

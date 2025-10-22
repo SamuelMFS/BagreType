@@ -230,6 +230,68 @@ export type Database = {
           }
         ]
       }
+      lesson_progress: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_id: string | null
+          chapter_id: number
+          lesson_id: string
+          completed_at: string
+          part1_wpm: number | null
+          part1_accuracy: number | null
+          part2_wpm: number | null
+          part2_accuracy: number | null
+          part3_wpm: number | null
+          part3_accuracy: number | null
+          average_wpm: number | null
+          average_accuracy: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_id?: string | null
+          chapter_id: number
+          lesson_id: string
+          completed_at?: string
+          part1_wpm?: number | null
+          part1_accuracy?: number | null
+          part2_wpm?: number | null
+          part2_accuracy?: number | null
+          part3_wpm?: number | null
+          part3_accuracy?: number | null
+          average_wpm?: number | null
+          average_accuracy?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_id?: string | null
+          chapter_id?: number
+          lesson_id?: string
+          completed_at?: string
+          part1_wpm?: number | null
+          part1_accuracy?: number | null
+          part2_wpm?: number | null
+          part2_accuracy?: number | null
+          part3_wpm?: number | null
+          part3_accuracy?: number | null
+          average_wpm?: number | null
+          average_accuracy?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

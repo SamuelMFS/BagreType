@@ -8,6 +8,7 @@ import SwimmingFish from "@/components/SwimmingFish";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import TypingTest from "@/components/TypingTest";
+import ScrollIndicator from "@/components/ScrollIndicator";
 import { Zap, Clock, Target, TrendingUp, Play, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,11 +123,22 @@ const Learn = () => {
   };
 
   // Handle test completion
-  const handleTestComplete = (wpm: number, accuracy: number) => {
+  const handleTestComplete = async (wpm: number, accuracy: number) => {
     setTestResults({ wpm, accuracy });
     setShowTest(false);
-    setShowResults(true);
-    saveBaselineCompletion();
+    await saveBaselineCompletion();
+    
+    // Check if user has seen the post-baseline page before
+    const hasSeenPostBaseline = localStorage.getItem('bagre-post-baseline-seen') === 'true';
+    
+    if (!hasSeenPostBaseline) {
+      // Navigate directly to post-baseline page
+      navigate('/post-baseline', { 
+        state: { 
+          baselineResults: { wpm, accuracy } 
+        } 
+      });
+    }
   };
 
   if (isLoading) {
@@ -441,6 +453,8 @@ const Learn = () => {
           )}
         </div>
       </div>
+      
+      <ScrollIndicator />
     </div>
   );
 };

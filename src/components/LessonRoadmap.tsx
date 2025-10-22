@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, PlayCircle, Lock, BookOpen, Trophy, Star } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LessonNode {
   id: string;
@@ -23,6 +26,121 @@ interface Chapter {
 
 const LessonRoadmap = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const [skipTarget, setSkipTarget] = useState<{ chapterId: number; lessonId: string } | null>(null);
+  const [dailyTimeSpent, setDailyTimeSpent] = useState(0); // in minutes
+
+  // Load lesson progress
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        let progressData: any[] = [];
+        
+        if (user) {
+          // Load from Supabase for logged-in users
+          console.log('Loading progress from Supabase for user:', user.id);
+          const { data, error } = await supabase
+            .from('lesson_progress')
+            .select('chapter_id, lesson_id')
+            .eq('user_id', user.id);
+          
+          if (error) {
+            console.error('Supabase loading error:', error);
+            throw error;
+          }
+          console.log('Supabase progress data:', data);
+          progressData = data || [];
+        } else {
+          // Load from localStorage for anonymous users
+          console.log('Loading progress from localStorage');
+          const storedProgress = localStorage.getItem('lesson_progress');
+          if (storedProgress) {
+            progressData = JSON.parse(storedProgress);
+            console.log('localStorage progress data:', progressData);
+          }
+        }
+        
+        // Convert to Set of lesson keys
+        const completedSet = new Set<string>();
+        progressData.forEach(progress => {
+          const lessonKey = `${progress.chapter_id}-${progress.lesson_id}`;
+          completedSet.add(lessonKey);
+          console.log('Added completed lesson:', lessonKey);
+        });
+        
+        console.log('Final completed lessons set:', Array.from(completedSet));
+        setCompletedLessons(completedSet);
+        
+        // Load daily time spent
+        await loadDailyTimeSpent();
+      } catch (error) {
+        console.error('Error loading lesson progress:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const loadDailyTimeSpent = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        
+        if (user) {
+          // Load from Supabase for logged-in users
+          const { data, error } = await supabase
+            .from('lesson_progress')
+            .select('created_at')
+            .eq('user_id', user.id)
+            .gte('created_at', `${today}T00:00:00.000Z`)
+            .lt('created_at', `${today}T23:59:59.999Z`);
+          
+          if (error) throw error;
+          
+          // Estimate time spent based on completed lessons (assuming ~2 minutes per lesson)
+          const timeSpent = (data?.length || 0) * 2;
+          setDailyTimeSpent(timeSpent);
+        } else {
+          // Load from localStorage for anonymous users
+          const storedTime = localStorage.getItem(`daily_time_${today}`);
+          if (storedTime) {
+            setDailyTimeSpent(parseInt(storedTime));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading daily time:', error);
+      }
+    };
+
+    // Function to update daily time when a lesson is completed
+    const updateDailyTime = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const newTime = dailyTimeSpent + 2; // Add 2 minutes for completed lesson
+      setDailyTimeSpent(newTime);
+      
+      // Save to localStorage for anonymous users
+      if (!user) {
+        localStorage.setItem(`daily_time_${today}`, newTime.toString());
+      }
+    };
+    
+    loadProgress();
+    
+    // Also reload when component becomes visible (user returns from lesson)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Page became visible, reloading progress...');
+        loadProgress();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
 
   // Curve positioning configuration
   const CURVE_POSITIONS = {
@@ -143,36 +261,209 @@ const LessonRoadmap = () => {
     }
   ];
 
-  const getNodeIcon = (node: LessonNode) => {
-    if (node.completed) {
+  // Memoize current lesson to avoid recalculating
+  const currentLesson = useMemo(() => {
+    // Get all lessons in order
+    const allLessons: { chapterId: number; lessonId: string }[] = [];
+    chapters.forEach(chapter => {
+      chapter.lessons.forEach(lesson => {
+        allLessons.push({ chapterId: chapter.id, lessonId: lesson.id });
+      });
+    });
+    
+    // Find the furthest completed lesson to determine what's skipped
+    let furthestCompletedIndex = -1;
+    for (let i = 0; i < allLessons.length; i++) {
+      const lesson = allLessons[i];
+      const lessonKey = `${lesson.chapterId}-${lesson.lessonId}`;
+      
+      if (completedLessons.has(lessonKey)) {
+        furthestCompletedIndex = i;
+      }
+    }
+    
+    // Find the first non-completed lesson after the furthest completed one
+    for (let i = furthestCompletedIndex + 1; i < allLessons.length; i++) {
+      const lesson = allLessons[i];
+      const lessonKey = `${lesson.chapterId}-${lesson.lessonId}`;
+      
+      // Check if this lesson's chapter is unlocked
+      const lessonChapter = chapters.find(ch => ch.id === lesson.chapterId);
+      const lessonPrevChapter = chapters.find(ch => ch.id === lesson.chapterId - 1);
+      // Chapter unlocks when the final test is completed, regardless of other lessons
+      const prevTestCompleted = lessonPrevChapter ? 
+        completedLessons.has(`${lessonPrevChapter.id}-test${lessonPrevChapter.id}`) : true;
+      const isLessonChapterUnlocked = !lessonPrevChapter || prevTestCompleted;
+      
+      if (isLessonChapterUnlocked && !completedLessons.has(lessonKey)) {
+        return lesson;
+      }
+    }
+    return null; // All lessons completed
+  }, [completedLessons, chapters]);
+
+  // Determine lesson status based on progress - 5 states: Completed, Current, Skipped, Unlocked, Locked
+  const getLessonStatus = (chapterId: number, lessonId: string) => {
+    const lessonKey = `${chapterId}-${lessonId}`;
+    
+    // 1. COMPLETED: User did the full lesson
+    const isCompleted = completedLessons.has(lessonKey);
+    if (isCompleted) {
+      return { isCompleted: true, isLocked: false, isCurrent: false, isSkipped: false, isUnlocked: false };
+    }
+    
+    // Find current chapter and previous chapter
+    const currentChapter = chapters.find(chapter => chapter.id === chapterId);
+    const previousChapter = chapters.find(chapter => chapter.id === chapterId - 1);
+    
+    if (!currentChapter) {
+      return { isCompleted: false, isLocked: true, isCurrent: false, isSkipped: false, isUnlocked: false };
+    }
+    
+    // Check if previous chapter is completed (for chapter unlocking)
+    // Chapter unlocks when the final test is completed, regardless of other lessons
+    const isPreviousChapterCompleted = !previousChapter || 
+      completedLessons.has(`${previousChapter.id}-test${previousChapter.id}`);
+    
+    // 5. LOCKED: Lessons in chapters ahead of current chapter
+    if (!isPreviousChapterCompleted) {
+      return { isCompleted: false, isLocked: true, isCurrent: false, isSkipped: false, isUnlocked: false };
+    }
+    
+    const isCurrent = currentLesson && currentLesson.chapterId === chapterId && currentLesson.lessonId === lessonId;
+    
+    // 2. CURRENT: The next lesson the user should do
+    if (isCurrent) {
+      return { isCompleted: false, isLocked: false, isCurrent: true, isSkipped: false, isUnlocked: false };
+    }
+    
+    // Check if this lesson is in the current chapter (unlocked)
+    const isInCurrentChapter = currentChapter.lessons.some(lesson => lesson.id === lessonId);
+    
+    // 4. UNLOCKED: Lessons that are available (in current chapter and previous chapters)
+    if (isInCurrentChapter) {
+      return { isCompleted: false, isLocked: false, isCurrent: false, isSkipped: false, isUnlocked: true };
+    }
+    
+    // 3. SKIPPED: Lessons that are not completed and are behind completed nodes
+    // A lesson is skipped if it's between completed lessons
+    const isSkipped = () => {
+      // Get all lessons in order
+      const allLessons: { chapterId: number; lessonId: string }[] = [];
+      chapters.forEach(chapter => {
+        chapter.lessons.forEach(lesson => {
+          allLessons.push({ chapterId: chapter.id, lessonId: lesson.id });
+        });
+      });
+      
+      const currentIndex = allLessons.findIndex(l => l.chapterId === chapterId && l.lessonId === lessonId);
+      
+      // Check if there's a completed lesson after this one
+      for (let i = currentIndex + 1; i < allLessons.length; i++) {
+        const lesson = allLessons[i];
+        const lessonKey = `${lesson.chapterId}-${lesson.lessonId}`;
+        if (completedLessons.has(lessonKey)) {
+          console.log(`Lesson ${chapterId}-${lessonId} is skipped because ${lessonKey} is completed after it`);
+          return true; // This lesson is skipped because there's a completed lesson after it
+        }
+      }
+      
+      return false;
+    };
+    
+    if (isSkipped()) {
+      console.log(`Marking ${chapterId}-${lessonId} as skipped`);
+      return { isCompleted: false, isLocked: false, isCurrent: false, isSkipped: true, isUnlocked: false };
+    }
+    
+    // Default to unlocked for lessons in current chapter
+    return { isCompleted: false, isLocked: false, isCurrent: false, isSkipped: false, isUnlocked: true };
+  };
+
+  const getNodeIcon = (node: LessonNode, chapterId: number) => {
+    const { isCompleted, isLocked, isCurrent, isSkipped, isUnlocked } = getLessonStatus(chapterId, node.id);
+    
+    if (isCompleted) {
       return <CheckCircle className="w-6 h-6" />;
     }
-    if (node.locked) {
+    if (isLocked) {
       return <Lock className="w-4 h-4" />;
     }
     if (node.type === 'test') {
       return <Trophy className="w-5 h-5" />;
     }
-    if (node.isCurrent) {
-      return <Star className="w-5 h-5" />;
+    if (isCurrent) {
+      return <PlayCircle className="w-5 h-5" />;
     }
     return <PlayCircle className="w-5 h-5" />;
   };
 
-  const getNodeStyle = (node: LessonNode) => {
-    if (node.completed) {
-      return 'bg-green-500 border-green-500 text-white shadow-lg';
+  const getNodeStyle = (node: LessonNode, chapterId: number) => {
+    const { isCompleted, isLocked, isCurrent, isSkipped, isUnlocked } = getLessonStatus(chapterId, node.id);
+    
+    if (isCompleted) {
+      return 'bg-primary border-primary text-primary-foreground shadow-lg'; // Main color for completed
     }
-    if (node.locked) {
-      return 'bg-gray-300 border-gray-300 text-gray-500';
+    if (isCurrent) {
+      return 'bg-primary border-primary text-primary-foreground animate-node-glow'; // Main color + glow for current
     }
-    if (node.isCurrent) {
-      return 'bg-primary border-primary text-primary-foreground animate-node-glow';
+    if (isSkipped) {
+      return 'bg-blue-200 border-blue-200 text-blue-600 cursor-pointer'; // Main color (lighter) for skipped
     }
-    if (node.type === 'test') {
-      return 'bg-purple-500 border-purple-500 text-white shadow-lg';
+    if (isUnlocked) {
+      return 'bg-gray-300 border-gray-300 text-gray-500 cursor-pointer'; // Gray for unlocked
     }
-    return 'bg-blue-400 border-blue-400 text-white shadow-lg';
+    if (isLocked) {
+      return 'bg-gray-300 border-gray-300 text-gray-500'; // Gray for locked
+    }
+    
+    // Default fallback
+    return 'bg-gray-300 border-gray-300 text-gray-500';
+  };
+
+  // Calculate progress metrics
+  const completedCount = completedLessons.size;
+  
+  // Calculate total number of lessons across all chapters
+  const totalLessons = chapters.reduce((total, chapter) => total + chapter.lessons.length, 0);
+  
+  // Calculate number of completed chapters (chapters where the final test is completed)
+  const completedChapters = chapters.filter(chapter => 
+    completedLessons.has(`${chapter.id}-test${chapter.id}`)
+  ).length;
+
+  // Find the current lesson position for dynamic line coloring
+  const getCurrentLessonPosition = () => {
+    // Find the current lesson (the one with glow) across all chapters
+    for (const chapter of chapters) {
+      for (const lesson of chapter.lessons) {
+        const { isCurrent } = getLessonStatus(chapter.id, lesson.id);
+        if (isCurrent) {
+          // Find the index of this lesson in the overall sequence
+          let index = 0;
+          for (const ch of chapters) {
+            for (const l of ch.lessons) {
+              if (ch.id === chapter.id && l.id === lesson.id) {
+                return index;
+              }
+              index++;
+            }
+          }
+        }
+      }
+    }
+    return 0;
+  };
+
+  const currentLessonPosition = getCurrentLessonPosition();
+  const progressPercentage = totalLessons > 0 ? (currentLessonPosition / totalLessons) * 100 : 0;
+
+  const handleSkipConfirm = (confirmed: boolean) => {
+    if (confirmed && skipTarget) {
+      navigate(`/lesson/${skipTarget.chapterId}/${skipTarget.lessonId}`);
+    }
+    setShowSkipConfirm(false);
+    setSkipTarget(null);
   };
 
   return (
@@ -180,16 +471,22 @@ const LessonRoadmap = () => {
       {/* Progress Stats - Top */}
       <div className="grid grid-cols-3 gap-4 mb-12">
         <Card className="p-4 bg-card/90 backdrop-blur-md border-border/50 text-center">
-          <div className="text-2xl font-bold text-primary">0</div>
+          <div className="text-2xl font-bold text-primary">
+            {isLoading ? "..." : `${completedCount}/${totalLessons}`}
+          </div>
           <div className="text-xs text-muted-foreground">Completed</div>
         </Card>
         <Card className="p-4 bg-card/90 backdrop-blur-md border-border/50 text-center">
-          <div className="text-2xl font-bold text-accent">{chapters.length}</div>
+          <div className="text-2xl font-bold text-accent">
+            {isLoading ? "..." : `${completedChapters}/5`}
+          </div>
           <div className="text-xs text-muted-foreground">Chapters</div>
         </Card>
         <Card className="p-4 bg-card/90 backdrop-blur-md border-border/50 text-center">
-          <div className="text-2xl font-bold text-primary">~2h</div>
-          <div className="text-xs text-muted-foreground">Total Time</div>
+          <div className="text-2xl font-bold text-primary">
+            {isLoading ? "..." : `${dailyTimeSpent}/30`}
+          </div>
+          <div className="text-xs text-muted-foreground">Minutes Today</div>
         </Card>
             </div>
 
@@ -203,8 +500,9 @@ const LessonRoadmap = () => {
             >
               <defs>
             <linearGradient id="path-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.6" />
+              <stop offset={`${progressPercentage}%`} stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+              <stop offset={`${progressPercentage}%`} stopColor="hsl(var(--foreground))" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0.3" />
                 </linearGradient>
               </defs>
               <path
@@ -221,7 +519,7 @@ const LessonRoadmap = () => {
           <div key={chapter.id}>
             {/* Chapter Header */}
             <div 
-              className="absolute left-4 z-10"
+              className={`absolute z-10 ${chapterIndex % 2 === 0 ? 'left-4' : 'right-4'}`}
               style={{ top: `${80 + CHAPTER_OFFSETS[chapter.id as keyof typeof CHAPTER_OFFSETS] + 20}px` }}
             >
               <Card className="p-4 bg-card/95 backdrop-blur-md border-border/50 shadow-lg w-48">
@@ -261,14 +559,63 @@ const LessonRoadmap = () => {
                     top: `${yPosition}px`,
                     transform: 'translate(-50%, -50%)',
                   }}
-                  onClick={() => !lesson.locked && navigate(`/lesson/${chapter.id}/${lesson.id}`)}
+        onClick={() => {
+          const { isCompleted, isLocked, isCurrent, isSkipped, isUnlocked } = getLessonStatus(chapter.id, lesson.id);
+          
+          if (isLocked) {
+            return; // Don't allow clicking locked lessons
+          }
+          
+          if (isCompleted || isCurrent || isSkipped) {
+            // Direct navigation for completed, current, or skipped lessons
+            navigate(`/lesson/${chapter.id}/${lesson.id}`);
+          } else if (isUnlocked) {
+            // Check if this lesson comes after the current lesson
+            const allLessons: { chapterId: number; lessonId: string }[] = [];
+            chapters.forEach(chapter => {
+              chapter.lessons.forEach(lesson => {
+                allLessons.push({ chapterId: chapter.id, lessonId: lesson.id });
+              });
+            });
+            
+            const currentLessonIndex = allLessons.findIndex(l => 
+              l.chapterId === currentLesson?.chapterId && l.lessonId === currentLesson?.lessonId
+            );
+            const thisLessonIndex = allLessons.findIndex(l => l.chapterId === chapter.id && l.lessonId === lesson.id);
+            
+            // Only show skip prompt for lessons that come AFTER the current lesson
+            const isAfterCurrent = thisLessonIndex > currentLessonIndex;
+            
+            if (isAfterCurrent) {
+              // Show confirmation for skipping to lessons after current
+              setSkipTarget({ chapterId: chapter.id, lessonId: lesson.id });
+              setShowSkipConfirm(true);
+            } else {
+              // Direct navigation for lessons before current (shouldn't happen with current logic, but safety)
+              navigate(`/lesson/${chapter.id}/${lesson.id}`);
+            }
+          }
+        }}
                 >
                   {/* Node Circle */}
-                  <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${getNodeStyle(lesson)}`}>
-                    {lesson.type === 'letter' ? (
-                      <span className="text-2xl font-bold">{lesson.letter}</span>
+                  <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${getNodeStyle(lesson, chapter.id)}`}>
+                    {getLessonStatus(chapter.id, lesson.id).isLocked ? (
+                      // Locked lesson: show lock by default, letter on hover
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <Lock className="w-6 h-6 group-hover:opacity-0 transition-opacity duration-300" />
+                        {lesson.type === 'letter' && (
+                          <span className="absolute text-2xl font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {lesson.letter}
+                          </span>
+                        )}
+                    </div>
                     ) : (
-                      getNodeIcon(lesson)
+                      // Unlocked lesson: show normal content
+                      lesson.type === 'letter' ? (
+                        <span className="text-2xl font-bold">{lesson.letter}</span>
+                      ) : (
+                        getNodeIcon(lesson, chapter.id)
+                      )
                     )}
                   </div>
 
@@ -281,8 +628,8 @@ const LessonRoadmap = () => {
                     </div>
                   )}
 
-                  {/* Current Lesson Indicator */}
-                  {lesson.isCurrent && (
+                  {/* Star only on F lesson (first lesson) */}
+                  {chapter.id === 1 && lesson.id === 'f' && !getLessonStatus(chapter.id, lesson.id).isCompleted && (
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
                       <Star className="w-4 h-4 text-white" />
                     </div>
@@ -290,10 +637,36 @@ const LessonRoadmap = () => {
                 </div>
               );
             })}
-          </div>
-        ))}
+        </div>
+      ))}
 
       </div>
+
+      {/* Skip Confirmation Dialog */}
+      {showSkipConfirm && skipTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded-lg shadow-lg max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-primary mb-4">Skip to Lesson?</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to skip to this lesson? You can always come back to previous lessons later.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => handleSkipConfirm(false)}
+              >
+                No, Continue Sequential
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={() => handleSkipConfirm(true)}
+              >
+                Yes, Skip
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

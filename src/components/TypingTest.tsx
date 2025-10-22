@@ -45,6 +45,8 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [errors, setErrors] = useState<Set<number>>(new Set());
+  const [totalKeystrokes, setTotalKeystrokes] = useState(0);
+  const [totalErrors, setTotalErrors] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
@@ -62,6 +64,8 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     setUserInput('');
     setCurrentIndex(0);
     setErrors(new Set());
+    setTotalKeystrokes(0);
+    setTotalErrors(0);
     setStartTime(null);
     setEndTime(null);
     setIsComplete(false);
@@ -111,15 +115,21 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
         const expectedChar = fullText[currentIndex];
         const typedChar = e.key;
 
+        // Track every keystroke
+        setTotalKeystrokes(prev => prev + 1);
+
         setUserInput(userInput + typedChar);
 
         if (typedChar !== expectedChar) {
+          // Track every error, regardless of correction
+          setTotalErrors(prev => prev + 1);
           setErrors(new Set([...errors, currentIndex]));
         }
 
         const newIndex = currentIndex + 1;
         
         if (newIndex === fullText.length) {
+          console.log('Test completed! Calling finishTest()');
           finishTest();
         } else {
           setCurrentIndex(newIndex);
@@ -194,6 +204,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
 
   const finishTest = async () => {
+    console.log('finishTest called');
     const end = Date.now();
     setEndTime(end);
     setIsComplete(true);
@@ -207,9 +218,14 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
       const accuracy = Math.round((correctChars / totalChars) * 100);
 
+      console.log('Test stats:', { wpm, accuracy, timeSeconds, correctChars, totalChars });
+
       // Call onComplete callback if provided
       if (onComplete) {
+        console.log('Calling onComplete with:', { wpm, accuracy });
         onComplete(wpm, accuracy);
+      } else {
+        console.log('No onComplete callback provided');
       }
 
       if (user) {
@@ -246,7 +262,9 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     const totalChars = fullText.length;
     const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
     const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
-    const accuracy = Math.round((correctChars / totalChars) * 100);
+    
+    // Calculate accuracy based on total keystrokes vs total errors
+    const accuracy = totalKeystrokes > 0 ? Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100) : 100;
 
     return { wpm, rawWpm, accuracy, timeSeconds: Math.round(timeSeconds) };
   };
@@ -259,9 +277,8 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   };
 
   const getCurrentAccuracy = () => {
-    if (currentIndex === 0) return 100;
-    const correctChars = currentIndex - errors.size;
-    return Math.round((correctChars / currentIndex) * 100);
+    if (totalKeystrokes === 0) return 100;
+    return Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100);
   };
 
   const stats = calculateStats();

@@ -12,6 +12,7 @@ import Intro from "./pages/Intro";
 import DataCollection from "./pages/DataCollection";
 import Results from "./pages/Results";
 import Learn from "./pages/Learn";
+import PostBaseline from "./pages/PostBaseline";
 import LessonsJourney from "./pages/LessonsJourney";
 import Lesson from "./pages/Lesson";
 import Practice from "./pages/Practice";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/collect" element={<DataCollection />} />
             <Route path="/results" element={<Results />} />
             <Route path="/learn" element={<Learn />} />
+            <Route path="/post-baseline" element={<PostBaseline />} />
             <Route path="/lessons" element={
               <ScrollProvider>
                 <LessonsJourney />

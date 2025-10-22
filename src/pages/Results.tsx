@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import LetterPerformanceChart from "@/components/LetterPerformanceChart";
 import HorizontalLetterChart from "@/components/HorizontalLetterChart";
+import ScrollIndicator from "@/components/ScrollIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -345,6 +346,9 @@ const Results = () => {
           )}
         </div>
       </div>
+      
+      {/* Scroll Indicator */}
+      <ScrollIndicator />
     </div>
   );
 };

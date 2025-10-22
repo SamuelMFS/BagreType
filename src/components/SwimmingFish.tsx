@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 
-const SwimmingFish = () => {
+interface SwimmingFishProps {
+  topOffset?: number;
+}
+
+const SwimmingFish = ({ topOffset = 0 }: SwimmingFishProps) => {
   const fish = useMemo(() => 
     Array.from({ length: 3 }, (_, i) => ({
       id: i,
@@ -11,7 +15,7 @@ const SwimmingFish = () => {
   );
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ transform: `translateY(${topOffset}px)` }}>
       {fish.map((f) => (
         <div
           key={f.id}
@@ -28,7 +32,7 @@ const SwimmingFish = () => {
             viewBox="0 0 60 30"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ opacity: 0.3 }}
+            style={{ opacity: 0.7 }}
           >
             <path
               d="M50 15C50 15 45 10 35 10C25 10 15 12 10 15C15 18 25 20 35 20C45 20 50 15 50 15Z"
