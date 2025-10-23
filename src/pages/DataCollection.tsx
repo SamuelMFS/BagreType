@@ -40,6 +40,7 @@ const DataCollection = () => {
   const [showResultsButton, setShowResultsButton] = useState(false);
   const [lastTypedCorrect, setLastTypedCorrect] = useState<boolean | null>(null);
   const [isBouncing, setIsBouncing] = useState(false);
+  const [userJustSelected, setUserJustSelected] = useState(false);
 
   // Generate or retrieve session ID for anonymous users
   useEffect(() => {
@@ -251,6 +252,26 @@ const DataCollection = () => {
     setIsBouncing(false);
   };
 
+  // Reset all questionnaire choices
+  const resetQuestionnaire = () => {
+    setKeyboardLayout(null);
+    setCanTouchType(null);
+    setWantToLearn(null);
+    setShareData(null);
+    setStep("layout");
+    setUserJustSelected(false);
+    
+    // Clear saved data
+    if (user) {
+      // For logged-in users, we could delete from Supabase, but for now just clear local state
+      console.log('Reset questionnaire for logged-in user');
+    } else {
+      // Clear localStorage for anonymous users
+      localStorage.removeItem('bagre-questionnaire-data');
+      localStorage.removeItem('bagre-questionnaire-session');
+    }
+  };
+
   // Save typing test data to Supabase
   const saveTypingTestData = async () => {
     try {
@@ -333,20 +354,22 @@ const DataCollection = () => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
-    if (wantToLearn && step === "want-to-learn") {
+    // Only auto-advance if user just made a selection (not when loading saved data)
+    if (wantToLearn && step === "want-to-learn" && userJustSelected && !isLoading) {
       timeoutId = setTimeout(() => {
         if (wantToLearn === "yes") {
           navigate("/learn");
         } else if (wantToLearn === "no") {
-      setStep("share");
+          setStep("share");
         }
+        setUserJustSelected(false); // Reset the flag
       }, 500);
     }
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [wantToLearn, step, navigate]);
+  }, [wantToLearn, step, navigate, isLoading, userJustSelected]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -419,6 +442,18 @@ const DataCollection = () => {
             <p className="text-2xl text-aqua-light">
               Help us build the future of keyboard layouts
             </p>
+            
+            {/* Reset button - only show if user has made some choices */}
+            {(keyboardLayout || canTouchType || wantToLearn || shareData) && (
+              <div className="pt-4">
+                <button
+                  onClick={resetQuestionnaire}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Reset Choices
+                </button>
+              </div>
+            )}
           </div>
 
           {step !== "test" && (
@@ -520,7 +555,10 @@ const DataCollection = () => {
                   </p>
                 </div>
 
-                <RadioGroup value={wantToLearn || ""} onValueChange={(v) => setWantToLearn(v as WantToLearn)}>
+                <RadioGroup value={wantToLearn || ""} onValueChange={(v) => {
+                  setWantToLearn(v as WantToLearn);
+                  setUserJustSelected(true); // Mark that user just made a selection
+                }}>
                   <Label htmlFor="learn-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                     <RadioGroupItem value="yes" id="learn-yes" className="w-5 h-5" />
                     <div className="flex-1">

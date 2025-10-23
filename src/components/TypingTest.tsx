@@ -9,8 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 interface TypingTestProps {
   wordCount?: number;
   customText?: string;
+  timeLimit?: number; // in seconds
+  zenMode?: boolean; // for zen mode
   onComplete?: (wpm: number, accuracy: number) => void;
   onRestart?: () => void;
+  hideCompletionScreen?: boolean; // New prop to hide completion screen
 }
 
 const commonWords = [
@@ -34,7 +37,7 @@ const generateWords = (count: number): string[] => {
   return words;
 };
 
-const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, onComplete, onRestart }, ref) => {
+const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false }, ref) => {
   const [words, setWords] = useState<string[]>(() => {
     // Initialize words on first render
     if (customText) {
@@ -50,7 +53,11 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [completionHandled, setCompletionHandled] = useState(false);
   const [displayOffset, setDisplayOffset] = useState(0);
+  const [zenText, setZenText] = useState<string>('');
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [lastKeystrokeTime, setLastKeystrokeTime] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -58,6 +65,9 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   const resetTest = () => {
     if (customText) {
       setWords(customText.trim().split(/\s+/));
+    } else if (zenMode) {
+      setWords([]);
+      setZenText('');
     } else {
       setWords(generateWords(wordCount));
     }
@@ -69,7 +79,10 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     setStartTime(null);
     setEndTime(null);
     setIsComplete(false);
+    setCompletionHandled(false);
     setDisplayOffset(0);
+    setTimeRemaining(timeLimit || null);
+    setLastKeystrokeTime(null);
   };
 
   // Expose reset method via ref
@@ -77,14 +90,42 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     reset: resetTest
   }));
 
+  // Time limit countdown
+  useEffect(() => {
+    if (timeRemaining !== null && timeRemaining > 0 && startTime && !isComplete) {
+      const timer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev === null || prev <= 1) {
+            setIsComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [timeRemaining, startTime, isComplete]);
+
   useEffect(() => {
     resetTest();
-  }, [wordCount, customText]);
+  }, [wordCount, customText, zenMode, timeLimit]);
 
   useEffect(() => {
     if (isComplete) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Escape key - restart test for all modes, complete for zen mode
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (zenMode) {
+          setIsComplete(true);
+        } else {
+          resetTest();
+        }
+        return;
+      }
+
       // Prevent default for space to avoid page scroll
       if (e.key === ' ') {
         e.preventDefault();
@@ -93,6 +134,20 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       // Start timer on first keypress
       if (!startTime && e.key.length === 1) {
         setStartTime(Date.now());
+      }
+
+      // Handle zen mode - just track typing without specific text
+      if (zenMode) {
+        if (e.key.length === 1) {
+          setTotalKeystrokes(prev => prev + 1);
+          setZenText(prev => prev + e.key);
+          setLastKeystrokeTime(Date.now());
+        } else if (e.key === 'Backspace') {
+          e.preventDefault();
+          setZenText(prev => prev.slice(0, -1));
+          setLastKeystrokeTime(Date.now());
+        }
+        return;
       }
 
       const fullText = words.join(' ');
@@ -129,8 +184,8 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
         const newIndex = currentIndex + 1;
         
         if (newIndex === fullText.length) {
-          console.log('Test completed! Calling finishTest()');
-          finishTest();
+          console.log('Test completed! Setting completion flag');
+          setIsComplete(true);
         } else {
           setCurrentIndex(newIndex);
           
@@ -145,8 +200,34 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, userInput, words, startTime, isComplete, errors]);
+  }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode]);
 
+  // Handle keyboard input when test is complete (space to restart)
+  useEffect(() => {
+    if (!isComplete) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        resetTest();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isComplete]);
+
+  // Handle test completion
+  useEffect(() => {
+    if (isComplete && !endTime && !completionHandled) {
+      console.log('Test completed! Calling finishTest()');
+      setCompletionHandled(true);
+      // Use requestAnimationFrame to defer to the next frame
+      requestAnimationFrame(() => {
+        finishTest();
+      });
+    }
+  }, [isComplete, endTime, completionHandled]);
 
   // Build rows of words that fit within a reasonable character limit
   const buildRows = () => {
@@ -223,7 +304,10 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       // Call onComplete callback if provided
       if (onComplete) {
         console.log('Calling onComplete with:', { wpm, accuracy });
-        onComplete(wpm, accuracy);
+        // Defer the callback to prevent state updates during render
+        setTimeout(() => {
+          onComplete(wpm, accuracy);
+        }, 0);
       } else {
         console.log('No onComplete callback provided');
       }
@@ -257,103 +341,218 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     if (!startTime || !endTime) return null;
 
     const timeSeconds = (endTime - startTime) / 1000;
-    const fullText = words.join(' ');
-    const correctChars = fullText.length - errors.size;
-    const totalChars = fullText.length;
-    const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
-    const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
+    if (timeSeconds === 0) return null;
     
-    // Calculate accuracy based on total keystrokes vs total errors
-    const accuracy = totalKeystrokes > 0 ? Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100) : 100;
+    if (zenMode) {
+      // For zen mode, use zenText length and last keystroke time
+      const correctChars = zenText.length;
+      const totalChars = zenText.length;
+      
+      // Use lastKeystrokeTime if available, otherwise use endTime
+      const actualEndTime = lastKeystrokeTime || endTime;
+      const timeSeconds = (actualEndTime - startTime) / 1000;
+      
+      if (timeSeconds <= 0) return null;
+      
+      const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+      const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
+      
+      // Calculate accuracy based on total keystrokes vs total errors
+      const accuracy = totalKeystrokes > 0 ? Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100) : 100;
 
-    return { wpm, rawWpm, accuracy, timeSeconds: Math.round(timeSeconds) };
+      return { 
+        wpm: isNaN(wpm) ? 0 : wpm, 
+        rawWpm: isNaN(rawWpm) ? 0 : rawWpm, 
+        accuracy: isNaN(accuracy) ? 0 : accuracy, 
+        timeSeconds: Math.round(timeSeconds) 
+      };
+    } else {
+      // For other modes, use words array
+      const fullText = words.join(' ');
+      const correctChars = fullText.length - errors.size;
+      const totalChars = fullText.length;
+      const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+      const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
+      
+      // Calculate accuracy based on total keystrokes vs total errors
+      const accuracy = totalKeystrokes > 0 ? Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100) : 100;
+
+      return { 
+        wpm: isNaN(wpm) ? 0 : wpm, 
+        rawWpm: isNaN(rawWpm) ? 0 : rawWpm, 
+        accuracy: isNaN(accuracy) ? 0 : accuracy, 
+        timeSeconds: Math.round(timeSeconds) 
+      };
+    }
   };
 
   const getCurrentWPM = () => {
-    if (!startTime || currentIndex === 0) return 0;
+    if (!startTime) return 0;
     const timeSeconds = (Date.now() - startTime) / 1000;
-    const correctChars = currentIndex - errors.size;
-    return Math.round(((correctChars / 5) / timeSeconds) * 60);
+    if (timeSeconds <= 0) return 0;
+    
+    if (zenMode) {
+      // For zen mode, use zenText length and last keystroke time
+      const correctChars = Math.max(0, zenText.length);
+      
+      // Use lastKeystrokeTime if available, otherwise use current time
+      const actualEndTime = lastKeystrokeTime || Date.now();
+      const timeSeconds = (actualEndTime - startTime) / 1000;
+      
+      if (timeSeconds <= 0) return 0;
+      
+      const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+      return isNaN(wpm) ? 0 : wpm;
+    } else {
+      // For other modes, use currentIndex
+      if (currentIndex === 0) return 0;
+      const correctChars = Math.max(0, currentIndex - errors.size);
+      const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
+      return isNaN(wpm) ? 0 : wpm;
+    }
   };
 
   const getCurrentAccuracy = () => {
     if (totalKeystrokes === 0) return 100;
-    return Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100);
+    if (totalKeystrokes < totalErrors) return 0; // Prevent negative accuracy
+    const accuracy = Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100);
+    return isNaN(accuracy) ? 0 : accuracy;
   };
 
   const stats = calculateStats();
 
-  if (isComplete && stats) {
+  // If completion screen is hidden, automatically call onComplete and reset
+  if (isComplete && stats && hideCompletionScreen) {
+    // Call onComplete callback if provided
+    if (onComplete) {
+      // Defer the callback to prevent state updates during render
+      setTimeout(() => {
+        onComplete(stats.wpm, stats.accuracy);
+      }, 0);
+    }
+    // Reset the test
+    resetTest();
+    return null; // Don't render anything while resetting
+  }
+
+  if (isComplete && stats && !hideCompletionScreen) {
     return (
-      <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
+      <div className="w-full max-w-2xl mx-auto">
         <div className="text-center space-y-8">
-          <div className="flex justify-center">
-            <Trophy className="w-16 h-16 text-primary animate-float" />
+          {/* Celebration Header */}
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <Trophy className="w-20 h-20 text-primary animate-float" />
+            </div>
+            <h2 className="text-5xl font-bold text-primary">Test Complete!</h2>
+            <p className="text-lg text-muted-foreground">Great job! Here are your results</p>
           </div>
           
-          <h2 className="text-4xl font-bold text-primary">Test Complete!</h2>
-          
-          <div className="grid grid-cols-2 gap-6 max-w-md mx-auto">
-            <div className="space-y-2">
-              <p className="text-5xl font-bold text-primary">{stats.wpm}</p>
-              <p className="text-sm text-muted-foreground">WPM</p>
+          {/* Results Card */}
+          <Card className="p-8 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border-border/30 shadow-lg">
+            <div className="grid grid-cols-2 gap-8">
+              {/* Primary Stats */}
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <p className="text-6xl font-bold text-primary">{stats.wpm}</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Words Per Minute</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-4xl font-bold text-foreground">{stats.rawWpm}</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Raw WPM</p>
+                </div>
+              </div>
+              
+              {/* Secondary Stats */}
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <p className="text-6xl font-bold text-accent">{stats.accuracy}%</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Accuracy</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-4xl font-bold text-foreground">{stats.timeSeconds}s</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Time</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <p className="text-5xl font-bold text-accent">{stats.accuracy}%</p>
-              <p className="text-sm text-muted-foreground">Accuracy</p>
+          </Card>
+
+          {/* Actions */}
+          <div className="space-y-4">
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={resetTest}
+                variant="ocean"
+                size="lg"
+                className="gap-2 px-8 py-3 text-lg font-semibold"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Try Again
+              </Button>
+
+              {onComplete && (
+                <Button
+                  onClick={() => onComplete(stats.wpm, stats.accuracy)}
+                  variant="outline"
+                  size="lg"
+                  className="px-8 py-3 text-lg font-semibold"
+                >
+                  Continue
+                </Button>
+              )}
             </div>
-            <div className="space-y-2">
-              <p className="text-3xl font-bold text-foreground">{stats.rawWpm}</p>
-              <p className="text-sm text-muted-foreground">Raw WPM</p>
-            </div>
-            <div className="space-y-2">
-              <p className="text-3xl font-bold text-foreground">{stats.timeSeconds}s</p>
-              <p className="text-sm text-muted-foreground">Time</p>
-            </div>
+            
+            <p className="text-sm text-muted-foreground">
+              Or press <kbd className="px-3 py-1.5 bg-card rounded-lg border border-border text-foreground font-mono text-sm">Space</kbd> to start a new test
+            </p>
           </div>
-
-          <Button
-            onClick={resetTest}
-            variant="ocean"
-            size="lg"
-            className="gap-2"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Try Again
-          </Button>
-
-          {onComplete && (
-            <Button
-              onClick={() => onComplete(stats.wpm, stats.accuracy)}
-              variant="outline"
-              size="lg"
-            >
-              Continue
-            </Button>
-          )}
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats Bar */}
-      <div className="flex justify-center gap-8 text-center">
-        <div className="space-y-1">
-          <p className="text-3xl font-bold text-primary">{getCurrentWPM()}</p>
-          <p className="text-sm text-muted-foreground">WPM</p>
+    <div className="space-y-8 w-full max-w-4xl mx-auto">
+      {/* Stats Bar - only show during active test, not on completion */}
+      {!isComplete && (
+        <div className="flex justify-center gap-8 text-center">
+          <div className="space-y-1">
+            <p className="text-3xl font-bold text-primary">{getCurrentWPM()}</p>
+            <p className="text-sm text-muted-foreground">WPM</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-bold text-accent">{getCurrentAccuracy()}%</p>
+            <p className="text-sm text-muted-foreground">Accuracy</p>
+          </div>
+          {timeRemaining !== null && (
+            <div className="space-y-1">
+              <p className="text-3xl font-bold text-foreground">{timeRemaining}</p>
+              <p className="text-sm text-muted-foreground">Seconds</p>
+            </div>
+          )}
         </div>
-        <div className="space-y-1">
-          <p className="text-3xl font-bold text-accent">{getCurrentAccuracy()}%</p>
-          <p className="text-sm text-muted-foreground">Accuracy</p>
-        </div>
-      </div>
+      )}
 
       {/* Words Display */}
-      <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
-        <div ref={containerRef} tabIndex={0} className="text-center space-y-6 focus:outline-none">
-          <div className="text-3xl leading-[3rem] font-mono select-none min-h-[6rem] max-w-full overflow-hidden">
+      <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50 w-full h-[16rem] flex flex-col justify-center relative">
+        {/* Progress Indicator */}
+        <div className="absolute top-4 right-4 text-xs text-muted-foreground">
+          {zenMode ? (
+            `${zenText.split(/\s+/).filter(word => word.length > 0).length} words`
+          ) : timeRemaining !== null ? (
+            `${Math.max(0, (timeLimit || 0) - (timeRemaining || 0))}/${timeLimit}s`
+          ) : (
+            `${userInput.split(/\s+/).filter(word => word.length > 0).length}/${words.length}`
+          )}
+        </div>
+        
+        <div ref={containerRef} tabIndex={0} className="text-center focus:outline-none w-full flex-1 flex flex-col justify-center">
+          {zenMode ? (
+            <div className="text-3xl leading-[3rem] font-mono select-none w-full overflow-hidden text-foreground/40">
+              {zenText}
+            </div>
+          ) : (
+            <div className="text-3xl leading-[3rem] font-mono select-none w-full overflow-hidden">
             {rows.slice(displayOffset, displayOffset + 2).map((row, rowIndex) => {
               const actualRowIndex = displayOffset + rowIndex;
               let charIndex = 0;
@@ -432,10 +631,11 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
 
-          <div className="text-center text-muted-foreground text-sm">
-            {!startTime && "Start typing to begin..."}
+          <div className="text-center text-muted-foreground text-sm h-[1.5rem] flex items-center justify-center mt-4">
+            {!startTime && (zenMode ? "Type anything you want... Press Esc when done" : "Start typing to begin...")}
           </div>
 
           <div className="flex justify-center gap-4">

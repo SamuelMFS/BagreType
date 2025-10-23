@@ -1,0 +1,14 @@
+# Typing Practice Quotes
+# Format: Each quote on a new line
+# Quotes will be automatically categorized by length
+
+"The quick brown fox jumps over the lazy dog."
+"To be or not to be, that is the question."
+"Life is what happens to you while you're busy making other plans."
+"In the end, we will remember not the words of our enemies, but the silence of our friends."
+"The only way to do great work is to love what you do."
+"Success is not final, failure is not fatal: it is the courage to continue that counts."
+"Two things are infinite: the universe and human stupidity; and I'm not sure about the universe."
+"The future belongs to those who believe in the beauty of their dreams."
+"It is during our darkest moments that we must focus to see the light."
+"Be yourself; everyone else is already taken."

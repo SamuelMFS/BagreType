@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
@@ -6,9 +6,10 @@ import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import TypingTest from "@/components/TypingTest";
+import SegmentedProgressBar from "@/components/SegmentedProgressBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart3 } from "lucide-react";
 import { LessonGenerator, getLessonConfig } from "@/lib/lessonGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ const Lesson = () => {
   const { lessonId, chapterId } = useParams();
   const { user } = useAuth();
   const [currentRound, setCurrentRound] = useState<PracticeRound>("lesson");
+  const typingTestRef = useRef<{ reset: () => void }>(null);
   
   // Debug current round changes
   useEffect(() => {
@@ -71,6 +73,75 @@ const Lesson = () => {
     return chapterNames[chapterId] || 'Unknown Chapter';
   }
 
+  function getLessonNumber(chapterId: string, lessonId: string): number {
+    // Define the lesson order across all chapters
+    const lessonOrder = [
+      // Chapter 1: Index Fingers
+      { chapterId: '1', lessonId: 'f' },
+      { chapterId: '1', lessonId: 'j' },
+      { chapterId: '1', lessonId: 'r' },
+      { chapterId: '1', lessonId: 'u' },
+      { chapterId: '1', lessonId: 'n' },
+      { chapterId: '1', lessonId: 'v' },
+      { chapterId: '1', lessonId: 't' },
+      { chapterId: '1', lessonId: 'y' },
+      { chapterId: '1', lessonId: 'g' },
+      { chapterId: '1', lessonId: 'h' },
+      { chapterId: '1', lessonId: 'b' },
+      { chapterId: '1', lessonId: 'm' },
+      // Chapter 2: Middle Fingers
+      { chapterId: '2', lessonId: 'd' },
+      { chapterId: '2', lessonId: 'k' },
+      { chapterId: '2', lessonId: 'e' },
+      { chapterId: '2', lessonId: 'i' },
+      { chapterId: '2', lessonId: 'c' },
+      { chapterId: '2', lessonId: 'comma' },
+      // Chapter 3: Ring Fingers
+      { chapterId: '3', lessonId: 's' },
+      { chapterId: '3', lessonId: 'l' },
+      { chapterId: '3', lessonId: 'w' },
+      { chapterId: '3', lessonId: 'o' },
+      { chapterId: '3', lessonId: 'x' },
+      { chapterId: '3', lessonId: 'period' },
+      // Chapter 4: Pinky Fingers
+      { chapterId: '4', lessonId: 'a' },
+      { chapterId: '4', lessonId: 'semicolon' },
+      { chapterId: '4', lessonId: 'q' },
+      { chapterId: '4', lessonId: 'p' },
+      { chapterId: '4', lessonId: 'z' },
+      { chapterId: '4', lessonId: 'slash' },
+      // Chapter 5: Numbers & Symbols
+      { chapterId: '5', lessonId: '1' },
+      { chapterId: '5', lessonId: '2' },
+      { chapterId: '5', lessonId: '3' },
+      { chapterId: '5', lessonId: '4' },
+      { chapterId: '5', lessonId: '5' },
+      { chapterId: '5', lessonId: '6' },
+      { chapterId: '5', lessonId: '7' },
+      { chapterId: '5', lessonId: '8' },
+      { chapterId: '5', lessonId: '9' },
+      { chapterId: '5', lessonId: '0' },
+      { chapterId: '5', lessonId: 'minus' },
+      { chapterId: '5', lessonId: 'equals' },
+      { chapterId: '5', lessonId: 'bracket-left' },
+      { chapterId: '5', lessonId: 'bracket-right' },
+      { chapterId: '5', lessonId: 'backslash' },
+      { chapterId: '5', lessonId: 'semicolon' },
+      { chapterId: '5', lessonId: 'quote' },
+      { chapterId: '5', lessonId: 'asterisk' },
+      { chapterId: '5', lessonId: 'dollar' },
+      { chapterId: '5', lessonId: 'ampersand' },
+      { chapterId: '5', lessonId: 'percent' },
+      { chapterId: '5', lessonId: 'caret' },
+    ];
+
+    const index = lessonOrder.findIndex(lesson => 
+      lesson.chapterId === chapterId && lesson.lessonId === lessonId
+    );
+    
+    return index + 1; // Return 1-based lesson number
+  }
+
   // Save lesson progress
   const saveLessonProgress = async (resultsToSave?: Array<{ round: string; wpm: number; accuracy: number; }>) => {
     const resultsData = resultsToSave || results;
@@ -113,16 +184,39 @@ const Lesson = () => {
       if (user) {
         // Save to Supabase for logged-in users
         console.log('Saving to Supabase:', progressData);
-        const { data, error } = await supabase
-          .from('lesson_progress')
-          .insert(progressData)
-          .select();
         
-        if (error) {
-          console.error('Supabase error:', error);
-          throw error;
+        // First check if a record already exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('lesson_progress')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('chapter_id', progressData.chapter_id)
+          .eq('lesson_id', progressData.lesson_id)
+          .single();
+        
+        let result;
+        if (existingData && !checkError) {
+          // Update existing record
+          console.log('Updating existing record:', existingData.id);
+          result = await supabase
+            .from('lesson_progress')
+            .update(progressData)
+            .eq('id', existingData.id)
+            .select();
+        } else {
+          // Insert new record
+          console.log('Inserting new record');
+          result = await supabase
+            .from('lesson_progress')
+            .insert(progressData)
+            .select();
         }
-        console.log('Supabase save result:', data);
+        
+        if (result.error) {
+          console.error('Supabase error:', result.error);
+          throw result.error;
+        }
+        console.log('Supabase save result:', result.data);
       } else {
         // Save to localStorage for anonymous users
         console.log('Saving to localStorage:', progressData);
@@ -141,13 +235,16 @@ const Lesson = () => {
   };
 
   const getRoundTitle = () => {
+    const lessonNumber = getLessonNumber(chapterId || "1", lessonId || "f");
+    const lessonTitle = `Lesson ${lessonNumber}: Key ${lessonData.key}`;
+    
     switch (currentRound) {
       case "lesson":
-        return `Part 1: ${lessonData.key} Key Only`;
+        return `${lessonTitle}`;
       case "chapter":
-        return `Part 2: ${lessonData.key} + ${lessonData.chapterName}`;
+        return `${lessonTitle}`;
       case "all":
-        return `Part 3: ${lessonData.key} + All Learned Keys`;
+        return `${lessonTitle}`;
       case "complete":
         return "Lesson Complete!";
     }
@@ -271,7 +368,7 @@ const Lesson = () => {
 
               <div className="text-center pt-4">
                 <p className="text-lg font-semibold text-foreground mb-2">
-                  Average WPM: {Math.round(results.reduce((sum, r) => sum + r.wpm, 0) / results.length)}
+                  Average WPM: {results.length > 0 ? Math.round(results.reduce((sum, r) => sum + r.wpm, 0) / results.length) : 0}
                 </p>
                 <p className="text-muted-foreground">
                   Keep practicing to improve your speed!
@@ -284,16 +381,32 @@ const Lesson = () => {
               </div>
             </Card>
 
-            <div className="text-center pt-4">
-              <Button
-                size="lg"
-                variant="ocean"
-                onClick={() => navigate("/lessons")}
-                className="gap-2"
-              >
-                <ArrowLeft size={20} />
-                Back to Roadmap
-              </Button>
+            <div className="text-center pt-4 space-y-4">
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  variant="ocean"
+                  onClick={() => navigate("/lessons")}
+                  className="gap-2"
+                >
+                  <ArrowLeft size={20} />
+                  Back to Roadmap
+                </Button>
+                
+                {/* Show Compare Progress button only for final test (test5) */}
+                {lessonId?.toLowerCase() === "test5" && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate("/compare-progress")}
+                    className="gap-2"
+                  >
+                    <BarChart3 size={20} />
+                     Continue
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -302,70 +415,73 @@ const Lesson = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="h-screen relative overflow-hidden flex flex-col">
       <Navigation />
       <LightRays />
       <Bubbles />
       <FloatingParticles />
       <SwimmingFish />
       
-      <div className="container mx-auto px-4 pt-24 pb-12 max-w-4xl">
-        <div className="animate-fade-in space-y-8">
+      <div className="flex-1 container mx-auto px-4 pt-24 pb-12 max-w-4xl flex flex-col">
+        <div className="animate-fade-in space-y-6 flex-1 flex flex-col">
           {/* Header */}
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-primary">
-              {getRoundTitle()}
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Part {results.length + 1} of 3 • 30 letters each
-            </p>
-            <div className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              {currentRound === "lesson" && `Focus on the ${lessonData.key} key with spaces for rhythm`}
-              {currentRound === "chapter" && `Practice ${lessonData.key} with other ${lessonData.chapterName.toLowerCase()} letters`}
-              {currentRound === "all" && `Combine ${lessonData.key} with all previously learned letters`}
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/lessons")}
+                className="text-muted-foreground hover:text-foreground"
+                size="sm"
+              >
+                <ArrowLeft size={100} />
+              </Button>
+              <h1 className="text-4xl font-bold text-primary">
+                {getRoundTitle()}
+              </h1>
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+              <SegmentedProgressBar 
+                currentStep={results.length + 1} 
+                totalSteps={3}
+              />
+              <p className="text-sm text-muted-foreground">
+                Part {results.length + 1} of 3 • 30 letters each
+              </p>
             </div>
           </div>
 
-          {/* GIF Placeholder */}
-          <Card className="p-8 bg-card/50 backdrop-blur">
-            <div className="aspect-video w-full max-w-md mx-auto rounded-lg bg-muted/30 border border-primary/20 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <div className="text-6xl">🎬</div>
-                <p className="text-muted-foreground">
-                  Hand position GIF placeholder
-                </p>
-                <p className="text-sm text-primary font-semibold">
-                  Demonstrating: {lessonData.key} key
-                </p>
-              </div>
-            </div>
-          </Card>
-
           {/* Practice Area */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 flex flex-col">
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
                 Focus on accuracy over speed
               </p>
             </div>
             
-            <TypingTest 
-              customText={getRoundWords()}
-              onComplete={(wpm, accuracy) => handleRoundComplete(wpm, accuracy)}
-            />
+            <div className="flex-1 flex items-center justify-center">
+              <TypingTest 
+                ref={typingTestRef}
+                customText={getRoundWords()}
+                onComplete={(wpm, accuracy) => handleRoundComplete(wpm, accuracy)}
+                hideCompletionScreen={true}
+              />
+            </div>
           </div>
 
-          {/* Back button */}
-          <div className="text-center pt-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/lessons")}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft size={16} />
-              Back to Roadmap
-            </Button>
-          </div>
+          {/* GIF Placeholder */}
+          <Card className="p-6 bg-card/50 backdrop-blur">
+            <div className="aspect-video w-full max-w-md mx-auto rounded-lg bg-muted/30 border border-primary/20 flex items-center justify-center">
+              <div className="text-center space-y-2">
+                <div className="text-4xl">🎬</div>
+                <p className="text-muted-foreground text-sm">
+                  Hand position GIF placeholder
+                </p>
+                <p className="text-xs text-primary font-semibold">
+                  Demonstrating: {lessonData.key} key
+                </p>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

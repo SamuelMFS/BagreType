@@ -18,6 +18,8 @@ import Lesson from "./pages/Lesson";
 import Practice from "./pages/Practice";
 import Generate from "./pages/Generate";
 import Auth from "./pages/Auth";
+import CompareProgress from "./pages/CompareProgress";
+import ComparisonResults from "./pages/ComparisonResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/practice" element={<Practice />} />
             <Route path="/generate" element={<Generate />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/compare-progress" element={<CompareProgress />} />
+            <Route path="/comparison-results" element={<ComparisonResults />} />
             <Route path="/profile" element={<Navigate to="/404" replace />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />

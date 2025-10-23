@@ -92,28 +92,37 @@ const Learn = () => {
   }, [user]);
 
   // Save baseline test completion
-  const saveBaselineCompletion = async () => {
+  const saveBaselineCompletion = async (results: { wpm: number; accuracy: number }) => {
     try {
+      console.log('Saving baseline completion for user:', user?.id, 'results:', results);
       if (user) {
         // For logged-in users, save to Supabase
-        const { error } = await supabase
+        const baselineData = {
+          user_id: user.id,
+          baseline_completed: true,
+          baseline_wpm: results.wpm,
+          baseline_accuracy: results.accuracy,
+          updated_at: new Date().toISOString()
+        };
+        console.log('Saving baseline data to Supabase:', baselineData);
+        
+        const { data, error } = await supabase
           .from('user_progress')
-          .upsert({
-            user_id: user.id,
-            baseline_completed: true,
-            baseline_wpm: testResults?.wpm,
-            baseline_accuracy: testResults?.accuracy,
-            updated_at: new Date().toISOString()
-          });
+          .upsert(baselineData)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error saving baseline:', error);
+          throw error;
+        }
+        console.log('Baseline saved successfully:', data);
       } else {
         // For anonymous users, save to localStorage
+        console.log('Saving baseline to localStorage for anonymous user');
         localStorage.setItem('baseline_completed', 'true');
-        if (testResults) {
-          localStorage.setItem('baseline_wpm', testResults.wpm.toString());
-          localStorage.setItem('baseline_accuracy', testResults.accuracy.toString());
-        }
+        localStorage.setItem('baseline_wpm', results.wpm.toString());
+        localStorage.setItem('baseline_accuracy', results.accuracy.toString());
+        console.log('Baseline saved to localStorage:', { wpm: results.wpm, accuracy: results.accuracy });
       }
       
       setHasCompletedBaseline(true);
@@ -124,9 +133,10 @@ const Learn = () => {
 
   // Handle test completion
   const handleTestComplete = async (wpm: number, accuracy: number) => {
-    setTestResults({ wpm, accuracy });
+    const results = { wpm, accuracy };
+    setTestResults(results);
     setShowTest(false);
-    await saveBaselineCompletion();
+    await saveBaselineCompletion(results);
     
     // Check if user has seen the post-baseline page before
     const hasSeenPostBaseline = localStorage.getItem('bagre-post-baseline-seen') === 'true';
@@ -135,7 +145,7 @@ const Learn = () => {
       // Navigate directly to post-baseline page
       navigate('/post-baseline', { 
         state: { 
-          baselineResults: { wpm, accuracy } 
+          baselineResults: results 
         } 
       });
     }
