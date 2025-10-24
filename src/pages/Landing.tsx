@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Bubbles from "@/components/Bubbles";
-import LightRays from "@/components/LightRays";
-import FloatingParticles from "@/components/FloatingParticles";
-import SwimmingFish from "@/components/SwimmingFish";
+import SplitText from "@/components/SplitText";
 
 const Landing = () => {
   const [showLogo, setShowLogo] = useState(true);
@@ -22,10 +19,6 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <LightRays />
-      <Bubbles />
-      <FloatingParticles />
-      <SwimmingFish />
       
       <div
         className={`text-center transition-all duration-1000 ${
@@ -33,12 +26,24 @@ const Landing = () => {
         }`}
       >
         <div className="relative">
-          <h1 className="text-8xl font-bold text-primary animate-glow mb-4">
+          <SplitText 
+            className="text-8xl font-bold text-primary mb-4"
+            animation="fadeInUp"
+            delay={500}
+            stagger={0.08}
+            duration={0.8}
+          >
             BagreType
-          </h1>
-          <p className="text-2xl text-aqua-light animate-float">
-            🐟 Discover Your Perfect Keyboard
-          </p>
+          </SplitText>
+          <SplitText 
+            className="text-2xl text-aqua-light"
+            animation="fadeInUp"
+            delay={1200}
+            stagger={0.05}
+            duration={0.6}
+          >
+            Discover Your Perfect Keyboard
+          </SplitText>
         </div>
       </div>
     </div>

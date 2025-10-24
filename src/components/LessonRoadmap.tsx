@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, PlayCircle, Lock, BookOpen, Trophy, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { createChaptersForLayout, LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
 
 interface LessonNode {
   id: string;
@@ -24,7 +25,11 @@ interface Chapter {
   lessons: LessonNode[];
 }
 
-const LessonRoadmap = () => {
+interface LessonRoadmapProps {
+  layoutString?: string;
+}
+
+const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
@@ -160,106 +165,13 @@ const LessonRoadmap = () => {
     5: 4050  // Numbers & Symbols: 22 lessons
   } as const;
 
-  // Duolingo-style learning progression
-  const chapters: Chapter[] = [
-    {
-      id: 1,
-      title: "Index Fingers",
-      depth: "5m",
-      description: "Master your index fingers",
-      lessons: [
-        { id: "f", type: 'letter', letter: 'F', completed: false, locked: false, isCurrent: true },
-        { id: "j", type: 'letter', letter: 'J', completed: false, locked: true, isCurrent: false },
-        { id: "r", type: 'letter', letter: 'R', completed: false, locked: true, isCurrent: false },
-        { id: "u", type: 'letter', letter: 'U', completed: false, locked: true, isCurrent: false },
-        { id: "n", type: 'letter', letter: 'N', completed: false, locked: true, isCurrent: false },
-        { id: "v", type: 'letter', letter: 'V', completed: false, locked: true, isCurrent: false },
-        { id: "t", type: 'letter', letter: 'T', completed: false, locked: true, isCurrent: false },
-        { id: "y", type: 'letter', letter: 'Y', completed: false, locked: true, isCurrent: false },
-        { id: "g", type: 'letter', letter: 'G', completed: false, locked: true, isCurrent: false },
-        { id: "h", type: 'letter', letter: 'H', completed: false, locked: true, isCurrent: false },
-        { id: "b", type: 'letter', letter: 'B', completed: false, locked: true, isCurrent: false },
-        { id: "m", type: 'letter', letter: 'M', completed: false, locked: true, isCurrent: false },
-        { id: "test1", type: 'test', title: 'FJRUNVTYGHBM Final Test', completed: false, locked: true, isCurrent: false }
-      ]
-    },
-    {
-      id: 2,
-      title: "Middle Fingers",
-      depth: "100m",
-      description: "Extend your middle fingers",
-      lessons: [
-        { id: "d", type: 'letter', letter: 'D', completed: false, locked: true, isCurrent: false },
-        { id: "k", type: 'letter', letter: 'K', completed: false, locked: true, isCurrent: false },
-        { id: "e", type: 'letter', letter: 'E', completed: false, locked: true, isCurrent: false },
-        { id: "i", type: 'letter', letter: 'I', completed: false, locked: true, isCurrent: false },
-        { id: "c", type: 'letter', letter: 'C', completed: false, locked: true, isCurrent: false },
-        { id: "comma", type: 'letter', letter: ',', completed: false, locked: true, isCurrent: false },
-        { id: "test2", type: 'test', title: 'DKEIC, Final Test', completed: false, locked: true, isCurrent: false }
-      ]
-    },
-    {
-      id: 3,
-      title: "Ring Fingers",
-      depth: "200m",
-      description: "Master your ring fingers",
-      lessons: [
-        { id: "s", type: 'letter', letter: 'S', completed: false, locked: true, isCurrent: false },
-        { id: "l", type: 'letter', letter: 'L', completed: false, locked: true, isCurrent: false },
-        { id: "w", type: 'letter', letter: 'W', completed: false, locked: true, isCurrent: false },
-        { id: "o", type: 'letter', letter: 'O', completed: false, locked: true, isCurrent: false },
-        { id: "x", type: 'letter', letter: 'X', completed: false, locked: true, isCurrent: false },
-        { id: "period", type: 'letter', letter: '.', completed: false, locked: true, isCurrent: false },
-        { id: "test3", type: 'test', title: 'SLWOX. Final Test', completed: false, locked: true, isCurrent: false }
-      ]
-    },
-    {
-      id: 4,
-      title: "Pinky Fingers",
-      depth: "300m",
-      description: "Challenge your pinky fingers",
-      lessons: [
-        { id: "a", type: 'letter', letter: 'A', completed: false, locked: true, isCurrent: false },
-        { id: "semicolon", type: 'letter', letter: ';', completed: false, locked: true, isCurrent: false },
-        { id: "q", type: 'letter', letter: 'Q', completed: false, locked: true, isCurrent: false },
-        { id: "p", type: 'letter', letter: 'P', completed: false, locked: true, isCurrent: false },
-        { id: "z", type: 'letter', letter: 'Z', completed: false, locked: true, isCurrent: false },
-        { id: "slash", type: 'letter', letter: '/', completed: false, locked: true, isCurrent: false },
-        { id: "test4", type: 'test', title: 'A;QPZ/ Final Test', completed: false, locked: true, isCurrent: false }
-      ]
-    },
-    {
-      id: 5,
-      title: "Numbers & Symbols",
-      depth: "400m",
-      description: "Master numbers and symbols",
-      lessons: [
-        { id: "lshift", type: 'letter', letter: 'L⇧', completed: false, locked: true, isCurrent: false },
-        { id: "rshift", type: 'letter', letter: 'R⇧', completed: false, locked: true, isCurrent: false },
-        { id: "1", type: 'letter', letter: '1', completed: false, locked: true, isCurrent: false },
-        { id: "0", type: 'letter', letter: '0', completed: false, locked: true, isCurrent: false },
-        { id: "2", type: 'letter', letter: '2', completed: false, locked: true, isCurrent: false },
-        { id: "9", type: 'letter', letter: '9', completed: false, locked: true, isCurrent: false },
-        { id: "3", type: 'letter', letter: '3', completed: false, locked: true, isCurrent: false },
-        { id: "8", type: 'letter', letter: '8', completed: false, locked: true, isCurrent: false },
-        { id: "4", type: 'letter', letter: '4', completed: false, locked: true, isCurrent: false },
-        { id: "7", type: 'letter', letter: '7', completed: false, locked: true, isCurrent: false },
-        { id: "5", type: 'letter', letter: '5', completed: false, locked: true, isCurrent: false },
-        { id: "6", type: 'letter', letter: '6', completed: false, locked: true, isCurrent: false },
-        { id: "exclamation", type: 'letter', letter: '!', completed: false, locked: true, isCurrent: false },
-        { id: "paren", type: 'letter', letter: ')', completed: false, locked: true, isCurrent: false },
-        { id: "at", type: 'letter', letter: '@', completed: false, locked: true, isCurrent: false },
-        { id: "paren2", type: 'letter', letter: '(', completed: false, locked: true, isCurrent: false },
-        { id: "hash", type: 'letter', letter: '#', completed: false, locked: true, isCurrent: false },
-        { id: "asterisk", type: 'letter', letter: '*', completed: false, locked: true, isCurrent: false },
-        { id: "dollar", type: 'letter', letter: '$', completed: false, locked: true, isCurrent: false },
-        { id: "ampersand", type: 'letter', letter: '&', completed: false, locked: true, isCurrent: false },
-        { id: "percent", type: 'letter', letter: '%', completed: false, locked: true, isCurrent: false },
-        { id: "caret", type: 'letter', letter: '^', completed: false, locked: true, isCurrent: false },
-        { id: "test5", type: 'test', title: 'Numbers & Symbols Final Test', completed: false, locked: true, isCurrent: false }
-      ]
-    }
-  ];
+  // Get the layout string to use (default to QWERTY if none provided)
+  const currentLayoutString = layoutString || LAYOUT_STRINGS.qwerty;
+  
+  // Generate chapters dynamically based on the layout
+  const chapters: Chapter[] = useMemo(() => {
+    return createChaptersForLayout(currentLayoutString);
+  }, [currentLayoutString]);
 
   // Memoize current lesson to avoid recalculating
   const currentLesson = useMemo(() => {

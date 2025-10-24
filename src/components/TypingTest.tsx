@@ -42,6 +42,9 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     // Initialize words on first render
     if (customText) {
       return customText.trim().split(/\s+/);
+    } else if (timeLimit) {
+      // For time mode, generate a large initial set of words
+      return generateWords(200);
     }
     return generateWords(wordCount);
   });
@@ -62,12 +65,23 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Function to add more words when needed (for time mode)
+  const addMoreWords = () => {
+    if (timeLimit && !customText) {
+      const additionalWords = generateWords(100);
+      setWords(prevWords => [...prevWords, ...additionalWords]);
+    }
+  };
+
   const resetTest = () => {
     if (customText) {
       setWords(customText.trim().split(/\s+/));
     } else if (zenMode) {
       setWords([]);
       setZenText('');
+    } else if (timeLimit) {
+      // For time mode, generate a large initial set of words
+      setWords(generateWords(200));
     } else {
       setWords(generateWords(wordCount));
     }
@@ -184,10 +198,21 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
         const newIndex = currentIndex + 1;
         
         if (newIndex === fullText.length) {
-          console.log('Test completed! Setting completion flag');
-          setIsComplete(true);
+          // For time mode, add more words instead of completing
+          if (timeLimit && !customText) {
+            addMoreWords();
+            setCurrentIndex(newIndex);
+          } else {
+            console.log('Test completed! Setting completion flag');
+            setIsComplete(true);
+          }
         } else {
           setCurrentIndex(newIndex);
+          
+          // Proactively add more words when we're getting close to the end (for time mode)
+          if (timeLimit && !customText && newIndex > fullText.length - 50) {
+            addMoreWords();
+          }
           
           // Update display offset - show current row and next row
           const currentRow = getCurrentRow();
@@ -202,12 +227,12 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode]);
 
-  // Handle keyboard input when test is complete (space to restart)
+  // Handle keyboard input when test is complete (escape to restart)
   useEffect(() => {
     if (!isComplete) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === ' ') {
+      if (e.key === 'Escape') {
         e.preventDefault();
         resetTest();
       }
@@ -503,7 +528,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
             </div>
             
             <p className="text-sm text-muted-foreground">
-              Or press <kbd className="px-3 py-1.5 bg-card rounded-lg border border-border text-foreground font-mono text-sm">Space</kbd> to start a new test
+              Or press <kbd className="px-3 py-1.5 bg-card rounded-lg border border-border text-foreground font-mono text-sm">Escape</kbd> to start a new test
             </p>
           </div>
         </div>

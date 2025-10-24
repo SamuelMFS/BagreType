@@ -6,7 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ScrollProvider } from "./contexts/ScrollContext";
+import { LayoutProvider } from "./contexts/LayoutContext";
 import ThemeToggle from "./components/ThemeToggle";
+import Bubbles from "./components/Bubbles";
+import LightRays from "./components/LightRays";
+import FloatingParticles from "./components/FloatingParticles";
+import SwimmingFish from "./components/SwimmingFish";
+import OceanDepthBackground from "./components/OceanDepthBackground";
 import Landing from "./pages/Landing";
 import Intro from "./pages/Intro";
 import DataCollection from "./pages/DataCollection";
@@ -28,10 +34,20 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <LayoutProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+            {/* Global background elements - persist across all pages */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+              <OceanDepthBackground />
+              <LightRays />
+              <Bubbles />
+              <FloatingParticles />
+              <SwimmingFish />
+            </div>
+            
             <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/intro" element={<Intro />} />
@@ -57,6 +73,7 @@ const App = () => (
             <ThemeToggle />
           </BrowserRouter>
         </TooltipProvider>
+        </LayoutProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

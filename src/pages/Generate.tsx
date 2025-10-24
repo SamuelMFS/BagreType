@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Code, Languages, FileText, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLayout } from "@/contexts/LayoutContext";
+import { LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
 
 const programmingLanguages = [
   "C", "C#", "C++", "Java", "JavaScript", "TypeScript", 
@@ -32,6 +34,7 @@ const Generate = () => {
   const [generatedLayout, setGeneratedLayout] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { setCurrentLayout, setLayoutName } = useLayout();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -50,8 +53,20 @@ const Generate = () => {
     // Simulate generation process
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Mock generated layout
-    const layout = "QWERTYUIOP\nASDFGHJKL\nZXCVBNM";
+    // Generate a custom layout string based on the selected language
+    // For now, we'll use Dvorak as an example of a different layout
+    // In a real implementation, this would be generated based on the text analysis
+    let layoutString: string;
+    
+    if (selectedLanguage === "Python" || selectedLanguage === "JavaScript") {
+      // Use Dvorak for programming languages
+      layoutString = LAYOUT_STRINGS.dvorak;
+    } else {
+      // Use QWERTY for other cases
+      layoutString = LAYOUT_STRINGS.qwerty;
+    }
+    
+    const layout = `${layoutString}`;
     setGeneratedLayout(layout);
     setIsGenerating(false);
     
@@ -62,8 +77,18 @@ const Generate = () => {
   };
 
   const handleLearnLayout = () => {
-    // TODO: Store the generated layout and navigate to lessons
-    navigate("/lessons");
+    // Extract the layout string from the generated layout display
+    if (generatedLayout) {
+      const lines = generatedLayout.split('\n');
+      const layoutString = lines[lines.length - 1]; // Get the last line which contains the layout string
+      
+      // Store the layout in context
+      setCurrentLayout(layoutString);
+      setLayoutName(getLayoutName(layoutString));
+      
+      // Navigate to lessons
+      navigate("/lessons");
+    }
   };
 
   const canGenerate = () => {
@@ -95,9 +120,18 @@ const Generate = () => {
 
             <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
               <div className="space-y-6">
-                <div className="flex justify-center">
-                  <div className="text-4xl font-mono tracking-wider text-primary whitespace-pre">
-                    {generatedLayout}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-primary mb-2">Generated Layout</h3>
+                    <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
+                      <div className="text-lg font-mono text-foreground break-all leading-relaxed">
+                        {generatedLayout.split('\n').map((line, index) => (
+                          <div key={index} className="mb-1">
+                            {line}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 

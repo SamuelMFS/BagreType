@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
-import Bubbles from "@/components/Bubbles";
-import LightRays from "@/components/LightRays";
-import FloatingParticles from "@/components/FloatingParticles";
-import SwimmingFish from "@/components/SwimmingFish";
 import SegmentedProgressBar from "@/components/SegmentedProgressBar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -41,6 +37,8 @@ const DataCollection = () => {
   const [lastTypedCorrect, setLastTypedCorrect] = useState<boolean | null>(null);
   const [isBouncing, setIsBouncing] = useState(false);
   const [userJustSelected, setUserJustSelected] = useState(false);
+  const [previousStep, setPreviousStep] = useState<string | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   // Generate or retrieve session ID for anonymous users
   useEffect(() => {
@@ -324,7 +322,7 @@ const DataCollection = () => {
 
     if (keyboardLayout && step === "layout") {
       timeoutId = setTimeout(() => {
-        setStep("touch-type");
+        transitionToStep("touch-type");
       }, 500);
     }
 
@@ -339,9 +337,9 @@ const DataCollection = () => {
     if (canTouchType && step === "touch-type") {
       timeoutId = setTimeout(() => {
     if (canTouchType === "yes") {
-      setStep("share");
+      transitionToStep("share");
     } else if (canTouchType === "no") {
-          setStep("want-to-learn");
+          transitionToStep("want-to-learn");
         }
       }, 500);
     }
@@ -360,7 +358,7 @@ const DataCollection = () => {
         if (wantToLearn === "yes") {
           navigate("/learn");
         } else if (wantToLearn === "no") {
-          setStep("share");
+          transitionToStep("share");
         }
         setUserJustSelected(false); // Reset the flag
       }, 500);
@@ -376,7 +374,7 @@ const DataCollection = () => {
 
     if (shareData && step === "share") {
       timeoutId = setTimeout(() => {
-        setStep("test");
+        transitionToStep("test");
       }, 500);
     }
 
@@ -384,6 +382,20 @@ const DataCollection = () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [shareData, step]);
+
+  // Function to handle step transitions with animation
+  const transitionToStep = (newStep: string) => {
+    if (step !== newStep) {
+      setPreviousStep(step);
+      setIsExiting(true);
+      
+      // After exit animation, change step and start enter animation
+      setTimeout(() => {
+        setStep(newStep as any);
+        setIsExiting(false);
+      }, 300);
+    }
+  };
 
   // Calculate current step number for progress bar
   const getCurrentStepNumber = () => {
@@ -404,10 +416,6 @@ const DataCollection = () => {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <Navigation />
-        <LightRays />
-        <Bubbles />
-        <FloatingParticles />
-        <SwimmingFish />
         
         <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
           <div className="animate-fade-in space-y-12">
@@ -428,13 +436,9 @@ const DataCollection = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
-      <LightRays />
-      <Bubbles />
-      <FloatingParticles />
-      <SwimmingFish />
       
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
-        <div className="animate-fade-in space-y-12">
+        <div className="space-y-12">
           <div className="text-center space-y-4">
             <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
               Data Collection
@@ -442,22 +446,230 @@ const DataCollection = () => {
             <p className="text-2xl text-aqua-light">
               Help us build the future of keyboard layouts
             </p>
-            
-            {/* Reset button - only show if user has made some choices */}
-            {(keyboardLayout || canTouchType || wantToLearn || shareData) && (
-              <div className="pt-4">
-                <button
-                  onClick={resetQuestionnaire}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
-                >
-                  Reset Choices
-                </button>
+          </div>
+
+          <div className={`transition-all duration-300 ${isExiting ? "animate-slide-out-left" : "animate-slide-in-right"}`}>
+            {step === "layout" && (
+              <div className="space-y-8">
+                <div className="space-y-3 text-center">
+                  <h2 className="text-3xl font-semibold text-accent">What type of keyboard do you use?</h2>
+                  <p className="text-lg text-muted-foreground">
+                    This helps us understand the physical layout you're typing on
+                  </p>
+                </div>
+                
+                <div className="space-y-6">
+                  <RadioGroup value={keyboardLayout || ""} onValueChange={(v) => setKeyboardLayout(v as KeyboardLayout)}>
+                    <Label htmlFor="staggered" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="staggered" id="staggered" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <div className="space-y-1">
+                          <p className="text-xl font-semibold text-foreground">Staggered</p>
+                          <p className="text-base text-muted-foreground">Traditional keyboard with offset rows (most common)</p>
+                        </div>
+                        </div>
+                      </Label>
+                    
+                    <Label htmlFor="ortholinear" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="ortholinear" id="ortholinear" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <div className="space-y-1">
+                          <p className="text-xl font-semibold text-foreground">Ortholinear</p>
+                          <p className="text-base text-muted-foreground">Keys arranged in a perfect grid (mechanical keyboards)</p>
+                        </div>
+                        </div>
+                      </Label>
+                  </RadioGroup>
+                </div>
+              </div>
+            )}
+
+            {step === "touch-type" && (
+              <div className="space-y-8">
+                <div className="space-y-3 text-center">
+                  <h2 className="text-3xl font-semibold text-accent">Can you touch type?</h2>
+                  <p className="text-lg text-muted-foreground">
+                    Touch typing means typing without looking at the keyboard
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <RadioGroup value={canTouchType || ""} onValueChange={(v) => setCanTouchType(v as TouchTyper)}>
+                    <Label htmlFor="yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="yes" id="yes" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">Yes, I can touch type</p>
+                      </div>
+                      </Label>
+                    
+                    <Label htmlFor="no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="no" id="no" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">No, I look at the keyboard</p>
+                      </div>
+                    </Label>
+                  </RadioGroup>
+                </div>
+              </div>
+            )}
+
+            {step === "want-to-learn" && (
+              <div className="space-y-8">
+                <div className="space-y-3 text-center">
+                  <h2 className="text-3xl font-semibold text-accent">Do you want to learn touch typing?</h2>
+                  <p className="text-lg text-muted-foreground">
+                    We can help you master touch typing in just a few weeks
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="p-6 rounded-lg border border-border/50 space-y-3">
+                    <h3 className="text-xl font-semibold text-accent">Why Learn Touch Typing?</h3>
+                    <ul className="space-y-2 text-base text-foreground/80">
+                      <li>• <span className="font-semibold">2-3x faster typing</span> - Increase from 30-40 WPM to 60-100+ WPM</li>
+                      <li>• <span className="font-semibold">Better accuracy</span> - Type without looking at the keyboard</li>
+                      <li>• <span className="font-semibold">Less fatigue</span> - Proper technique reduces strain</li>
+                      <li>• <span className="font-semibold">Professional skill</span> - Essential for many careers</li>
+                    </ul>
+                    <p className="text-sm text-muted-foreground italic pt-2">
+                      Our gamified learning system makes it fun and engaging, similar to Duolingo!
+                    </p>
+                  </div>
+
+                  <RadioGroup value={wantToLearn || ""} onValueChange={(v) => {
+                    setWantToLearn(v as WantToLearn);
+                    setUserJustSelected(true); // Mark that user just made a selection
+                  }}>
+                    <Label htmlFor="learn-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="yes" id="learn-yes" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">Yes, I want to learn touch typing</p>
+                      </div>
+                      </Label>
+                    
+                    <Label htmlFor="learn-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="no" id="learn-no" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">No, I'll continue with my current method</p>
+                    </div>
+                    </Label>
+                  </RadioGroup>
+                </div>
+              </div>
+            )}
+
+            {step === "share" && (
+              <div className="space-y-6">
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-semibold text-accent">Share Your Data?</h2>
+                  <p className="text-lg text-muted-foreground">
+                    Help improve keyboard layouts for everyone
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="p-6 rounded-lg border border-border/50 space-y-4">
+                    <h3 className="text-xl font-semibold text-accent">What Data We Collect:</h3>
+                    <ul className="space-y-2 text-base text-foreground/80">
+                      <li>• Reaction times for each key press</li>
+                      <li>• Time between consecutive keys in sequences</li>
+                      <li>• Typing accuracy metrics</li>
+                      <li>• Keyboard layout type</li>
+                    </ul>
+                    <p className="text-sm text-muted-foreground italic pt-2">
+                      All data is anonymized and used solely for research purposes. 
+                      No personal information is stored.
+                    </p>
+                  </div>
+
+                  <RadioGroup value={shareData || ""} onValueChange={(v) => setShareData(v as ShareData)}>
+                    <Label htmlFor="share-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="yes" id="share-yes" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">Yes, share my data with the project</p>
+                      </div>
+                      </Label>
+                    
+                    <Label htmlFor="share-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
+                      <RadioGroupItem value="no" id="share-no" className="w-5 h-5" />
+                      <div className="flex-1">
+                        <p className="text-xl font-semibold text-foreground">No, keep data locally (I can export it later)</p>
+                      </div>
+                      </Label>
+                  </RadioGroup>
+                </div>
+              </div>
+            )}
+
+            {step === "test" && (
+              <div className="space-y-8">
+                <div className="space-y-3 text-center">
+                  <h2 className="text-3xl font-semibold text-accent">Typing Test</h2>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="text-center space-y-6">
+                    <Card className={`p-12 bg-card/90 backdrop-blur-md border-border/50 max-w-md mx-auto relative transition-all duration-200 ${
+                      !isTestActive && !testCompleted ? 'blur-sm' : ''
+                    }`}>
+                      <div className="absolute top-4 right-4 text-sm text-muted-foreground">
+                        {testCompleted ? `${letterSequence.length} of ${letterSequence.length}` : `${currentIndex + 1} of ${letterSequence.length}`}
+                      </div>
+                      <div className="text-center">
+                        {testCompleted ? (
+                          <div className="space-y-6">
+                            <div className="text-6xl">↻</div>
+                            <div className="text-lg text-muted-foreground">
+                              Press Space to play again
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={`text-6xl font-bold transition-all duration-150 ${
+                            lastTypedCorrect === true ? 'text-green-500' :
+                            lastTypedCorrect === false ? 'text-red-500' :
+                            'text-primary'
+                          } ${isBouncing ? 'scale-125' : 'scale-100'}`}>
+                            {currentLetter}
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                    
+                    {!testCompleted && (
+                    <p className="text-base text-muted-foreground">
+                      Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono">Space</kbd> to start • 
+                      Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono ml-1">Esc</kbd> to stop
+                    </p>
+                    )}
+                    
+                    <div className="text-lg text-muted-foreground space-y-1">
+                      <p>Type each letter as quickly and accurately as possible</p>
+                      <p>This will take only 15-30 secs</p>
+                    </div>
+                    
+                    {showResultsButton && (
+                      <div className={`transition-opacity duration-1000 ${showResultsButton ? 'opacity-100' : 'opacity-0'}`}>
+                        <button 
+                          onClick={() => navigate('/results')}
+                          className="text-lg font-semibold text-primary hover:text-accent transition-colors"
+                        >
+                          Results →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-center text-base text-muted-foreground">
+                    <p>Focus on accuracy first, then speed will follow naturally</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
-
-          {step !== "test" && (
-            <div className="flex flex-col items-center space-y-2 mb-8">
+          
+          {/* Progress bar and Reset button - locked in position */}
+          <div className="fixed left-1/2 transform -translate-x-1/2 bottom-16 z-10">
+            <div className="flex flex-col items-center space-y-2">
               <SegmentedProgressBar 
                 currentStep={getCurrentStepNumber()} 
                 totalSteps={totalSteps}
@@ -465,225 +677,18 @@ const DataCollection = () => {
               <p className="text-sm text-muted-foreground">
                 Step {getCurrentStepNumber()} of {totalSteps}
               </p>
-            </div>
-          )}
-
-          {step === "layout" && (
-            <div className="space-y-8">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-semibold text-accent">What type of keyboard do you use?</h2>
-                <p className="text-lg text-muted-foreground">
-                  This helps us understand the physical layout you're typing on
-                </p>
-              </div>
               
-              <div className="space-y-6">
-                <RadioGroup value={keyboardLayout || ""} onValueChange={(v) => setKeyboardLayout(v as KeyboardLayout)}>
-                  <Label htmlFor="staggered" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="staggered" id="staggered" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <div className="space-y-1">
-                        <p className="text-xl font-semibold text-foreground">Staggered</p>
-                        <p className="text-base text-muted-foreground">Traditional keyboard with offset rows (most common)</p>
-                      </div>
-                      </div>
-                    </Label>
-                  
-                  <Label htmlFor="ortholinear" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="ortholinear" id="ortholinear" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <div className="space-y-1">
-                        <p className="text-xl font-semibold text-foreground">Ortholinear</p>
-                        <p className="text-base text-muted-foreground">Keys arranged in a perfect grid (mechanical keyboards)</p>
-                      </div>
-                      </div>
-                    </Label>
-                </RadioGroup>
-              </div>
+              {/* Reset Choices button - extra small */}
+              {(keyboardLayout || canTouchType || wantToLearn || shareData) && (
+                <button
+                  onClick={resetQuestionnaire}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                  Reset Choices
+                </button>
+              )}
             </div>
-          )}
-
-          {step === "touch-type" && (
-            <div className="space-y-8">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-semibold text-accent">Can you touch type?</h2>
-                <p className="text-lg text-muted-foreground">
-                  Touch typing means typing without looking at the keyboard
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <RadioGroup value={canTouchType || ""} onValueChange={(v) => setCanTouchType(v as TouchTyper)}>
-                  <Label htmlFor="yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="yes" id="yes" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">Yes, I can touch type</p>
-                    </div>
-                    </Label>
-                  
-                  <Label htmlFor="no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="no" id="no" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">No, I look at the keyboard</p>
-                    </div>
-                  </Label>
-                </RadioGroup>
-              </div>
-            </div>
-          )}
-
-          {step === "want-to-learn" && (
-            <div className="space-y-8">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-semibold text-accent">Do you want to learn touch typing?</h2>
-                <p className="text-lg text-muted-foreground">
-                  We can help you master touch typing in just a few weeks
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="p-6 rounded-lg border border-border/50 space-y-3">
-                  <h3 className="text-xl font-semibold text-accent">Why Learn Touch Typing?</h3>
-                  <ul className="space-y-2 text-base text-foreground/80">
-                    <li>• <span className="font-semibold">2-3x faster typing</span> - Increase from 30-40 WPM to 60-100+ WPM</li>
-                    <li>• <span className="font-semibold">Better accuracy</span> - Type without looking at the keyboard</li>
-                    <li>• <span className="font-semibold">Less fatigue</span> - Proper technique reduces strain</li>
-                    <li>• <span className="font-semibold">Professional skill</span> - Essential for many careers</li>
-                  </ul>
-                  <p className="text-sm text-muted-foreground italic pt-2">
-                    Our gamified learning system makes it fun and engaging, similar to Duolingo!
-                  </p>
-                </div>
-
-                <RadioGroup value={wantToLearn || ""} onValueChange={(v) => {
-                  setWantToLearn(v as WantToLearn);
-                  setUserJustSelected(true); // Mark that user just made a selection
-                }}>
-                  <Label htmlFor="learn-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="yes" id="learn-yes" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">Yes, I want to learn touch typing</p>
-                    </div>
-                    </Label>
-                  
-                  <Label htmlFor="learn-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="no" id="learn-no" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">No, I'll continue with my current method</p>
-                  </div>
-                  </Label>
-                </RadioGroup>
-              </div>
-            </div>
-          )}
-
-          {step === "share" && (
-            <div className="space-y-8">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-semibold text-accent">Share Your Data?</h2>
-                <p className="text-lg text-muted-foreground">
-                  Help improve keyboard layouts for everyone
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="p-6 rounded-lg border border-border/50 space-y-4">
-                  <h3 className="text-xl font-semibold text-accent">What Data We Collect:</h3>
-                  <ul className="space-y-2 text-base text-foreground/80">
-                    <li>• Reaction times for each key press</li>
-                    <li>• Time between consecutive keys in sequences</li>
-                    <li>• Typing accuracy metrics</li>
-                    <li>• Keyboard layout type</li>
-                  </ul>
-                  <p className="text-sm text-muted-foreground italic pt-2">
-                    All data is anonymized and used solely for research purposes. 
-                    No personal information is stored.
-                  </p>
-                </div>
-
-                <RadioGroup value={shareData || ""} onValueChange={(v) => setShareData(v as ShareData)}>
-                  <Label htmlFor="share-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="yes" id="share-yes" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">Yes, share my data with the project</p>
-                    </div>
-                    </Label>
-                  
-                  <Label htmlFor="share-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
-                    <RadioGroupItem value="no" id="share-no" className="w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="text-xl font-semibold text-foreground">No, keep data locally (I can export it later)</p>
-                    </div>
-                    </Label>
-                </RadioGroup>
-              </div>
-            </div>
-          )}
-
-          {step === "test" && (
-            <div className="space-y-8">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-semibold text-accent">Typing Test</h2>
-              </div>
-
-              <div className="space-y-8">
-                <div className="text-center space-y-6">
-                  <Card className={`p-12 bg-card/90 backdrop-blur-md border-border/50 max-w-md mx-auto relative transition-all duration-200 ${
-                    !isTestActive && !testCompleted ? 'blur-sm' : ''
-                  }`}>
-                    <div className="absolute top-4 right-4 text-sm text-muted-foreground">
-                      {testCompleted ? `${letterSequence.length} of ${letterSequence.length}` : `${currentIndex + 1} of ${letterSequence.length}`}
-                    </div>
-                    <div className="text-center">
-                      {testCompleted ? (
-                        <div className="space-y-6">
-                          <div className="text-6xl">↻</div>
-                          <div className="text-lg text-muted-foreground">
-                            Press Space to play again
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={`text-6xl font-bold transition-all duration-150 ${
-                          lastTypedCorrect === true ? 'text-green-500' :
-                          lastTypedCorrect === false ? 'text-red-500' :
-                          'text-primary'
-                        } ${isBouncing ? 'scale-125' : 'scale-100'}`}>
-                          {currentLetter}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                  
-                  {!testCompleted && (
-                  <p className="text-base text-muted-foreground">
-                    Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono">Space</kbd> to start • 
-                    Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono ml-1">Esc</kbd> to stop
-                  </p>
-                  )}
-                  
-                  <div className="text-lg text-muted-foreground space-y-1">
-                    <p>Type each letter as quickly and accurately as possible</p>
-                    <p>This will take only 15-30 secs</p>
-                  </div>
-                  
-                  {showResultsButton && (
-                    <div className={`transition-opacity duration-1000 ${showResultsButton ? 'opacity-100' : 'opacity-0'}`}>
-                      <button 
-                        onClick={() => navigate('/results')}
-                        className="text-lg font-semibold text-primary hover:text-accent transition-colors"
-                      >
-                        Results →
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center text-base text-muted-foreground">
-                  <p>Focus on accuracy first, then speed will follow naturally</p>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

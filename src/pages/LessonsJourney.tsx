@@ -6,12 +6,13 @@ import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import DeepFish from "@/components/DeepFish";
-import OceanFloor from "@/components/OceanFloor";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useScrollProgress } from "@/contexts/ScrollContext";
+import { useLayout } from "@/contexts/LayoutContext";
 
 const LessonsJourney = () => {
   const scrollProgress = useScrollProgress();
+  const { currentLayout, layoutName } = useLayout();
 
   useEffect(() => {
     // Ensure we start at the top when component mounts
@@ -90,11 +91,6 @@ const LessonsJourney = () => {
       <SwimmingFish topOffset={scrollProgress * -200} />
       <DeepFish topOffset={scrollProgress * -200} />
       
-      {/* Ocean floor positioned at the actual bottom of the roadmap */}
-      <div className="absolute left-0 right-0" style={{ top: '7455px' }}>
-        <OceanFloor />
-      </div>
-      
       {/* Bioluminescent particles for deep ocean (dark theme only) */}
       {scrollProgress > 0.4 && (
         <div className="fixed inset-0 pointer-events-none" style={{ opacity: (scrollProgress - 0.4) * 1.5 }}>
@@ -151,12 +147,12 @@ const LessonsJourney = () => {
               Your Typing Journey
             </h1>
             <p className="text-lg text-foreground/80 drop-shadow-lg">
-              Descend into the depths and master each key
+              {currentLayout ? `Learning ${layoutName.toUpperCase()} Layout` : 'Descend into the depths and master each key'}
             </p>
           </div>
 
           {/* Roadmap */}
-          <LessonRoadmap />
+          <LessonRoadmap layoutString={currentLayout || undefined} />
         </div>
       </div>
       

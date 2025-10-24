@@ -5,6 +5,7 @@ import LightRays from "@/components/LightRays";
 import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import TypingTest from "@/components/TypingTest";
+import CustomTextModal from "@/components/CustomTextModal";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,9 +20,11 @@ const Practice = () => {
   const [timeLimit, setTimeLimit] = useState(30);
   const [quoteLength, setQuoteLength] = useState(100);
   const [customText, setCustomText] = useState("");
+  const [selectedCustomTextTitle, setSelectedCustomTextTitle] = useState("");
   const [savedTexts, setSavedTexts] = useState<{title: string, text: string}[]>([]);
   const [quotes, setQuotes] = useState<string[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Load saved custom texts from localStorage
   useEffect(() => {
@@ -73,11 +76,12 @@ const Practice = () => {
   }, [mode, quoteLength]);
 
   const handleSaveCustomText = (title: string, text: string) => {
-    if (text.trim() && title.trim()) {
-      const newTexts = [...savedTexts, { title, text }];
-      setSavedTexts(newTexts);
-      localStorage.setItem("customTexts", JSON.stringify(newTexts));
-    }
+    const newTexts = [...savedTexts, { title, text }];
+    setSavedTexts(newTexts);
+    localStorage.setItem("customTexts", JSON.stringify(newTexts));
+    setCustomText(text);
+    setSelectedCustomTextTitle(title);
+    if (testRef.current) testRef.current.reset();
   };
 
   const handleRemoveCustomText = (index: number) => {
@@ -99,7 +103,7 @@ const Practice = () => {
       case "zen":
         return { zenMode: true };
       case "custom":
-        return { customText };
+        return customText ? { customText } : { disabled: true };
       default:
         return { wordCount: 30 };
     }
@@ -201,44 +205,48 @@ const Practice = () => {
             {mode === "custom" && (
               <div className="flex items-center gap-2">
                 {savedTexts.length > 0 && (
-                  <Select onValueChange={(value) => {
-                    setCustomText(value);
-                    if (testRef.current) testRef.current.reset();
-                  }}>
-                    <SelectTrigger className="w-48 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
-                      <SelectValue placeholder="saved texts" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border-border z-50">
-                      {savedTexts.map((item, index) => (
-                        <SelectItem key={index} value={item.text}>
-                          <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Select onValueChange={(value) => {
+                      const selectedItem = savedTexts.find(item => item.text === value);
+                      if (selectedItem) {
+                        setCustomText(selectedItem.text);
+                        setSelectedCustomTextTitle(selectedItem.title);
+                        if (testRef.current) testRef.current.reset();
+                      }
+                    }}>
+                      <SelectTrigger className="w-48 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
+                        <SelectValue placeholder={selectedCustomTextTitle || "saved texts"} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border-border z-50">
+                        {savedTexts.map((item, index) => (
+                          <SelectItem key={index} value={item.text}>
                             <span className="truncate">{item.title}</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveCustomText(index);
-                              }}
-                              className="ml-2 text-destructive hover:text-destructive/80"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {customText && (
+                      <button
+                        onClick={() => {
+                          const index = savedTexts.findIndex(item => item.text === customText);
+                          if (index !== -1) {
+                            handleRemoveCustomText(index);
+                            // Clear selection when text is deleted
+                            setCustomText("");
+                            setSelectedCustomTextTitle("");
+                          }
+                        }}
+                        className="text-muted-foreground hover:text-primary p-1 transition-colors"
+                        title="Delete current text"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
                 )}
                 <button
                   className="text-sm text-foreground/50 hover:text-foreground flex items-center gap-1"
-                  onClick={() => {
-                    const title = prompt("Enter a title for your text:");
-                    const text = prompt("Enter your custom text:");
-                    if (text?.trim() && title?.trim()) {
-                      setCustomText(text);
-                      handleSaveCustomText(title, text);
-                      if (testRef.current) testRef.current.reset();
-                    }
-                  }}
+                  onClick={() => setIsModalOpen(true)}
                 >
                   <Plus size={14} />
                   new text
@@ -248,12 +256,43 @@ const Practice = () => {
           </div>
 
           {/* Typing Test */}
-          <TypingTest 
-            ref={testRef}
-            {...getTestProps()}
-          />
+          {mode === "custom" && !customText ? (
+            <div className="text-center py-16">
+              <div className="space-y-4">
+                <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mx-auto">
+                  <Plus className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-foreground">No Custom Text Selected</h3>
+                  <p className="text-muted-foreground">
+                    Select a saved text or create a new one to start practicing
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  variant="outline"
+                  className="mt-4"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Text
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <TypingTest 
+              ref={testRef}
+              {...getTestProps()}
+            />
+          )}
         </div>
       </div>
+
+      {/* Custom Text Modal */}
+      <CustomTextModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveCustomText}
+      />
     </div>
   );
 };
