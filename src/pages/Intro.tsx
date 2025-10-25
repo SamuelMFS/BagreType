@@ -1,36 +1,39 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Target, Brain, Keyboard, GraduationCap, Database, Zap } from "lucide-react";
+import { useLocalization } from "@/hooks/useLocalization";
 import ScrollIndicator from "@/components/ScrollIndicator";
 
 const Intro = () => {
   const navigate = useNavigate();
+  const { lang } = useParams();
+  const { t } = useLocalization();
 
   const features = [
     {
       icon: Target,
-      title: "Data Collection",
-      description: "We measure your typing patterns and reaction times to understand your unique typing behavior.",
+      title: t('intro.features.dataCollection.title'),
+      description: t('intro.features.dataCollection.description'),
       color: "text-blue-400"
     },
     {
       icon: Brain,
-      title: "ML Analysis",
-      description: "Our algorithm analyzes linguistic patterns across languages to optimize layout efficiency.",
+      title: t('intro.features.mlAnalysis.title'),
+      description: t('intro.features.mlAnalysis.description'),
       color: "text-purple-400"
     },
     {
       icon: Keyboard,
-      title: "Custom Layouts",
-      description: "Generate universal or language-specific keyboards tailored to your specific needs.",
+      title: t('intro.features.customLayouts.title'),
+      description: t('intro.features.customLayouts.description'),
       color: "text-green-400"
     },
     {
       icon: GraduationCap,
-      title: "Learn & Practice",
-      description: "Master new layouts through gamified lessons and interactive practice sessions.",
+      title: t('intro.features.learnPractice.title'),
+      description: t('intro.features.learnPractice.description'),
       color: "text-orange-400"
     }
   ];
@@ -38,13 +41,13 @@ const Intro = () => {
   const benefits = [
     {
       icon: Zap,
-      title: "Faster Typing",
-      description: "Increase your typing speed by up to 40% with optimized layouts"
+      title: t('intro.benefits.fasterTyping.title'),
+      description: t('intro.benefits.fasterTyping.description')
     },
     {
       icon: Database,
-      title: "Contribute to Science",
-      description: "Help build better models for everyone with anonymized data"
+      title: t('intro.benefits.contributeToScience.title'),
+      description: t('intro.benefits.contributeToScience.description')
     }
   ];
 
@@ -97,12 +100,10 @@ const Intro = () => {
           <div className="text-center space-y-8">
             <div className="space-y-6">
               <h1 className="text-8xl font-bold text-primary animate-float">
-                BagreType
+                {t('intro.title')}
               </h1>
               <p className="text-3xl text-aqua-light font-light max-w-4xl mx-auto leading-relaxed">
-                Discover the most efficient keyboard layouts through 
-                <span className="text-primary font-semibold"> machine learning</span> and 
-                <span className="text-primary font-semibold"> human data</span>
+                {t('intro.subtitle')}
               </p>
             </div>
 
@@ -110,19 +111,19 @@ const Intro = () => {
               <Button
                 variant="ocean"
                 size="lg"
-                onClick={() => navigate("/collect")}
+                onClick={() => navigate(`/${lang}/collect`)}
                 className="group text-lg px-8 py-6 hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)]"
               >
-                Start Your Journey
+                {t('intro.startJourney')}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-wave" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => navigate("/learn")}
+                onClick={() => navigate(`/${lang}/learn`)}
                 className="text-lg px-8 py-6"
               >
-                Learn Touch Typing
+                {t('intro.learnTouchTyping')}
               </Button>
             </div>
           </div>
@@ -130,9 +131,9 @@ const Intro = () => {
           {/* How It Works Section */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-accent mb-4">How It Works</h2>
+              <h2 className="text-4xl font-bold text-accent mb-4">{t('intro.howItWorks')}</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Our four-step process transforms your typing experience through data-driven optimization
+                {t('intro.howItWorksDescription')}
               </p>
             </div>
 
@@ -161,9 +162,9 @@ const Intro = () => {
           {/* Benefits Section */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-accent mb-4">Why Choose BagreType?</h2>
+              <h2 className="text-4xl font-bold text-accent mb-4">{t('intro.whyChoose')}</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Whether you're a programmer, multilingual writer, or just curious about typing efficiency
+                {t('intro.whyChooseDescription')}
               </p>
             </div>
 
@@ -190,9 +191,9 @@ const Intro = () => {
           {/* Final CTA Section */}
           <div className="text-center space-y-8 py-12">
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold text-accent">Ready to Transform Your Typing?</h2>
+              <h2 className="text-3xl font-bold text-accent">{t('intro.readyToTransform')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of users who have already optimized their typing experience
+                {t('intro.readyToTransformDescription')}
               </p>
             </div>
             
@@ -200,19 +201,19 @@ const Intro = () => {
               <Button
                 variant="ocean"
                 size="lg"
-                onClick={() => navigate("/collect")}
+                onClick={() => navigate(`/${lang}/collect`)}
                 className="group text-lg px-8 py-6 hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)]"
               >
-                Get Started Now
+                {t('intro.getStartedNow')}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-wave" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => navigate("/learn")}
+                onClick={() => navigate(`/${lang}/learn`)}
                 className="text-lg px-8 py-6"
               >
-                Learn First
+                {t('intro.learnFirst')}
               </Button>
             </div>
           </div>

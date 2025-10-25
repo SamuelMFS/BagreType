@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -15,18 +15,21 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
-
-const programmingLanguages = [
-  "C", "C#", "C++", "Java", "JavaScript", "TypeScript", 
-  "Python", "Ruby", "Go", "Rust", "PHP", "Swift"
-];
-
-const humanLanguages = [
-  "English", "Portuguese", "Spanish", "French", "Italian", 
-  "German", "Dutch", "Russian", "Chinese", "Japanese"
-];
+import { useLocalization } from "@/hooks/useLocalization";
 
 const Generate = () => {
+  const { lang } = useParams();
+  const { t } = useLocalization();
+  
+  const programmingLanguages = [
+    "C", "C#", "C++", "Java", "JavaScript", "TypeScript", 
+    "Python", "Ruby", "Go", "Rust", "PHP", "Swift"
+  ];
+
+  const humanLanguages = [
+    "English", "Portuguese", "Spanish", "French", "Italian", 
+    "German", "Dutch"
+  ];
   const [selectedType, setSelectedType] = useState<"curated" | "custom" | "manual">("curated");
   const [selectedCategory, setSelectedCategory] = useState<"programming" | "human">("programming");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
@@ -57,8 +60,8 @@ const Generate = () => {
     if (file) {
       setUploadedFile(file);
       toast({
-        title: "File uploaded",
-        description: `${file.name} is ready for processing`,
+        title: t('generate.toasts.fileUploaded'),
+        description: t('generate.toasts.fileReady', { filename: file.name }),
       });
     }
   };
@@ -87,8 +90,8 @@ const Generate = () => {
     setIsGenerating(false);
     
     toast({
-      title: "Layout Generated!",
-      description: "Your optimized keyboard layout is ready",
+      title: t('generate.toasts.layoutGenerated'),
+      description: t('generate.toasts.layoutReady'),
     });
   };
 
@@ -128,8 +131,8 @@ const Generate = () => {
           }
           
           toast({
-            title: "Layout Switched",
-            description: "Your progress has been reset for the new layout",
+            title: t('generate.toasts.layoutSwitched'),
+            description: t('generate.toasts.progressReset'),
           });
         } else if (!currentLayout) {
           // First time setting a layout, clear any existing progress just in case
@@ -157,19 +160,19 @@ const Generate = () => {
         localStorage.setItem('persistent_layout', layoutToUse);
         
         // Navigate to lessons
-        navigate("/lessons");
+        navigate(`/${lang}/lessons`);
       } catch (error) {
         console.error('Error handling layout change:', error);
         toast({
-          title: "Error",
-          description: "Failed to switch layouts",
+          title: t('generate.toasts.error'),
+          description: t('generate.toasts.switchFailed'),
           variant: "destructive"
         });
       }
     } else {
       toast({
-        title: "Invalid Layout",
-        description: "Layout string must be exactly 45 characters",
+        title: t('generate.toasts.invalidLayout'),
+        description: t('generate.toasts.mustBe45Chars'),
         variant: "destructive"
       });
     }
@@ -199,12 +202,12 @@ const Generate = () => {
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-5xl font-bold text-primary mb-4">
-                {selectedType === "manual" ? "Manual Layout Entered" : "Your Optimized Layout"}
+                {selectedType === "manual" ? t('generate.results.manualTitle') : t('generate.results.generatedTitle')}
               </h1>
               <p className="text-lg text-muted-foreground">
                 {selectedType === "manual" 
-                  ? "Custom layout string configured" 
-                  : `Generated based on ${selectedType === "curated" ? selectedLanguage : "your custom data"}`}
+                  ? t('generate.results.manualSubtitle')
+                  : t('generate.results.generatedSubtitle', { source: selectedType === "curated" ? selectedLanguage : t('generate.custom.pasteText') })}
               </p>
             </div>
 
@@ -213,7 +216,7 @@ const Generate = () => {
                 <div className="space-y-4">
                   <div className="text-center">
                     <h3 className="text-xl font-semibold text-primary mb-2">
-                      {selectedType === "manual" ? "Manual Layout" : "Generated Layout"}
+                      {selectedType === "manual" ? t('generate.results.manualLayout') : t('generate.results.generatedLayout')}
                     </h3>
                     <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
                       <div className="text-lg font-mono text-foreground break-all leading-relaxed">
@@ -235,15 +238,15 @@ const Generate = () => {
                   <div className="grid md:grid-cols-3 gap-4 pt-4">
                     <div className="text-center">
                       <p className="text-3xl font-bold text-accent">42%</p>
-                      <p className="text-sm text-muted-foreground">Efficiency Gain</p>
+                      <p className="text-sm text-muted-foreground">{t('generate.results.efficiencyGain')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-3xl font-bold text-accent">65%</p>
-                      <p className="text-sm text-muted-foreground">Home Row Usage</p>
+                      <p className="text-sm text-muted-foreground">{t('generate.results.homeRowUsage')}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-3xl font-bold text-accent">28%</p>
-                      <p className="text-sm text-muted-foreground">Less Finger Travel</p>
+                      <p className="text-sm text-muted-foreground">{t('generate.results.lessFingerTravel')}</p>
                     </div>
                   </div>
                 )}
@@ -258,7 +261,7 @@ const Generate = () => {
                 className="gap-2"
               >
                 <Sparkles className="w-5 h-5" />
-                Learn This Layout
+                {t('generate.actions.learnLayout')}
               </Button>
               <Button
                 onClick={() => {
@@ -267,7 +270,7 @@ const Generate = () => {
                 variant="outline"
                 size="lg"
               >
-                Generate Another
+                {t('generate.actions.generateAnother')}
               </Button>
             </div>
           </div>
@@ -288,10 +291,10 @@ const Generate = () => {
         <div className="animate-fade-in space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-5xl font-bold text-primary mb-4 animate-float">
-              Generate Custom Layout
+              {t('generate.title')}
             </h1>
             <p className="text-xl text-muted-foreground">
-              Optimize your keyboard layout for your specific needs
+              {t('generate.subtitle')}
             </p>
           </div>
 
@@ -299,15 +302,15 @@ const Generate = () => {
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="curated" className="gap-2">
                 <Code className="w-4 h-4" />
-                Curated Applications
+                {t('generate.tabs.curated')}
               </TabsTrigger>
               <TabsTrigger value="custom" className="gap-2">
                 <FileText className="w-4 h-4" />
-                Custom Data
+                {t('generate.tabs.custom')}
               </TabsTrigger>
               <TabsTrigger value="manual" className="gap-2">
                 <Languages className="w-4 h-4" />
-                Manual Entry
+                {t('generate.tabs.manual')}
               </TabsTrigger>
             </TabsList>
 
@@ -316,13 +319,13 @@ const Generate = () => {
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 text-accent">
                     <Languages className="w-5 h-5" />
-                    <h3 className="text-xl font-semibold">Choose Your Application</h3>
+                    <h3 className="text-xl font-semibold">{t('generate.curated.title')}</h3>
                   </div>
 
                   <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as "programming" | "human")}>
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="programming">Programming Languages</TabsTrigger>
-                      <TabsTrigger value="human">Human Languages</TabsTrigger>
+                      <TabsTrigger value="programming">{t('generate.curated.programming')}</TabsTrigger>
+                      <TabsTrigger value="human">{t('generate.curated.human')}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="programming" className="mt-6">
@@ -334,7 +337,7 @@ const Generate = () => {
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
                           >
-                            {lang}
+                            {t(`generate.curated.languages.programming.${lang}`)}
                           </Button>
                         ))}
                       </div>
@@ -349,7 +352,7 @@ const Generate = () => {
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
                           >
-                            {lang}
+                            {t(`generate.curated.languages.human.${lang}`)}
                           </Button>
                         ))}
                       </div>
@@ -366,16 +369,16 @@ const Generate = () => {
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium text-foreground flex items-center gap-2">
                         <Languages className="w-4 h-4" />
-                        Edit Layout String (45 characters)
+                        {t('generate.manual.title')}
                       </label>
                       {manualLayoutString === localStorage.getItem('persistent_layout') && manualLayoutString.length === 45 && (
                         <span className="text-xs text-accent bg-accent/10 px-2 py-1 rounded">
-                          Currently Active
+                          {t('generate.manual.currentlyActive')}
                         </span>
                       )}
                     </div>
                     <Textarea
-                      placeholder="1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./"
+                      placeholder={t('generate.manual.placeholder')}
                       value={manualLayoutString}
                       onChange={(e) => setManualLayoutString(e.target.value)}
                       maxLength={45}
@@ -383,8 +386,8 @@ const Generate = () => {
                     />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">
-                        Length: {manualLayoutString.length}/45
-                        {manualLayoutString.length !== 45 && " (Must be exactly 45 characters)"}
+                        {t('generate.manual.length', { current: manualLayoutString.length })}
+                        {manualLayoutString.length !== 45 && t('generate.manual.mustBe45')}
                       </p>
                       <div className="flex gap-2">
                         <Button
@@ -394,7 +397,7 @@ const Generate = () => {
                             setManualLayoutString(LAYOUT_STRINGS.qwerty);
                           }}
                         >
-                          Set to QWERTY
+                          {t('generate.manual.setQwerty')}
                         </Button>
                         <Button
                           variant="outline"
@@ -405,7 +408,7 @@ const Generate = () => {
                           }}
                           disabled={!manualLayoutString}
                         >
-                          Clear
+                          {t('generate.manual.clear')}
                         </Button>
                       </div>
                     </div>
@@ -420,10 +423,10 @@ const Generate = () => {
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      Paste Your Text
+                      {t('generate.custom.pasteText')}
                     </label>
                     <Textarea
-                      placeholder="Paste text that represents what you'll be typing..."
+                      placeholder={t('generate.custom.pastePlaceholder')}
                       value={customText}
                       onChange={(e) => setCustomText(e.target.value)}
                       className="min-h-[200px] bg-background/80 border-border"
@@ -435,14 +438,14 @@ const Generate = () => {
                       <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-card px-2 text-muted-foreground">OR</span>
+                      <span className="bg-card px-2 text-muted-foreground">{t('generate.custom.or')}</span>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <Upload className="w-4 h-4" />
-                      Upload a File
+                      {t('generate.custom.uploadFile')}
                     </label>
                     <div className="flex items-center gap-4">
                       <input
@@ -458,11 +461,11 @@ const Generate = () => {
                         className="w-full gap-2"
                       >
                         <Upload className="w-4 h-4" />
-                        {uploadedFile ? uploadedFile.name : "Choose File"}
+                        {uploadedFile ? uploadedFile.name : t('generate.custom.chooseFile')}
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Supported: TXT, PDF, YAML, JSON, MD
+                      {t('generate.custom.supportedFormats')}
                     </p>
                   </div>
                 </div>
@@ -480,15 +483,15 @@ const Generate = () => {
                 className="gap-2 min-w-[200px]"
               >
                 <Sparkles className="w-5 h-5" />
-                {selectedType === "manual" 
-                  ? "Learn This Layout" 
+                {selectedType === 'manual' 
+                  ? t('generate.actions.learnLayout')
                   : isGenerating 
-                    ? "Generating..." 
-                    : "Generate Layout"}
+                    ? t('generate.actions.generating')
+                    : t('generate.actions.generateLayout')}
               </Button>
               {selectedType === "manual" && manualLayoutString.length === 45 && (
                 <p className="text-xs text-muted-foreground text-center max-w-[300px]">
-                  Click "Learn This Layout" to activate this layout and start practicing
+                  {t('generate.actions.learnHint')}
                 </p>
               )}
             </div>

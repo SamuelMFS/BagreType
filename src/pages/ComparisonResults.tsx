@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -10,11 +10,14 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Trophy, TrendingUp, Target, Zap, BarChart3, Award, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocalization } from "@/hooks/useLocalization";
 
 const ComparisonResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang } = useParams();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [baselineResults, setBaselineResults] = useState<{ wpm: number; accuracy: number } | null>(null);
   const [comparisonResults, setComparisonResults] = useState<{ wpm: number; accuracy: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,10 +112,10 @@ const ComparisonResults = () => {
           <div className="animate-fade-in space-y-16">
             <div className="text-center space-y-6">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Loading Your Results...
+                {t('comparisonResults.loading.title')}
               </h1>
               <p className="text-xl text-muted-foreground">
-                Debug: isLoading={isLoading.toString()}, baselineResults={baselineResults ? 'loaded' : 'null'}, comparisonResults={comparisonResults ? 'loaded' : 'null'}
+                {t('comparisonResults.loading.debug', { isLoading: isLoading.toString(), baseline: baselineResults ? 'loaded' : 'null', comparison: comparisonResults ? 'loaded' : 'null' })}
               </p>
             </div>
           </div>
@@ -135,13 +138,13 @@ const ComparisonResults = () => {
           <div className="animate-fade-in space-y-16">
             <div className="text-center space-y-6">
               <h1 className="text-6xl font-bold text-primary mb-4">
-                Results Not Available
+                {t('comparisonResults.error.title')}
               </h1>
               <p className="text-xl text-muted-foreground">
-                We couldn't load your comparison results. Please try again.
+                {t('comparisonResults.error.description')}
               </p>
-              <Button onClick={() => navigate("/compare-progress")}>
-                Take Comparison Test Again
+              <Button onClick={() => navigate(`/${lang}/compare-progress`)}>
+                {t('comparisonResults.error.retryButton')}
               </Button>
             </div>
           </div>
@@ -166,11 +169,11 @@ const ComparisonResults = () => {
               <Trophy className="w-20 h-20 text-primary animate-float" />
             </div>
             <h1 className="text-6xl font-bold text-primary mb-4 animate-glow">
-              Your Progress Results! 🎉
+              {t('comparisonResults.congratulations.title')}
             </h1>
             <p className="text-2xl text-aqua-light max-w-4xl mx-auto">
               {baselineResults ? 
-                `🚀 Amazing! You've improved by ${comparisonResults.wpm - baselineResults.wpm} WPM and ${comparisonResults.accuracy - baselineResults.accuracy}% accuracy!` :
+                t('comparisonResults.congratulations.improvement', { wpm: comparisonResults.wpm - baselineResults.wpm, accuracy: comparisonResults.accuracy - baselineResults.accuracy }) :
                 ``
               }
             </p>
@@ -180,7 +183,7 @@ const ComparisonResults = () => {
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <p className="text-xl text-muted-foreground">
-                {baselineResults ? "See how much you've improved since day one!" : "Here are your comparison test results!"}
+                {baselineResults ? t('comparisonResults.congratulations.subtitle') : t('comparisonResults.congratulations.noBaselineSubtitle')}
               </p>
             </div>
 
@@ -190,17 +193,17 @@ const ComparisonResults = () => {
                 <Card className="p-8 bg-card/50 backdrop-blur border-border/50">
                   <div className="space-y-6">
                     <h3 className="text-2xl font-bold text-center text-muted-foreground">
-                      Baseline Test
+                      {t('comparisonResults.results.baseline.title')}
                     </h3>
                     <div className="text-center space-y-4">
                       <div className="text-4xl font-bold text-muted-foreground">
-                        {baselineResults.wpm} WPM
+                        {baselineResults.wpm} {t('comparisonResults.units.wpm')}
                       </div>
                       <div className="text-2xl font-semibold text-muted-foreground">
-                        {baselineResults.accuracy}% Accuracy
+                        {baselineResults.accuracy}% {t('comparisonResults.units.accuracy')}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Your starting point
+                        {t('comparisonResults.results.baseline.description')}
                       </p>
                     </div>
                   </div>
@@ -211,17 +214,17 @@ const ComparisonResults = () => {
               <Card className="p-8 bg-card/50 backdrop-blur border-primary/20">
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold text-center text-primary">
-                    Final Comparison Test
+                    {t('comparisonResults.results.comparison.title')}
                   </h3>
                   <div className="text-center space-y-4">
                     <div className="text-4xl font-bold text-primary">
-                      {comparisonResults.wpm} WPM
+                      {comparisonResults.wpm} {t('comparisonResults.units.wpm')}
                     </div>
                     <div className="text-2xl font-semibold text-accent">
-                      {comparisonResults.accuracy}% Accuracy
+                      {comparisonResults.accuracy}% {t('comparisonResults.units.accuracy')}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Your current level
+                      {t('comparisonResults.results.comparison.description')}
                     </p>
                   </div>
                 </div>
@@ -233,15 +236,15 @@ const ComparisonResults = () => {
               <Card className="p-8 bg-card/50 backdrop-blur border-green-500/20">
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold text-center text-green-500">
-                    Your Amazing Improvement
+                    {t('comparisonResults.results.improvement.title')}
                   </h3>
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="text-center space-y-2">
                       <div className="text-3xl font-bold text-green-500">
-                        {comparisonResults.wpm - baselineResults.wpm > 0 ? '+' : ''}{comparisonResults.wpm - baselineResults.wpm} WPM
+                        {comparisonResults.wpm - baselineResults.wpm > 0 ? '+' : ''}{comparisonResults.wpm - baselineResults.wpm} {t('comparisonResults.units.wpm')}
                       </div>
                       <div className="text-lg text-muted-foreground">
-                        Speed Improvement
+                        {t('comparisonResults.results.improvement.speedImprovement')}
                       </div>
                     </div>
                     <div className="text-center space-y-2">
@@ -249,7 +252,7 @@ const ComparisonResults = () => {
                         {comparisonResults.accuracy - baselineResults.accuracy > 0 ? '+' : ''}{comparisonResults.accuracy - baselineResults.accuracy}%
                       </div>
                       <div className="text-lg text-muted-foreground">
-                        Accuracy Improvement
+                        {t('comparisonResults.results.improvement.accuracyImprovement')}
                       </div>
                     </div>
                   </div>
@@ -262,10 +265,10 @@ const ComparisonResults = () => {
           <div className="text-center space-y-6">
             <div className="space-y-4">
               <h3 className="text-3xl font-bold text-primary">
-                🚀 The Sky's the Limit!
+                {t('comparisonResults.motivation.title')}
               </h3>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Now you can practice as much as you want! Your typing journey has just begun, and with consistent practice, you'll continue to improve and reach new heights.
+                {t('comparisonResults.motivation.description')}
               </p>
             </div>
             
@@ -273,11 +276,11 @@ const ComparisonResults = () => {
               <Button
                 size="lg"
                 variant="ocean"
-                onClick={() => navigate("/practice")}
+                onClick={() => navigate(`/${lang}/practice`)}
                 className="gap-2 text-lg px-8 py-4"
               >
                 <Zap size={24} />
-                Start Practicing
+                {t('comparisonResults.motivation.startPracticing')}
               </Button>
             </div>
           </div>

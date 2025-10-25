@@ -1,0 +1,689 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "close": "Fechar",
+    "open": "Abrir",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "navigation": {
+    "dataCollection": "Coleta de Dados",
+    "learnToType": "Aprender a Digitar",
+    "practice": "Prática",
+    "generateLayout": "Gerar Layout",
+    "profile": "Perfil",
+    "viewResults": "Ver Resultados",
+    "signOut": "Sair",
+    "signIn": "Entrar"
+  },
+  "landing": {
+    "title": "BagreType",
+    "subtitle": "Descubra Seu Teclado Perfeito"
+  },
+  "intro": {
+    "title": "BagreType",
+    "subtitle": "Descubra os layouts de teclado mais eficientes através de aprendizado de máquina e dados humanos",
+    "startJourney": "Começar Sua Jornada",
+    "learnTouchTyping": "Aprender Digitação",
+    "howItWorks": "Como Funciona",
+    "howItWorksDescription": "Nosso processo de quatro etapas transforma sua experiência de digitação através de otimização baseada em dados",
+    "whyChoose": "Por Que Escolher o BagreType?",
+    "whyChooseDescription": "Seja você um programador, escritor multilíngue ou apenas curioso sobre eficiência de digitação",
+    "readyToTransform": "Pronto para Transformar Sua Digitação?",
+    "readyToTransformDescription": "Junte-se a milhares de usuários que já otimizaram sua experiência de digitação",
+    "getStartedNow": "Começar Agora",
+    "learnFirst": "Aprender Primeiro",
+    "features": {
+      "dataCollection": {
+        "title": "Coleta de Dados",
+        "description": "Medimos seus padrões de digitação e tempos de reação para entender seu comportamento único de digitação."
+      },
+      "mlAnalysis": {
+        "title": "Análise de ML",
+        "description": "Nosso algoritmo analisa padrões linguísticos entre idiomas para otimizar a eficiência do layout."
+      },
+      "customLayouts": {
+        "title": "Layouts Personalizados",
+        "description": "Gere teclados universais ou específicos de idioma adaptados às suas necessidades específicas."
+      },
+      "learnPractice": {
+        "title": "Aprender e Praticar",
+        "description": "Domine novos layouts através de lições gamificadas e sessões de prática interativas."
+      }
+    },
+    "benefits": {
+      "fasterTyping": {
+        "title": "Digitação Mais Rápida",
+        "description": "Aumente sua velocidade de digitação em até 40% com layouts otimizados"
+      },
+      "contributeToScience": {
+        "title": "Contribuir para a Ciência",
+        "description": "Ajude a construir melhores modelos para todos com dados anonimizados"
+      }
+    }
+  },
+  "dataCollection": {
+    "title": "Coleta de Dados",
+    "description": "Ajude-nos a construir o futuro dos layouts de teclado",
+    "loading": "Carregando seu progresso...",
+    "startTest": "Iniciar Teste",
+    "instructions": "Siga as instruções na tela para completar a avaliação de digitação",
+    "steps": {
+      "layout": {
+        "title": "Que tipo de teclado você usa?",
+        "description": "Isso nos ajuda a entender o layout físico em que você está digitando",
+        "staggered": "Staggered",
+        "staggeredDescription": "Teclado tradicional com fileiras desalinhadas (mais comum)",
+        "ortholinear": "Ortholinear",
+        "ortholinearDescription": "Teclas dispostas em uma grade perfeita (teclados especiais)"
+      },
+      "touchType": {
+        "title": "Você sabe digitar touch typing?",
+        "description": "Touch typing significa digitar sem olhar para o teclado",
+        "yes": "Sim, sei digitar sem olhar",
+        "no": "Não, olho para o teclado"
+      },
+      "wantToLearn": {
+        "title": "Você quer aprender a digitar sem olhar?",
+        "description": "Podemos ajudá-lo a dominar a digitação sem olhar em apenas algumas semanas",
+        "whyLearn": "Por Que Aprender a Digitar Sem Olhar?",
+        "benefits": {
+          "faster": "Digitação 2-3x mais rápida - Aumente de 30-40 PPM para 60-100+ PPM",
+          "accuracy": "Melhor precisão - Digite sem olhar para o teclado",
+          "fatigue": "Menos fadiga - Técnica adequada reduz tensão",
+          "professional": "Habilidade profissional - Essencial para muitas carreiras"
+        },
+        "gamified": "Nosso sistema de aprendizado gamificado torna divertido e envolvente, similar ao Duolingo!",
+        "yes": "Sim, quero aprender a digitar sem olhar",
+        "no": "Não, vou continuar com meu método atual"
+      },
+      "share": {
+        "title": "Compartilhar Seus Dados?",
+        "description": "Ajude a melhorar os layouts de teclado para todos",
+        "whatWeCollect": "Que Dados Coletamos:",
+        "dataTypes": {
+          "reactionTimes": "Tempos de reação para cada pressionamento de tecla",
+          "sequences": "Tempo entre teclas consecutivas em sequências",
+          "accuracy": "Métricas de precisão de digitação",
+          "layout": "Tipo de layout do teclado"
+        },
+        "privacy": "Todos os dados são anonimizados e usados exclusivamente para fins de pesquisa. Nenhuma informação pessoal é armazenada ou compartilhada.",
+        "yes": "Sim, compartilhe meus dados com o projeto",
+        "no": "Não, mantenha os dados localmente"
+      },
+      "test": {
+        "title": "Teste de Digitação",
+        "instructions": "Digite cada letra o mais rápido e preciso possível",
+        "duration": "Isso levará apenas 15-30 segundos",
+        "spaceToStart": "Pressione Espaço para começar",
+        "escToStop": "Pressione Esc para parar",
+        "spaceToPlayAgain": "Pressione Espaço para jogar novamente",
+        "focusOnAccuracy": "Foque na precisão primeiro, depois a velocidade seguirá naturalmente",
+        "results": "Resultados →",
+        "step": "Etapa",
+        "of": "de",
+        "resetChoices": "Redefinir Escolhas"
+      }
+    }
+  },
+  "results": {
+    "title": "Seus Resultados",
+    "description": "Análise de performance do seu teste de digitação",
+    "loading": "Carregando seus dados de performance...",
+    "noData": "Nenhum dado de teste encontrado",
+    "takeTest": "Fazer um Teste",
+    "performanceLevel": "Nível de Performance",
+    "testDetails": "Detalhes do Teste",
+    "accuracy": "Precisão",
+    "avgReaction": "Reação Média",
+    "duration": "Duração:",
+    "lettersTyped": "Letras Digitadas:",
+    "keyboard": "Teclado:",
+    "touchTyping": "Touch Typing:",
+    "touchTypingValues": {
+      "yes": "✅ Sim",
+      "no": "❌ Não"
+    },
+    "takeAnotherTest": "Fazer Outro Teste",
+    "backToHome": "Voltar ao Início",
+    "testHistory": "Histórico de Testes",
+    "showing": "Mostrando",
+    "of": "de",
+    "tests": "testes",
+    "accuracyLabel": "precisão",
+    "avgLabel": "média",
+    "previous": "← Anterior",
+    "next": "Próximo →",
+    "levels": {
+      "expert": "Especialista",
+      "advanced": "Avançado",
+      "intermediate": "Intermediário",
+      "beginner": "Iniciante"
+    },
+    "charts": {
+      "letterPerformance": {
+        "title": "Performance Geral das Letras",
+        "description": "Tempos de reação médios, melhores e piores em todos os testes",
+        "noData": "Nenhum dado de performance de letras disponível",
+        "best": "Melhor",
+        "average": "Médio",
+        "worst": "Pior",
+        "overallBest": "Melhor Geral",
+        "overallAverage": "Médio Geral",
+        "overallWorst": "Pior Geral"
+      },
+      "horizontalChart": {
+        "title": "Performance das Letras",
+        "description": "Tempos de reação médios, melhores e piores",
+        "best": "Melhor",
+        "average": "Médio",
+        "worst": "Pior"
+      }
+    }
+  },
+  "learn": {
+    "title": "Aprender Digitação",
+    "description": "Domine a arte de digitar sem olhar para o teclado",
+    "loading": "Carregando seu progresso...",
+    "whyLearn": "Por Que Aprender Touch Typing?",
+    "whyLearnDescription": "A digitação é uma habilidade que melhora drasticamente sua velocidade e precisão de digitação. Com apenas 30 minutos de prática por dia, você pode aumentar sua PPM de 30-40 para 60-100+.",
+    "benefits": {
+      "speedIncrease": "Aumento na velocidade de digitação",
+      "dailyPractice": "Prática diária necessária",
+      "timeToProficient": "Para se tornar proficiente",
+      "timeToProficientValue": "2-4 semanas"
+    },
+    "gamifiedNote": "Muitas pessoas acham o processo de aprendizado divertido através de prática de digitação gamificada, similar ao Monkeytype ou TypeRacer.",
+    "getStarted": "Começar",
+    "getStartedDescription": "Primeiro, vamos ver sua velocidade atual de digitação",
+    "baselineTest": "Teste de Base",
+    "baselineTestDescription": "Digite uma passagem de 30 palavras o mais rápido e preciso possível",
+    "baselineTestExplanation": "Antes de começarmos nossa jornada de aprendizado, vamos testar sua velocidade atual de digitação. Esta base ajudará a acompanhar seu progresso enquanto você aprende.",
+    "startBaselineTest": "Iniciar Teste de Base",
+    "afterTestNote": "Após o teste, você começará sua jornada de aprendizado personalizada",
+    "readyToLearn": "Pronto para Aprender!",
+    "readyToLearnDescription": "Você completou seu teste de base. Vamos começar sua jornada de aprendizado!",
+    "startLearning": "Começar a Aprender",
+    "startLearningDescription": "Inicie suas lições personalizadas de digitação",
+    "startLearningExplanation": "Seus resultados do teste de base foram salvos. Agora você pode começar a aprender digitação com lições personalizadas projetadas para seu nível de habilidade.",
+    "startLessons": "Iniciar Lições",
+    "testResults": {
+      "title": "Resultados do Teste de Base",
+      "description": "Veja como você se saiu!",
+      "wpm": "Palavras Por Minuto",
+      "accuracy": "Precisão",
+      "greatJob": "Ótimo trabalho! Agora vamos começar sua jornada de aprendizado personalizada.",
+      "continueToLessons": "Continuar para as Lições"
+    },
+    "testScreen": {
+      "title": "Teste de Base",
+      "description": "Digite as palavras o mais rápido e preciso possível",
+      "startTyping": "Comece a digitar para iniciar...",
+      "zenMode": "Digite qualquer coisa que quiser... Pressione Esc quando terminar",
+      "restart": "Reiniciar",
+      "signInPrompt": "Entre para salvar seu progresso e acompanhar sua melhoria ao longo do tempo"
+    },
+    "startLearning": "Começar a Aprender",
+    "continueLearning": "Continuar Aprendendo"
+  },
+  "postBaseline": {
+    "title": "Bem-vindo à Sua Jornada!",
+    "subtitle": "Hora de quebrar esses velhos hábitos e construir algo incrível",
+    "handGifPlaceholder": "Placeholder do GIF da Mão",
+    "handGifNote": "(Você adicionará o gif aqui)",
+    "baselineResults": {
+      "title": "Seus Resultados de Base",
+      "description": "Este é seu ponto de partida - vamos acompanhar sua melhoria a partir daqui!",
+      "typingSpeed": "Velocidade de Digitação",
+      "wordsPerMinute": "Palavras por minuto",
+      "accuracy": "Precisão",
+      "characterAccuracy": "Precisão de caracteres"
+    },
+    "touchTyping": {
+      "title": "O que é Touch Typing?",
+      "description": "A arte de digitar sem olhar para o teclado, usando memória muscular.",
+      "bumpExplanation": "Você já notou que as teclas F e J têm um pequeno relevo? Esses são os marcos do touch typing para mostrar onde seus dedos indicadores devem estar para que você não precise olhar para o teclado.",
+      "gamerJoke": "Estou te vendo aí com a mão no WASD, seu gamerzinho! 😏",
+      "choreography": "Não se preocupe, todos já estivemos lá. Seus dedos têm feito a mesma dança por anos, e agora vamos ensinar uma coreografia completamente nova."
+    },
+    "expectations": {
+      "title": "Aqui está o que Esperar",
+      "description": "Sua jornada de digitação terá altos e baixos, mas o destino vale a pena",
+      "speedDrop": {
+        "title": "Queda de Velocidade",
+        "description": "Sua velocidade de digitação vai cair no início - isso é completamente normal!"
+      },
+      "neuralRewiring": {
+        "title": "Reconexão Neural",
+        "description": "Seu cérebro está reconectando caminhos neurais - isso leva tempo e paciência"
+      },
+      "skyrocketSpeed": {
+        "title": "Velocidade Explosiva",
+        "description": "Após prática dedicada, sua velocidade vai explodir além do que você pensava ser possível"
+      }
+    },
+    "encouragement": {
+      "piano": "Pense nisso como aprender a tocar piano com os pés - estranho no início, mas quando conseguir, você vai se perguntar como viveu sem isso!",
+      "expert": "Lembre-se: Todo especialista já foi um iniciante",
+      "button": "Vamos mergulhar!"
+    }
+  },
+  "lessons": {
+    "title": "Sua Jornada de Digitação",
+    "subtitle": "Desça às profundezas e domine cada tecla",
+    "learningLayout": "Aprendendo Layout {{layout}}",
+    "progress": {
+      "completed": "Concluídas",
+      "chapters": "Capítulos",
+      "minutesToday": "Minutos Hoje"
+    },
+    "chapter": {
+      "title": "Capítulo {{number}}",
+      "depth": "Profundidade: {{depth}}",
+      "titles": {
+        "1": "Dedos Indicadores",
+        "2": "Dedos Médios",
+        "3": "Dedos Anelares", 
+        "4": "Dedos Mindinhos",
+        "5": "Números e Símbolos"
+      },
+      "descriptions": {
+        "1": "Domine seus dedos indicadores",
+        "2": "Estenda seus dedos médios",
+        "3": "Domine seus dedos anelares",
+        "4": "Desafie seus dedos mindinhos", 
+        "5": "Domine números e símbolos"
+      }
+    },
+    "lesson": {
+      "test": "Teste"
+    },
+    "skipDialog": {
+      "title": "Pular para a Lição?",
+      "message": "Tem certeza de que quer pular para esta lição? Você sempre pode voltar às lições anteriores depois.",
+      "continueSequential": "Não, Continuar Sequencial",
+      "skip": "Sim, Pular"
+    }
+  },
+  "lessonsJourney": {
+    "title": "Jornada das Lições",
+    "description": "Progrida através do nosso caminho de aprendizado estruturado",
+    "currentLesson": "Lição Atual",
+    "completedLessons": "Lições Concluídas",
+    "totalLessons": "Total de Lições"
+  },
+  "lesson": {
+    "title": "Lição",
+    "instructions": "Instruções",
+    "practice": "Prática",
+    "complete": "Completar",
+    "nextLesson": "Próxima Lição",
+    "previousLesson": "Lição Anterior",
+    "loading": {
+      "title": "Carregando Lição...",
+      "description": "Preparando sua prática da tecla {{key}}"
+    },
+    "complete": {
+      "title": "Lição Concluída! 🎉",
+      "description": "Você dominou a tecla {{key}}",
+      "performance": "Seu Desempenho",
+      "averageWpm": "PPM Médio: {{wpm}}",
+      "keepPracticing": "Continue praticando para melhorar sua velocidade!",
+      "savingProgress": "Salvando seu progresso...",
+      "backToRoadmap": "Voltar ao Mapa",
+      "continue": "Continuar"
+    },
+    "rounds": {
+      "part1": "Parte 1: Apenas {{key}}",
+      "part2": "Parte 2: {{key}} + Capítulo",
+      "part3": "Parte 3: {{key}} + Tudo",
+      "testPart1": "Parte 1: Apenas {{chapter}}",
+      "testPart2": "Parte 2: {{chapter}} + Capítulo",
+      "testPart3": "Parte 3: {{chapter}} + Tudo",
+      "progress": "Parte {{current}} de 3 • 30 letras cada",
+      "focus": "Foque na precisão em vez da velocidade"
+    },
+    "test": {
+      "title": "Teste {{number}}"
+    },
+    "lessonTitle": "Lição {{number}}: Tecla {{key}}",
+    "wpm": "PPM",
+    "accuracy": "Precisão"
+  },
+  "compareProgress": {
+    "loading": {
+      "title": "Carregando Seu Progresso..."
+    },
+    "congratulations": {
+      "title": "Parabéns! 🎉",
+      "subtitle": "Você desbloqueou um novo superpoder! Seus dedos agora dançam pelo teclado com precisão e velocidade."
+    },
+    "achievements": {
+      "lightningFastTitle": "Velocidade Relâmpago",
+      "lightningFastDescription": "Sua velocidade de digitação se transformou de caça-e-bica para precisão relâmpago!",
+      "pinpointAccuracyTitle": "Precisão Cirúrgica",
+      "pinpointAccuracyDescription": "Cada tecla atinge seu alvo com precisão cirúrgica. Sem mais erros de digitação te atrasando!",
+      "continuousGrowthTitle": "Crescimento Contínuo",
+      "continuousGrowthDescription": "Este é apenas o começo! Suas habilidades de digitação continuarão melhorando com a prática."
+    },
+    "progress": {
+      "title": "Seu Progresso Incrível",
+      "subtitle": "Vamos ver o quão longe você chegou!",
+      "before": "Antes (Baseline)",
+      "after": "Depois (Teste Final)",
+      "takeTest": "Faça um teste de comparação para ver seus resultados finais!",
+      "takeComparisonTest": "Fazer Teste de Comparação",
+      "comparisonResults": "Resultados do Teste de Comparação"
+    },
+    "improvements": {
+      "amazing": "🚀 Incrível! Você melhorou {{wpm}} PPM e {{accuracy}}% de precisão!",
+      "speed": "⚡ Ótimo! Você melhorou {{wpm}} PPM!",
+      "accuracy": "🎯 Excelente! Você melhorou {{accuracy}}% de precisão!",
+      "keepPracticing": "💪 Continue praticando! Cada tecla te torna melhor!",
+      "wpmImprovement": "🚀 {{improvement}} PPM de melhoria",
+      "accuracyImprovement": "🎯 {{improvement}}% de melhoria na precisão"
+    },
+    "test": {
+      "title": "Teste Final de Comparação",
+      "subtitle": "Vamos ver o quanto você melhorou!"
+    },
+    "actions": {
+      "backToRoadmap": "Voltar ao Mapa",
+      "takeComparisonTest": "Fazer Teste de Comparação"
+    }
+  },
+  "practice": {
+    "title": "Modo Prática",
+    "description": "Pratique suas habilidades de digitação com vários exercícios",
+    "startPractice": "Iniciar Prática",
+    "selectExercise": "Selecionar Exercício"
+  },
+  "generate": {
+    "title": "Gerar Layout",
+    "description": "Crie seu layout de teclado personalizado",
+    "generateLayout": "Gerar Layout",
+    "downloadLayout": "Baixar Layout"
+  },
+  "auth": {
+    "title": "Autenticação",
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "dontHaveAccount": "Não tem uma conta?",
+    "alreadyHaveAccount": "Já tem uma conta?"
+  },
+  "comparisonResults": {
+    "loading": {
+      "title": "Carregando Seus Resultados...",
+      "debug": "Debug: isLoading={{isLoading}}, baselineResults={{baseline}}, comparisonResults={{comparison}}"
+    },
+    "error": {
+      "title": "Resultados Não Disponíveis",
+      "description": "Não conseguimos carregar seus resultados de comparação. Tente novamente.",
+      "retryButton": "Fazer Teste de Comparação Novamente"
+    },
+    "congratulations": {
+      "title": "Seus Resultados de Progresso! 🎉",
+      "improvement": "🐟 Incrível! Você melhorou {{wpm}} PPM e {{accuracy}}% de precisão!",
+      "subtitle": "Veja o quanto você melhorou desde o primeiro dia!",
+      "noBaselineSubtitle": "Aqui estão seus resultados do teste de comparação!"
+    },
+    "results": {
+      "baseline": {
+        "title": "Teste de Base",
+        "description": "Seu ponto de partida"
+      },
+      "comparison": {
+        "title": "Teste Final de Comparação",
+        "description": "Seu nível atual"
+      },
+      "improvement": {
+        "title": "Sua Melhoria Incrível",
+        "speedImprovement": "Melhoria de Velocidade",
+        "accuracyImprovement": "Melhoria de Precisão"
+      }
+    },
+    "motivation": {
+      "title": "🐟 O Céu é o Limite!",
+      "description": "Agora você pode praticar o quanto quiser! Sua jornada de digitação apenas começou, e com prática consistente, você continuará melhorando e alcançando novas alturas.",
+      "startPracticing": "Começar a Praticar"
+    },
+    "units": {
+      "wpm": "PPM",
+      "accuracy": "Precisão"
+    }
+  },
+  "notFound": {
+    "title": "Página Não Encontrada",
+    "description": "A página que você está procurando não existe",
+    "goHome": "Ir para o Início"
+  },
+  "practice": {
+    "modes": {
+      "words": "palavras",
+      "time": "tempo",
+      "quote": "citação",
+      "zen": "zen",
+      "custom": "personalizado"
+    },
+    "placeholders": {
+      "savedTexts": "textos salvos",
+      "newText": "novo texto",
+      "keyboard": "teclado"
+    },
+    "titles": {
+      "hideKeyboard": "Ocultar imagem do teclado",
+      "showKeyboard": "Mostrar imagem do teclado",
+      "deleteText": "Excluir texto atual"
+    },
+    "noCustomText": {
+      "title": "Nenhum Texto Personalizado Selecionado",
+      "description": "Selecione um texto salvo ou crie um novo para começar a praticar",
+      "createButton": "Criar Novo Texto"
+    }
+  },
+  "customTextModal": {
+    "title": "Adicionar Texto Personalizado",
+    "form": {
+      "titleLabel": "Título",
+      "titlePlaceholder": "Digite um título para seu texto...",
+      "textLabel": "Conteúdo do Texto",
+      "textPlaceholder": "Digite seu texto personalizado aqui... (mínimo 10 caracteres)",
+      "charactersCount": "caracteres",
+      "minimumChars": "Mínimo 10 caracteres"
+    },
+    "validation": {
+      "titleRequired": "Título é obrigatório",
+      "textRequired": "Texto é obrigatório",
+      "textMinLength": "Texto deve ter pelo menos 10 caracteres"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "save": "Salvar Texto"
+    }
+  },
+  "testResults": {
+    "title": "Teste Concluído!",
+    "subtitle": "Ótimo trabalho! Aqui estão seus resultados",
+    "metrics": {
+      "wordsPerMinute": "PPM",
+      "rawWpm": "PPM Bruto",
+      "accuracy": "Precisão",
+      "time": "Tempo",
+      "seconds": "Segundos"
+    },
+    "actions": {
+      "tryAgain": "Tentar Novamente",
+      "continue": "Continuar",
+      "escapeHint": "Ou pressione Escape para iniciar um novo teste"
+    }
+  },
+  "generate": {
+    "title": "Gerar Layout Personalizado",
+    "subtitle": "Otimize seu layout de teclado para suas necessidades específicas",
+    "tabs": {
+      "curated": "Aplicações Curadas",
+      "custom": "Dados Personalizados",
+      "manual": "Entrada Manual"
+    },
+    "curated": {
+      "title": "Escolha Sua Aplicação",
+      "programming": "Linguagens de Programação",
+      "human": "Linguagens Humanas",
+      "languages": {
+        "programming": {
+          "C": "C",
+          "C#": "C#",
+          "C++": "C++",
+          "Java": "Java",
+          "JavaScript": "JavaScript",
+          "TypeScript": "TypeScript",
+          "Python": "Python",
+          "Ruby": "Ruby",
+          "Go": "Go",
+          "Rust": "Rust",
+          "PHP": "PHP",
+          "Swift": "Swift"
+        },
+        "human": {
+          "English": "Inglês",
+          "Portuguese": "Português",
+          "Spanish": "Espanhol",
+          "French": "Francês",
+          "Italian": "Italiano",
+          "German": "Alemão",
+          "Dutch": "Holandês"
+        }
+      }
+    },
+    "manual": {
+      "title": "Editar String de Layout (45 caracteres)",
+      "placeholder": "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./",
+      "length": "Comprimento: {{current}}/45",
+      "mustBe45": " (Deve ter exatamente 45 caracteres)",
+      "currentlyActive": "Atualmente Ativo",
+      "setQwerty": "Definir como QWERTY",
+      "clear": "Limpar"
+    },
+    "custom": {
+      "pasteText": "Cole Seu Texto",
+      "pastePlaceholder": "Cole texto que representa o que você vai digitar...",
+      "uploadFile": "Fazer Upload de Arquivo",
+      "chooseFile": "Escolher Arquivo",
+      "supportedFormats": "Suportado: TXT, PDF, YAML, JSON, MD",
+      "or": "OU"
+    },
+    "results": {
+      "manualTitle": "Layout Manual Inserido",
+      "generatedTitle": "Seu Layout Otimizado",
+      "manualSubtitle": "String de layout personalizado configurado",
+      "generatedSubtitle": "Gerado baseado em {{source}}",
+      "manualLayout": "Layout Manual",
+      "generatedLayout": "Layout Gerado",
+      "efficiencyGain": "Ganho de Eficiência",
+      "homeRowUsage": "Uso da Linha Inicial",
+      "lessFingerTravel": "Menos Movimento dos Dedos"
+    },
+    "actions": {
+      "learnLayout": "Aprender Este Layout",
+      "generateLayout": "Gerar Layout",
+      "generating": "Gerando...",
+      "generateAnother": "Gerar Outro",
+      "learnHint": "Clique em \"Aprender Este Layout\" para ativar este layout e começar a praticar"
+    },
+    "toasts": {
+      "fileUploaded": "Arquivo carregado",
+      "fileReady": "{{filename}} está pronto para processamento",
+      "layoutGenerated": "Layout Gerado!",
+      "layoutReady": "Seu layout de teclado otimizado está pronto",
+      "layoutSwitched": "Layout Alterado",
+      "progressReset": "Seu progresso foi resetado para o novo layout",
+      "error": "Erro",
+      "switchFailed": "Falha ao alterar layouts",
+      "invalidLayout": "Layout Inválido",
+      "mustBe45Chars": "A string de layout deve ter exatamente 45 caracteres"
+    }
+  },
+  "auth": {
+    "title": "BagreType",
+    "description": "Entre para salvar seu progresso de digitação em todos os dispositivos",
+    "tabs": {
+      "signIn": "Entrar",
+      "signUp": "Cadastrar"
+    },
+    "form": {
+      "email": "Email",
+      "password": "Senha",
+      "emailPlaceholder": "seu@email.com",
+      "passwordPlaceholder": "••••••••"
+    },
+    "buttons": {
+      "signIn": "Entrar",
+      "signUp": "Cadastrar",
+      "signingIn": "Entrando...",
+      "creatingAccount": "Criando conta...",
+      "continueWithoutAccount": "Continuar sem conta"
+    },
+    "validation": {
+      "invalidEmail": "Endereço de email inválido",
+      "passwordMinLength": "A senha deve ter pelo menos 6 caracteres"
+    },
+    "toasts": {
+      "validationError": "Erro de Validação",
+      "signUpFailed": "Cadastro Falhou",
+      "signInFailed": "Login Falhou",
+      "success": "Sucesso!",
+      "checkEmail": "Verifique seu email para confirmar sua conta.",
+      "welcomeBack": "Bem-vindo de volta!",
+      "signedInSuccessfully": "Você entrou com sucesso.",
+      "resetPasswordSent": "Email de recuperação enviado!",
+      "resetPasswordSuccess": "Verifique seu email para redefinir sua senha.",
+      "resetPasswordFailed": "Falha ao enviar email de recuperação"
+    },
+    "forgotPassword": {
+      "title": "Esqueci minha senha",
+      "description": "Digite seu email e enviaremos um link para redefinir sua senha",
+      "emailLabel": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "sendResetLink": "Enviar Link de Recuperação",
+      "backToSignIn": "Voltar para Login",
+      "sending": "Enviando..."
+    }
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "subtitle": "Acompanhe seu progresso e estatísticas de digitação",
+    "loading": "Carregando perfil...",
+    "anonymous": "Usuário Anônimo",
+    "memberSince": "Membro desde",
+    "lessonsCompleted": "Lições Concluídas",
+    "testsCompleted": "Testes Concluídos",
+    "averageWPM": "PPM Médio",
+    "bestWPM": "Melhor PPM",
+    "timeSpent": "Tempo Gasto",
+    "currentStreak": "Sequência Atual",
+    "baselineWPM": "PPM Base",
+    "baselineAccuracy": "Precisão Base",
+    "continueLearning": "Continuar Aprendendo",
+    "practice": "Praticar",
+    "signOut": "Sair"
+  },
+  "language": {
+    "select": "Selecionar Idioma",
+    "english": "English",
+    "portuguese": "Português (Brasil)"
+  }
+}

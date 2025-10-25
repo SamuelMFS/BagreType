@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LessonRoadmap from "@/components/LessonRoadmap";
 import Bubbles from "@/components/Bubbles";
@@ -9,10 +10,13 @@ import DeepFish from "@/components/DeepFish";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useScrollProgress } from "@/contexts/ScrollContext";
 import { useLayout } from "@/contexts/LayoutContext";
+import { useLocalization } from "@/hooks/useLocalization";
 
 const LessonsJourney = () => {
   const scrollProgress = useScrollProgress();
   const { currentLayout, layoutName } = useLayout();
+  const { lang } = useParams();
+  const { t } = useLocalization();
 
   useEffect(() => {
     // Ensure we start at the top when component mounts
@@ -144,15 +148,15 @@ const LessonsJourney = () => {
                 textShadow: '0 0 20px hsl(var(--primary) / 0.5)',
               }}
             >
-              Your Typing Journey
+              {t('lessons.title')}
             </h1>
             <p className="text-lg text-foreground/80 drop-shadow-lg">
-              {currentLayout ? `Learning ${layoutName.toUpperCase()} Layout` : 'Descend into the depths and master each key'}
+              {currentLayout ? t('lessons.learningLayout', { layout: layoutName.toUpperCase() }) : t('lessons.subtitle')}
             </p>
           </div>
 
           {/* Roadmap */}
-          <LessonRoadmap layoutString={currentLayout || undefined} />
+          <LessonRoadmap layoutString={currentLayout || undefined} language={lang} />
         </div>
       </div>
       

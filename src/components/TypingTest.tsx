@@ -5,6 +5,7 @@ import { RotateCcw, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface TypingTestProps {
   wordCount?: number;
@@ -17,7 +18,7 @@ interface TypingTestProps {
   onCurrentCharChange?: (char: string) => void; // New prop to track current character
 }
 
-const commonWords = [
+const commonWordsEnglish = [
   'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
   'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
   'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
@@ -30,24 +31,44 @@ const commonWords = [
   'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us'
 ];
 
-const generateWords = (count: number): string[] => {
+const commonWordsPortuguese = [
+  'o', 'a', 'de', 'e', 'do', 'da', 'em', 'um', 'para', 'e',
+  'com', 'nao', 'uma', 'os', 'no', 'se', 'na', 'por', 'mais', 'as',
+  'dos', 'como', 'mas', 'foi', 'ao', 'ele', 'das', 'tem', 'a', 'seu',
+  'sua', 'ou', 'ser', 'quando', 'muito', 'ha', 'nos', 'ja', 'esta', 'eu',
+  'também', 'so', 'pelo', 'pela', 'ate', 'isso', 'ela', 'entre', 'era', 'depois',
+  'sem', 'mesmo', 'aos', 'ter', 'seus', 'suas', 'numa', 'pelos', 'pelas', 'esse',
+  'eles', 'estava', 'foram', 'essa', 'num', 'nem', 'meu', 'minha', 'tem', 'todo',
+  'toda', 'todos', 'todas', 'pode', 'poder', 'fazer', 'feito', 'feita', 'feitos', 'feitas',
+  'vida', 'pessoa', 'homem', 'mulher', 'casa', 'trabalho', 'tempo', 'dia', 'noite', 'ano',
+  'mes', 'semana', 'hora', 'minuto', 'segundo', 'agora', 'hoje', 'ontem', 'amanha', 'sempre',
+  'nunca', 'talvez', 'quase', 'junto', 'sozinho', 'sozinha', 'grande', 'pequeno', 'pequena', 'novo',
+  'nova', 'velho', 'velha', 'bom', 'boa', 'ruim', 'melhor', 'pior', 'primeiro', 'primeira',
+  'ultimo', 'ultima', 'proximo', 'proxima', 'outro', 'outra', 'diferente', 'igual', 'facil', 'dificil',
+  'importante', 'necessario', 'possivel', 'impossivel', 'certo', 'errado', 'verdade', 'mentira', 'coisa', 'lugar'
+];
+
+const generateWords = (count: number, language: string = 'en'): string[] => {
   const words: string[] = [];
+  const wordList = language === 'pt-BR' ? commonWordsPortuguese : commonWordsEnglish;
+  
   for (let i = 0; i < count; i++) {
-    words.push(commonWords[Math.floor(Math.random() * commonWords.length)]);
+    words.push(wordList[Math.floor(Math.random() * wordList.length)]);
   }
   return words;
 };
 
 const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false, onCurrentCharChange }, ref) => {
+  const { i18n, t } = useTranslation();
   const [words, setWords] = useState<string[]>(() => {
     // Initialize words on first render
     if (customText && typeof customText === 'string') {
       return customText.trim().split(/\s+/);
     } else if (timeLimit) {
       // For time mode, generate a large initial set of words
-      return generateWords(200);
+      return generateWords(200, i18n.language);
     }
-    return generateWords(wordCount);
+    return generateWords(wordCount, i18n.language);
   });
   const [userInput, setUserInput] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,7 +90,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   // Function to add more words when needed (for time mode)
   const addMoreWords = () => {
     if (timeLimit && !customText) {
-      const additionalWords = generateWords(100);
+      const additionalWords = generateWords(100, i18n.language);
       setWords(prevWords => [...prevWords, ...additionalWords]);
     }
   };
@@ -82,9 +103,9 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       setZenText('');
     } else if (timeLimit) {
       // For time mode, generate a large initial set of words
-      setWords(generateWords(200));
+      setWords(generateWords(200, i18n.language));
     } else {
-      setWords(generateWords(wordCount));
+      setWords(generateWords(wordCount, i18n.language));
     }
     setUserInput('');
     setCurrentIndex(0);
@@ -491,8 +512,8 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
             <div className="flex justify-center">
               <Trophy className="w-20 h-20 text-primary animate-float" />
             </div>
-            <h2 className="text-5xl font-bold text-primary">Test Complete!</h2>
-            <p className="text-lg text-muted-foreground">Great job! Here are your results</p>
+            <h2 className="text-5xl font-bold text-primary">{t('testResults.title')}</h2>
+            <p className="text-lg text-muted-foreground">{t('testResults.subtitle')}</p>
           </div>
           
           {/* Results Card */}
@@ -502,11 +523,11 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
               <div className="space-y-6">
                 <div className="text-center space-y-2">
                   <p className="text-6xl font-bold text-primary">{stats.wpm}</p>
-                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Words Per Minute</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t('testResults.metrics.wordsPerMinute')}</p>
                 </div>
                 <div className="text-center space-y-2">
                   <p className="text-4xl font-bold text-foreground">{stats.rawWpm}</p>
-                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Raw WPM</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t('testResults.metrics.rawWpm')}</p>
                 </div>
               </div>
               
@@ -514,11 +535,11 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
               <div className="space-y-6">
                 <div className="text-center space-y-2">
                   <p className="text-6xl font-bold text-accent">{stats.accuracy}%</p>
-                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Accuracy</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t('testResults.metrics.accuracy')}</p>
                 </div>
                 <div className="text-center space-y-2">
                   <p className="text-4xl font-bold text-foreground">{stats.timeSeconds}s</p>
-                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Time</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t('testResults.metrics.time')}</p>
                 </div>
               </div>
             </div>
@@ -534,7 +555,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
                 className="gap-2 px-8 py-3 text-lg font-semibold"
               >
                 <RotateCcw className="w-5 h-5" />
-                Try Again
+                {t('testResults.actions.tryAgain')}
               </Button>
 
               {onComplete && (
@@ -544,13 +565,13 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
                   size="lg"
                   className="px-8 py-3 text-lg font-semibold"
                 >
-                  Continue
+                  {t('testResults.actions.continue')}
                 </Button>
               )}
             </div>
             
             <p className="text-sm text-muted-foreground">
-              Or press <kbd className="px-3 py-1.5 bg-card rounded-lg border border-border text-foreground font-mono text-sm">Escape</kbd> to start a new test
+              {t('testResults.actions.escapeHint')}
             </p>
           </div>
         </div>
@@ -565,16 +586,16 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
         <div className="flex justify-center gap-8 text-center">
           <div className="space-y-1">
             <p className="text-3xl font-bold text-primary">{getCurrentWPM()}</p>
-            <p className="text-sm text-muted-foreground">WPM</p>
+            <p className="text-sm text-muted-foreground">{t('testResults.metrics.wordsPerMinute')}</p>
           </div>
           <div className="space-y-1">
             <p className="text-3xl font-bold text-accent">{getCurrentAccuracy()}%</p>
-            <p className="text-sm text-muted-foreground">Accuracy</p>
+            <p className="text-sm text-muted-foreground">{t('testResults.metrics.accuracy')}</p>
           </div>
           {timeRemaining !== null && (
             <div className="space-y-1">
               <p className="text-3xl font-bold text-foreground">{timeRemaining}</p>
-              <p className="text-sm text-muted-foreground">Seconds</p>
+              <p className="text-sm text-muted-foreground">{t('testResults.metrics.seconds')}</p>
             </div>
           )}
         </div>
@@ -682,7 +703,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
           )}
 
           <div className="text-center text-muted-foreground text-sm h-[1.5rem] flex items-center justify-center mt-4">
-            {!startTime && (zenMode ? "Type anything you want... Press Esc when done" : "Start typing to begin...")}
+            {!startTime && (zenMode ? t('learn.testScreen.zenMode') : t('learn.testScreen.startTyping'))}
           </div>
 
           <div className="flex justify-center gap-4">
@@ -693,7 +714,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
               className="gap-2"
             >
               <RotateCcw className="w-4 h-4" />
-              Restart
+              {t('learn.testScreen.restart')}
             </Button>
           </div>
         </div>
@@ -701,7 +722,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
       {!user && (
         <p className="text-center text-sm text-muted-foreground">
-          Sign in to save your progress and track your improvement over time
+          {t('learn.testScreen.signInPrompt')}
         </p>
       )}
     </div>

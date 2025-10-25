@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -12,10 +12,13 @@ import { ArrowLeft, Trophy, TrendingUp, Target, Zap, BarChart3 } from "lucide-re
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import TypingTest from "@/components/TypingTest";
+import { useLocalization } from "@/hooks/useLocalization";
 
 const CompareProgress = () => {
   const navigate = useNavigate();
+  const { lang } = useParams();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [baselineResults, setBaselineResults] = useState<{ wpm: number; accuracy: number } | null>(null);
   const [finalTestResults, setFinalTestResults] = useState<{ wpm: number; accuracy: number } | null>(null);
   const [showComparisonTest, setShowComparisonTest] = useState(false);
@@ -100,7 +103,7 @@ const CompareProgress = () => {
     setShowComparisonTest(false);
     
     // Navigate to the comparison results page with the test results
-    navigate("/comparison-results", {
+    navigate(`/${lang}/comparison-results`, {
       state: {
         comparisonResults: { wpm, accuracy }
       }
@@ -114,13 +117,13 @@ const CompareProgress = () => {
     const accuracyImprovement = finalTestResults.accuracy - baselineResults.accuracy;
     
     if (wpmImprovement > 0 && accuracyImprovement > 0) {
-      return `🚀 Amazing! You've improved by ${wpmImprovement} WPM and ${accuracyImprovement}% accuracy!`;
+      return t('compareProgress.improvements.amazing', { wpm: wpmImprovement, accuracy: accuracyImprovement });
     } else if (wpmImprovement > 0) {
-      return `⚡ Great! You've improved by ${wpmImprovement} WPM!`;
+      return t('compareProgress.improvements.speed', { wpm: wpmImprovement });
     } else if (accuracyImprovement > 0) {
-      return `🎯 Excellent! You've improved by ${accuracyImprovement}% accuracy!`;
+      return t('compareProgress.improvements.accuracy', { accuracy: accuracyImprovement });
     } else {
-      return `💪 Keep practicing! Every keystroke makes you better!`;
+      return t('compareProgress.improvements.keepPracticing');
     }
   };
 
@@ -154,7 +157,7 @@ const CompareProgress = () => {
           <div className="animate-fade-in space-y-16">
             <div className="text-center space-y-6">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Loading Your Progress...
+                {t('compareProgress.loading.title')}
               </h1>
             </div>
           </div>
@@ -176,10 +179,10 @@ const CompareProgress = () => {
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-5xl font-bold text-primary animate-glow">
-                Final Comparison Test
+                {t('compareProgress.test.title')}
               </h1>
               <p className="text-xl text-muted-foreground">
-                Let's see how much you've improved!
+                {t('compareProgress.test.subtitle')}
               </p>
             </div>
 
@@ -211,10 +214,10 @@ const CompareProgress = () => {
               <Trophy className="w-20 h-20 text-primary animate-float" />
             </div>
             <h1 className="text-6xl font-bold text-primary mb-4 animate-glow">
-              Congratulations! 🎉
+              {t('compareProgress.congratulations.title')}
             </h1>
             <p className="text-2xl text-aqua-light max-w-4xl mx-auto">
-              You've unlocked a new superpower! Your fingers now dance across the keyboard with precision and speed.
+              {t('compareProgress.congratulations.subtitle')}
             </p>
           </div>
 
@@ -225,9 +228,9 @@ const CompareProgress = () => {
                 <div className="flex justify-center">
                   <Zap className="w-12 h-12 text-primary animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-primary">Lightning Fast</h3>
+                <h3 className="text-xl font-bold text-primary">{t('compareProgress.achievements.lightningFastTitle')}</h3>
                 <p className="text-muted-foreground">
-                  Your typing speed has transformed from hunt-and-peck to lightning-fast precision!
+                  {t('compareProgress.achievements.lightningFastDescription')}
                 </p>
               </div>
             </Card>
@@ -237,9 +240,9 @@ const CompareProgress = () => {
                 <div className="flex justify-center">
                   <Target className="w-12 h-12 text-accent animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-accent">Pinpoint Accuracy</h3>
+                <h3 className="text-xl font-bold text-accent">{t('compareProgress.achievements.pinpointAccuracyTitle')}</h3>
                 <p className="text-muted-foreground">
-                  Every keystroke hits its mark with surgical precision. No more typos slowing you down!
+                  {t('compareProgress.achievements.pinpointAccuracyDescription')}
                 </p>
               </div>
             </Card>
@@ -249,9 +252,9 @@ const CompareProgress = () => {
                 <div className="flex justify-center">
                   <TrendingUp className="w-12 h-12 text-green-500 animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-green-500">Continuous Growth</h3>
+                <h3 className="text-xl font-bold text-green-500">{t('compareProgress.achievements.continuousGrowthTitle')}</h3>
                 <p className="text-muted-foreground">
-                  This is just the beginning! Your typing skills will keep improving with practice.
+                  {t('compareProgress.achievements.continuousGrowthDescription')}
                 </p>
               </div>
             </Card>
@@ -262,10 +265,10 @@ const CompareProgress = () => {
             <div className="space-y-8">
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold text-primary">
-                  Your Amazing Progress
+                  {t('compareProgress.progress.title')}
                 </h2>
                 <p className="text-xl text-muted-foreground">
-                  Let's see how far you've come!
+                  {t('compareProgress.progress.subtitle')}
                 </p>
               </div>
 
@@ -274,7 +277,7 @@ const CompareProgress = () => {
                 <Card className="p-8 bg-card/50 backdrop-blur border-border/50">
                   <div className="space-y-6">
                     <h3 className="text-2xl font-bold text-center text-muted-foreground">
-                      Before (Baseline)
+                      {t('compareProgress.progress.before')}
                     </h3>
                     <div className="text-center space-y-4">
                       <div className="text-4xl font-bold text-muted-foreground">
@@ -291,7 +294,7 @@ const CompareProgress = () => {
                 <Card className="p-8 bg-card/50 backdrop-blur border-primary/20">
                   <div className="space-y-6">
                     <h3 className="text-2xl font-bold text-center text-primary">
-                      After (Final Test)
+                      {t('compareProgress.progress.after')}
                     </h3>
                     {finalTestResults ? (
                       <div className="text-center space-y-4">
@@ -310,14 +313,14 @@ const CompareProgress = () => {
                     ) : (
                       <div className="text-center space-y-4">
                         <p className="text-muted-foreground">
-                          Take a comparison test to see your final results!
+                          {t('compareProgress.progress.takeTest')}
                         </p>
                         <Button
                           onClick={() => setShowComparisonTest(true)}
                           className="gap-2"
                         >
                           <BarChart3 size={20} />
-                          Take Comparison Test
+                          {t('compareProgress.progress.takeComparisonTest')}
                         </Button>
                       </div>
                     )}
@@ -330,7 +333,7 @@ const CompareProgress = () => {
                 <Card className="p-8 bg-card/50 backdrop-blur border-green-500/20">
                   <div className="space-y-6">
                     <h3 className="text-2xl font-bold text-center text-green-500">
-                      Comparison Test Results
+                      {t('compareProgress.progress.comparisonResults')}
                     </h3>
                     <div className="text-center space-y-4">
                       <div className="text-4xl font-bold text-green-500">
@@ -345,10 +348,10 @@ const CompareProgress = () => {
                           return (
                             <div className="space-y-2">
                               <div className="text-lg font-semibold text-green-500">
-                                🚀 {comparison.wpmImprovement > 0 ? '+' : ''}{comparison.wpmImprovement} WPM improvement
+                                {t('compareProgress.improvements.wpmImprovement', { improvement: `${comparison.wpmImprovement > 0 ? '+' : ''}${comparison.wpmImprovement}` })}
                               </div>
                               <div className="text-lg font-semibold text-green-500">
-                                🎯 {comparison.accuracyImprovement > 0 ? '+' : ''}{comparison.accuracyImprovement}% accuracy improvement
+                                {t('compareProgress.improvements.accuracyImprovement', { improvement: `${comparison.accuracyImprovement > 0 ? '+' : ''}${comparison.accuracyImprovement}` })}
                               </div>
                             </div>
                           );
@@ -368,11 +371,11 @@ const CompareProgress = () => {
               <Button
                 size="lg"
                 variant="ocean"
-                onClick={() => navigate("/lessons")}
+                onClick={() => navigate(`/${lang}/lessons`)}
                 className="gap-2"
               >
                 <ArrowLeft size={20} />
-                Back to Roadmap
+                {t('compareProgress.actions.backToRoadmap')}
               </Button>
               
               {!comparisonTestResults && (
@@ -383,7 +386,7 @@ const CompareProgress = () => {
                   className="gap-2"
                 >
                   <BarChart3 size={20} />
-                  Take Comparison Test
+                  {t('compareProgress.actions.takeComparisonTest')}
                 </Button>
               )}
             </div>

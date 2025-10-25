@@ -1,0 +1,14 @@
+# Citações para Prática de Digitação em Português
+# Formato: Cada citação em uma nova linha
+# As citações serão automaticamente categorizadas por comprimento
+
+A raposa marrom rápida pula sobre o cão preguiçoso.
+Ser ou não ser, eis a questão.
+A vida é o que acontece com você enquanto você está ocupado fazendo outros planos.
+No final, lembraremos não das palavras de nossos inimigos, mas do silêncio de nossos amigos.
+A única maneira de fazer um grande trabalho é amar o que você faz.
+O sucesso não é final, o fracasso não é fatal: é a coragem de continuar que conta.
+Duas coisas são infinitas: o universo e a estupidez humana; e não tenho certeza sobre o universo.
+O futuro pertence àqueles que acreditam na beleza de seus sonhos.
+É durante nossos momentos mais sombrios que devemos focar para ver a luz.
+Seja você mesmo; todos os outros já estão ocupados.

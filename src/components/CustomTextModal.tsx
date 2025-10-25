@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { useLocalization } from "@/hooks/useLocalization";
 
 interface CustomTextModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface CustomTextModalProps {
 }
 
 const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
+  const { t } = useLocalization();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [errors, setErrors] = useState<{ title?: string; text?: string }>({});
@@ -29,13 +31,13 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
     const newErrors: { title?: string; text?: string } = {};
     
     if (!title.trim()) {
-      newErrors.title = "Title is required";
+      newErrors.title = t('customTextModal.validation.titleRequired');
     }
     
     if (!text.trim()) {
-      newErrors.text = "Text is required";
+      newErrors.text = t('customTextModal.validation.textRequired');
     } else if (text.trim().length < 10) {
-      newErrors.text = "Text must be at least 10 characters long";
+      newErrors.text = t('customTextModal.validation.textMinLength');
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -86,7 +88,7 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-primary">Add Custom Text</h2>
+            <h2 className="text-2xl font-bold text-primary">{t('customTextModal.title')}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -102,14 +104,14 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
             {/* Title Input */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">
-                Title
+                {t('customTextModal.form.titleLabel')}
               </Label>
               <Input
                 ref={titleRef}
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter a title for your text..."
+                placeholder={t('customTextModal.form.titlePlaceholder')}
                 className={`bg-background/10 backdrop-blur-sm border-border/70 ${
                   errors.title ? "border-destructive" : ""
                 }`}
@@ -124,14 +126,14 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
             {/* Text Input */}
             <div className="space-y-2">
               <Label htmlFor="text" className="text-sm font-medium">
-                Text Content
+                {t('customTextModal.form.textLabel')}
               </Label>
               <Textarea
                 ref={textareaRef}
                 id="text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Enter your custom text here... (minimum 10 characters)"
+                placeholder={t('customTextModal.form.textPlaceholder')}
                 className={`min-h-[200px] bg-background/10 backdrop-blur-sm border-border/70 resize-none ${
                   errors.text ? "border-destructive" : ""
                 }`}
@@ -142,11 +144,11 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
                   <p className="text-sm text-destructive">{errors.text}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    {text.length} characters
+                    {text.length} {t('customTextModal.form.charactersCount')}
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Minimum 10 characters
+                  {t('customTextModal.form.minimumChars')}
                 </p>
               </div>
             </div>
@@ -159,14 +161,14 @@ const CustomTextModal = ({ isOpen, onClose, onSave }: CustomTextModalProps) => {
                 onClick={handleClose}
                 className="border-border hover:bg-muted"
               >
-                Cancel
+                {t('customTextModal.buttons.cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 disabled={!title.trim() || !text.trim() || text.trim().length < 10}
               >
-                Save Text
+                {t('customTextModal.buttons.save')}
               </Button>
             </div>
           </form>

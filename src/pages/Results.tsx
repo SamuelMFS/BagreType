@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -11,6 +11,7 @@ import LetterPerformanceChart from "@/components/LetterPerformanceChart";
 import HorizontalLetterChart from "@/components/HorizontalLetterChart";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocalization } from "@/hooks/useLocalization";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -34,7 +35,9 @@ interface TypingTestData {
 
 const Results = () => {
   const navigate = useNavigate();
+  const { lang } = useParams();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [typingTests, setTypingTests] = useState<TypingTestData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedTestId, setExpandedTestId] = useState<string | null>(null);
@@ -96,10 +99,10 @@ const Results = () => {
   };
 
   const getPerformanceLevel = (accuracy: number, avgReactionTime: number) => {
-    if (accuracy >= 95 && avgReactionTime <= 300) return { level: "Expert", color: "text-green-500" };
-    if (accuracy >= 90 && avgReactionTime <= 500) return { level: "Advanced", color: "text-blue-500" };
-    if (accuracy >= 80 && avgReactionTime <= 800) return { level: "Intermediate", color: "text-yellow-500" };
-    return { level: "Beginner", color: "text-orange-500" };
+    if (accuracy >= 95 && avgReactionTime <= 300) return { level: t('results.levels.expert'), color: "text-green-500" };
+    if (accuracy >= 90 && avgReactionTime <= 500) return { level: t('results.levels.advanced'), color: "text-blue-500" };
+    if (accuracy >= 80 && avgReactionTime <= 800) return { level: t('results.levels.intermediate'), color: "text-yellow-500" };
+    return { level: t('results.levels.beginner'), color: "text-orange-500" };
   };
 
   const toggleTestExpansion = (testId: string) => {
@@ -130,10 +133,10 @@ const Results = () => {
           <div className="animate-fade-in space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Results
+                {t('results.title')}
               </h1>
               <p className="text-2xl text-aqua-light">
-                Loading your performance data...
+                {t('results.loading')}
               </p>
             </div>
           </div>
@@ -157,16 +160,16 @@ const Results = () => {
           <div className="animate-fade-in space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Results
+                {t('results.title')}
               </h1>
               <p className="text-2xl text-aqua-light">
-                No test data found
+                {t('results.noData')}
               </p>
               <Button 
-                onClick={() => navigate('/collect')}
+                onClick={() => navigate(`/${lang}/collect`)}
                 className="mt-8"
               >
-                Take a Test
+                {t('results.takeTest')}
               </Button>
             </div>
           </div>
@@ -189,10 +192,10 @@ const Results = () => {
         <div className="animate-fade-in space-y-12">
           <div className="text-center space-y-4">
             <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-              Your Results
+              {t('results.title')}
             </h1>
             <p className="text-2xl text-aqua-light">
-              Performance analysis from your typing test
+              {t('results.description')}
             </p>
           </div>
 
@@ -204,7 +207,7 @@ const Results = () => {
                   <div className={`text-4xl font-bold ${performance.color} mb-2`}>
                     {performance.level}
                   </div>
-                  <p className="text-muted-foreground">Performance Level</p>
+                  <p className="text-muted-foreground">{t('results.performanceLevel')}</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-center">
@@ -212,13 +215,13 @@ const Results = () => {
                     <div className="text-3xl font-bold text-primary">
                       {latestTest.accuracy_percentage}%
                     </div>
-                    <p className="text-sm text-muted-foreground">Accuracy</p>
+                    <p className="text-sm text-muted-foreground">{t('results.accuracy')}</p>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-accent">
                       {latestTest.average_reaction_time_ms}ms
                     </div>
-                    <p className="text-sm text-muted-foreground">Avg Reaction</p>
+                    <p className="text-sm text-muted-foreground">{t('results.avgReaction')}</p>
                   </div>
                 </div>
               </div>
@@ -227,24 +230,24 @@ const Results = () => {
             {/* Test Details Card */}
             <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-accent">Test Details</h3>
+                <h3 className="text-xl font-semibold text-accent">{t('results.testDetails')}</h3>
                 
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Duration:</span>
+                    <span className="text-muted-foreground">{t('results.duration')}</span>
                     <span className="font-semibold">{formatDuration(latestTest.test_duration_ms)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Letters Typed:</span>
+                    <span className="text-muted-foreground">{t('results.lettersTyped')}</span>
                     <span className="font-semibold">{latestTest.completed_letters}/{latestTest.total_letters}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Keyboard:</span>
+                    <span className="text-muted-foreground">{t('results.keyboard')}</span>
                     <span className="font-semibold capitalize">{latestTest.keyboard_layout}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Touch Typing:</span>
-                    <span className="font-semibold capitalize">{latestTest.can_touch_type}</span>
+                    <span className="text-muted-foreground">{t('results.touchTyping')}</span>
+                    <span className="font-semibold">{t(`results.touchTypingValues.${latestTest.can_touch_type}`)}</span>
                   </div>
                 </div>
               </div>
@@ -254,17 +257,17 @@ const Results = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => navigate('/collect')}
+              onClick={() => navigate(`/${lang}/collect`)}
               className="flex-1 sm:flex-none"
             >
-              Take Another Test
+              {t('results.takeAnotherTest')}
             </Button>
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate(`/${lang}`)}
               variant="outline"
               className="flex-1 sm:flex-none"
             >
-              Back to Home
+              {t('results.backToHome')}
             </Button>
           </div>
 
@@ -276,9 +279,9 @@ const Results = () => {
             <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold text-accent">Test History</h3>
+                  <h3 className="text-xl font-semibold text-accent">{t('results.testHistory')}</h3>
                   <div className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1}-{Math.min(endIndex, typingTests.length)} of {typingTests.length} tests
+                    {t('results.showing')} {startIndex + 1}-{Math.min(endIndex, typingTests.length)} {t('results.of')} {typingTests.length} {t('results.tests')}
                   </div>
                 </div>
                 
@@ -306,8 +309,8 @@ const Results = () => {
                           </div>
                         </div>
                         <div className="flex gap-4 text-sm">
-                          <span>{test.accuracy_percentage}% accuracy</span>
-                          <span>{test.average_reaction_time_ms}ms avg</span>
+                          <span>{test.accuracy_percentage}% {t('results.accuracyLabel')}</span>
+                          <span>{test.average_reaction_time_ms}ms {t('results.avgLabel')}</span>
                         </div>
                       </div>
 
@@ -330,7 +333,7 @@ const Results = () => {
                       onClick={() => goToPage(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      ← Previous
+                      {t('results.previous')}
                     </Button>
                     
                     <div className="flex gap-1">
@@ -353,7 +356,7 @@ const Results = () => {
                       onClick={() => goToPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      Next →
+                      {t('results.next')}
                     </Button>
                   </div>
                 )}

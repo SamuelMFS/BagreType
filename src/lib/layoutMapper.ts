@@ -122,7 +122,7 @@ export function generateRoadmapNodes(layoutString: string): (LessonNode | { type
   return nodes;
 }
 
-export function createChaptersForLayout(layoutString: string): Chapter[] {
+export function createChaptersForLayout(layoutString: string, t?: (key: string) => string): Chapter[] {
   const nodes = generateRoadmapNodes(layoutString);
   
   // Split nodes into chapters based on test markers
@@ -174,7 +174,7 @@ export function createChaptersForLayout(layoutString: string): Chapter[] {
       chapters[currentChapterIndex].lessons.push({
         id: node.id,
         type: 'test' as const,
-        title: `Test ${testNumber}`,
+        title: t ? `${t('lessons.lesson.test')} ${testNumber}` : `Test ${testNumber}`,
         completed: false,
         locked: true,
         isCurrent: false

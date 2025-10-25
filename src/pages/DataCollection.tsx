@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import SegmentedProgressBar from "@/components/SegmentedProgressBar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocalization } from "@/hooks/useLocalization";
 import { supabase } from "@/integrations/supabase/client";
 
 type KeyboardLayout = "ortholinear" | "staggered" | null;
@@ -15,7 +16,9 @@ type ShareData = "yes" | "no" | null;
 
 const DataCollection = () => {
   const navigate = useNavigate();
+  const { lang } = useParams();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [step, setStep] = useState<"layout" | "touch-type" | "want-to-learn" | "share" | "test">("layout");
   const [keyboardLayout, setKeyboardLayout] = useState<KeyboardLayout>(null);
   const [canTouchType, setCanTouchType] = useState<TouchTyper>(null);
@@ -356,7 +359,7 @@ const DataCollection = () => {
     if (wantToLearn && step === "want-to-learn" && userJustSelected && !isLoading) {
       timeoutId = setTimeout(() => {
         if (wantToLearn === "yes") {
-          navigate("/learn");
+          navigate(`/${lang}/learn`);
         } else if (wantToLearn === "no") {
           transitionToStep("share");
         }
@@ -421,10 +424,10 @@ const DataCollection = () => {
           <div className="animate-fade-in space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Data Collection
+                {t('dataCollection.title')}
               </h1>
               <p className="text-2xl text-aqua-light">
-                Loading your progress...
+                {t('dataCollection.loading')}
               </p>
             </div>
           </div>
@@ -441,10 +444,10 @@ const DataCollection = () => {
         <div className="space-y-12">
           <div className="text-center space-y-4">
             <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-              Data Collection
+              {t('dataCollection.title')}
             </h1>
             <p className="text-2xl text-aqua-light">
-              Help us build the future of keyboard layouts
+              {t('dataCollection.description')}
             </p>
           </div>
 
@@ -452,9 +455,9 @@ const DataCollection = () => {
             {step === "layout" && (
               <div className="space-y-8">
                 <div className="space-y-3 text-center">
-                  <h2 className="text-3xl font-semibold text-accent">What type of keyboard do you use?</h2>
+                  <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.layout.title')}</h2>
                   <p className="text-lg text-muted-foreground">
-                    This helps us understand the physical layout you're typing on
+                    {t('dataCollection.steps.layout.description')}
                   </p>
                 </div>
                 
@@ -464,8 +467,8 @@ const DataCollection = () => {
                       <RadioGroupItem value="staggered" id="staggered" className="w-5 h-5" />
                       <div className="flex-1">
                         <div className="space-y-1">
-                          <p className="text-xl font-semibold text-foreground">Staggered</p>
-                          <p className="text-base text-muted-foreground">Traditional keyboard with offset rows (most common)</p>
+                          <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.layout.staggered')}</p>
+                          <p className="text-base text-muted-foreground">{t('dataCollection.steps.layout.staggeredDescription')}</p>
                         </div>
                         </div>
                       </Label>
@@ -474,8 +477,8 @@ const DataCollection = () => {
                       <RadioGroupItem value="ortholinear" id="ortholinear" className="w-5 h-5" />
                       <div className="flex-1">
                         <div className="space-y-1">
-                          <p className="text-xl font-semibold text-foreground">Ortholinear</p>
-                          <p className="text-base text-muted-foreground">Keys arranged in a perfect grid (mechanical keyboards)</p>
+                          <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.layout.ortholinear')}</p>
+                          <p className="text-base text-muted-foreground">{t('dataCollection.steps.layout.ortholinearDescription')}</p>
                         </div>
                         </div>
                       </Label>
@@ -487,9 +490,9 @@ const DataCollection = () => {
             {step === "touch-type" && (
               <div className="space-y-8">
                 <div className="space-y-3 text-center">
-                  <h2 className="text-3xl font-semibold text-accent">Can you touch type?</h2>
+                  <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.touchType.title')}</h2>
                   <p className="text-lg text-muted-foreground">
-                    Touch typing means typing without looking at the keyboard
+                    {t('dataCollection.steps.touchType.description')}
                   </p>
                 </div>
 
@@ -498,14 +501,14 @@ const DataCollection = () => {
                     <Label htmlFor="yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="yes" id="yes" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">Yes, I can touch type</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.touchType.yes')}</p>
                       </div>
                       </Label>
                     
                     <Label htmlFor="no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="no" id="no" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">No, I look at the keyboard</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.touchType.no')}</p>
                       </div>
                     </Label>
                   </RadioGroup>
@@ -516,23 +519,23 @@ const DataCollection = () => {
             {step === "want-to-learn" && (
               <div className="space-y-8">
                 <div className="space-y-3 text-center">
-                  <h2 className="text-3xl font-semibold text-accent">Do you want to learn touch typing?</h2>
+                  <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.wantToLearn.title')}</h2>
                   <p className="text-lg text-muted-foreground">
-                    We can help you master touch typing in just a few weeks
+                    {t('dataCollection.steps.wantToLearn.description')}
                   </p>
                 </div>
 
                 <div className="space-y-6">
                   <div className="p-6 rounded-lg border border-border/50 space-y-3">
-                    <h3 className="text-xl font-semibold text-accent">Why Learn Touch Typing?</h3>
+                    <h3 className="text-xl font-semibold text-accent">{t('dataCollection.steps.wantToLearn.whyLearn')}</h3>
                     <ul className="space-y-2 text-base text-foreground/80">
-                      <li>• <span className="font-semibold">2-3x faster typing</span> - Increase from 30-40 WPM to 60-100+ WPM</li>
-                      <li>• <span className="font-semibold">Better accuracy</span> - Type without looking at the keyboard</li>
-                      <li>• <span className="font-semibold">Less fatigue</span> - Proper technique reduces strain</li>
-                      <li>• <span className="font-semibold">Professional skill</span> - Essential for many careers</li>
+                      <li>• <span className="font-semibold">{t('dataCollection.steps.wantToLearn.benefits.faster')}</span></li>
+                      <li>• <span className="font-semibold">{t('dataCollection.steps.wantToLearn.benefits.accuracy')}</span></li>
+                      <li>• <span className="font-semibold">{t('dataCollection.steps.wantToLearn.benefits.fatigue')}</span></li>
+                      <li>• <span className="font-semibold">{t('dataCollection.steps.wantToLearn.benefits.professional')}</span></li>
                     </ul>
                     <p className="text-sm text-muted-foreground italic pt-2">
-                      Our gamified learning system makes it fun and engaging, similar to Duolingo!
+                      {t('dataCollection.steps.wantToLearn.gamified')}
                     </p>
                   </div>
 
@@ -543,14 +546,14 @@ const DataCollection = () => {
                     <Label htmlFor="learn-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="yes" id="learn-yes" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">Yes, I want to learn touch typing</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.wantToLearn.yes')}</p>
                       </div>
                       </Label>
                     
                     <Label htmlFor="learn-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="no" id="learn-no" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">No, I'll continue with my current method</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.wantToLearn.no')}</p>
                     </div>
                     </Label>
                   </RadioGroup>
@@ -561,24 +564,23 @@ const DataCollection = () => {
             {step === "share" && (
               <div className="space-y-6">
                 <div className="space-y-2 text-center">
-                  <h2 className="text-3xl font-semibold text-accent">Share Your Data?</h2>
+                  <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.share.title')}</h2>
                   <p className="text-lg text-muted-foreground">
-                    Help improve keyboard layouts for everyone
+                    {t('dataCollection.steps.share.description')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <div className="p-6 rounded-lg border border-border/50 space-y-4">
-                    <h3 className="text-xl font-semibold text-accent">What Data We Collect:</h3>
+                    <h3 className="text-xl font-semibold text-accent">{t('dataCollection.steps.share.whatWeCollect')}</h3>
                     <ul className="space-y-2 text-base text-foreground/80">
-                      <li>• Reaction times for each key press</li>
-                      <li>• Time between consecutive keys in sequences</li>
-                      <li>• Typing accuracy metrics</li>
-                      <li>• Keyboard layout type</li>
+                      <li>• {t('dataCollection.steps.share.dataTypes.reactionTimes')}</li>
+                      <li>• {t('dataCollection.steps.share.dataTypes.sequences')}</li>
+                      <li>• {t('dataCollection.steps.share.dataTypes.accuracy')}</li>
+                      <li>• {t('dataCollection.steps.share.dataTypes.layout')}</li>
                     </ul>
                     <p className="text-sm text-muted-foreground italic pt-2">
-                      All data is anonymized and used solely for research purposes. 
-                      No personal information is stored.
+                      {t('dataCollection.steps.share.privacy')}
                     </p>
                   </div>
 
@@ -586,14 +588,14 @@ const DataCollection = () => {
                     <Label htmlFor="share-yes" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="yes" id="share-yes" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">Yes, share my data with the project</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.share.yes')}</p>
                       </div>
                       </Label>
                     
                     <Label htmlFor="share-no" className="flex items-center space-x-3 p-6 rounded-lg border-2 border-border hover:border-primary transition-wave cursor-pointer">
                       <RadioGroupItem value="no" id="share-no" className="w-5 h-5" />
                       <div className="flex-1">
-                        <p className="text-xl font-semibold text-foreground">No, keep data locally (I can export it later)</p>
+                        <p className="text-xl font-semibold text-foreground">{t('dataCollection.steps.share.no')}</p>
                       </div>
                       </Label>
                   </RadioGroup>
@@ -604,7 +606,7 @@ const DataCollection = () => {
             {step === "test" && (
               <div className="space-y-8">
                 <div className="space-y-3 text-center">
-                  <h2 className="text-3xl font-semibold text-accent">Typing Test</h2>
+                  <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.test.title')}</h2>
                 </div>
 
                 <div className="space-y-8">
@@ -620,7 +622,7 @@ const DataCollection = () => {
                           <div className="space-y-6">
                             <div className="text-6xl">↻</div>
                             <div className="text-lg text-muted-foreground">
-                              Press Space to play again
+                              {t('dataCollection.steps.test.spaceToPlayAgain')}
                             </div>
                           </div>
                         ) : (
@@ -637,30 +639,30 @@ const DataCollection = () => {
                     
                     {!testCompleted && (
                     <p className="text-base text-muted-foreground">
-                      Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono">Space</kbd> to start • 
-                      Press <kbd className="px-3 py-1.5 bg-card rounded border-2 border-border text-foreground font-mono ml-1">Esc</kbd> to stop
+                      {t('dataCollection.steps.test.spaceToStart')} • 
+                      {t('dataCollection.steps.test.escToStop')}
                     </p>
                     )}
                     
                     <div className="text-lg text-muted-foreground space-y-1">
-                      <p>Type each letter as quickly and accurately as possible</p>
-                      <p>This will take only 15-30 secs</p>
+                      <p>{t('dataCollection.steps.test.instructions')}</p>
+                      <p>{t('dataCollection.steps.test.duration')}</p>
                     </div>
                     
                     {showResultsButton && (
                       <div className={`transition-opacity duration-1000 ${showResultsButton ? 'opacity-100' : 'opacity-0'}`}>
                         <button 
-                          onClick={() => navigate('/results')}
+                          onClick={() => navigate(`/${lang}/results`)}
                           className="text-lg font-semibold text-primary hover:text-accent transition-colors"
                         >
-                          Results →
+                          {t('dataCollection.steps.test.results')}
                         </button>
                       </div>
                     )}
                   </div>
 
                   <div className="text-center text-base text-muted-foreground">
-                    <p>Focus on accuracy first, then speed will follow naturally</p>
+                    <p>{t('dataCollection.steps.test.focusOnAccuracy')}</p>
                   </div>
                 </div>
               </div>
@@ -675,7 +677,7 @@ const DataCollection = () => {
                 totalSteps={totalSteps}
               />
               <p className="text-sm text-muted-foreground">
-                Step {getCurrentStepNumber()} of {totalSteps}
+                {t('dataCollection.steps.test.step')} {getCurrentStepNumber()} {t('dataCollection.steps.test.of')} {totalSteps}
               </p>
               
               {/* Reset Choices button - extra small */}
@@ -684,7 +686,7 @@ const DataCollection = () => {
                   onClick={resetQuestionnaire}
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
                 >
-                  Reset Choices
+                  {t('dataCollection.steps.test.resetChoices')}
                 </button>
               )}
             </div>

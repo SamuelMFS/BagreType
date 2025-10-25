@@ -1,0 +1,689 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "dataCollection": "Data Collection",
+    "learnToType": "Learn to Type",
+    "practice": "Practice",
+    "generateLayout": "Generate Layout",
+    "profile": "Profile",
+    "viewResults": "View Results",
+    "signOut": "Sign Out",
+    "signIn": "Sign In"
+  },
+  "landing": {
+    "title": "BagreType",
+    "subtitle": "Discover Your Perfect Keyboard"
+  },
+  "intro": {
+    "title": "BagreType",
+    "subtitle": "Discover the most efficient keyboard layouts through machine learning and human data",
+    "startJourney": "Start Your Journey",
+    "learnTouchTyping": "Learn Touch Typing",
+    "howItWorks": "How It Works",
+    "howItWorksDescription": "Our four-step process transforms your typing experience through data-driven optimization",
+    "whyChoose": "Why Choose BagreType?",
+    "whyChooseDescription": "Whether you're a programmer, multilingual writer, or just curious about typing efficiency",
+    "readyToTransform": "Ready to Transform Your Typing?",
+    "readyToTransformDescription": "Join thousands of users who have already optimized their typing experience",
+    "getStartedNow": "Get Started Now",
+    "learnFirst": "Learn First",
+    "features": {
+      "dataCollection": {
+        "title": "Data Collection",
+        "description": "We measure your typing patterns and reaction times to understand your unique typing behavior."
+      },
+      "mlAnalysis": {
+        "title": "ML Analysis",
+        "description": "Our algorithm analyzes linguistic patterns across languages to optimize layout efficiency."
+      },
+      "customLayouts": {
+        "title": "Custom Layouts",
+        "description": "Generate universal or language-specific keyboards tailored to your specific needs."
+      },
+      "learnPractice": {
+        "title": "Learn & Practice",
+        "description": "Master new layouts through gamified lessons and interactive practice sessions."
+      }
+    },
+    "benefits": {
+      "fasterTyping": {
+        "title": "Faster Typing",
+        "description": "Increase your typing speed by up to 40% with optimized layouts"
+      },
+      "contributeToScience": {
+        "title": "Contribute to Science",
+        "description": "Help build better models for everyone with anonymized data"
+      }
+    }
+  },
+  "dataCollection": {
+    "title": "Data Collection",
+    "description": "Help us build the future of keyboard layouts",
+    "loading": "Loading your progress...",
+    "startTest": "Start Test",
+    "instructions": "Follow the instructions on screen to complete the typing assessment",
+    "steps": {
+      "layout": {
+        "title": "What type of keyboard do you use?",
+        "description": "This helps us understand the physical layout you're typing on",
+        "staggered": "Staggered",
+        "staggeredDescription": "Traditional keyboard with offset rows (most common)",
+        "ortholinear": "Ortholinear",
+        "ortholinearDescription": "Keys arranged in a perfect grid (mechanical keyboards)"
+      },
+      "touchType": {
+        "title": "Can you touch type?",
+        "description": "Touch typing means typing without looking at the keyboard",
+        "yes": "Yes, I can touch type",
+        "no": "No, I look at the keyboard"
+      },
+      "wantToLearn": {
+        "title": "Do you want to learn touch typing?",
+        "description": "We can help you master touch typing in just a few weeks",
+        "whyLearn": "Why Learn Touch Typing?",
+        "benefits": {
+          "faster": "2-3x faster typing - Increase from 30-40 WPM to 60-100+ WPM",
+          "accuracy": "Better accuracy - Type without looking at the keyboard",
+          "fatigue": "Less fatigue - Proper technique reduces strain",
+          "professional": "Professional skill - Essential for many careers"
+        },
+        "gamified": "Our gamified learning system makes it fun and engaging, similar to Duolingo!",
+        "yes": "Yes, I want to learn touch typing",
+        "no": "No, I'll continue with my current method"
+      },
+      "share": {
+        "title": "Share Your Data?",
+        "description": "Help improve keyboard layouts for everyone",
+        "whatWeCollect": "What Data We Collect:",
+        "dataTypes": {
+          "reactionTimes": "Reaction times for each key press",
+          "sequences": "Time between consecutive keys in sequences",
+          "accuracy": "Typing accuracy metrics",
+          "layout": "Keyboard layout type"
+        },
+        "privacy": "All data is anonymized and used solely for research purposes. No personal information is stored.",
+        "yes": "Yes, share my data with the project",
+        "no": "No, keep data locally (I can export it later)"
+      },
+      "test": {
+        "title": "Typing Test",
+        "instructions": "Type each letter as quickly and accurately as possible",
+        "duration": "This will take only 15-30 secs",
+        "spaceToStart": "Press Space to start",
+        "escToStop": "Press Esc to stop",
+        "spaceToPlayAgain": "Press Space to play again",
+        "focusOnAccuracy": "Focus on accuracy first, then speed will follow naturally",
+        "results": "Results →",
+        "step": "Step",
+        "of": "of",
+        "resetChoices": "Reset Choices"
+      }
+    }
+  },
+  "results": {
+    "title": "Your Results",
+    "description": "Performance analysis from your typing test",
+    "loading": "Loading your performance data...",
+    "noData": "No test data found",
+    "takeTest": "Take a Test",
+    "performanceLevel": "Performance Level",
+    "testDetails": "Test Details",
+    "accuracy": "Accuracy",
+    "avgReaction": "Avg Reaction",
+    "duration": "Duration:",
+    "lettersTyped": "Letters Typed:",
+    "keyboard": "Keyboard:",
+    "touchTyping": "Touch Typing:",
+    "touchTypingValues": {
+      "yes": "✅ Yes",
+      "no": "❌ No"
+    },
+    "takeAnotherTest": "Take Another Test",
+    "backToHome": "Back to Home",
+    "testHistory": "Test History",
+    "showing": "Showing",
+    "of": "of",
+    "tests": "tests",
+    "accuracyLabel": "accuracy",
+    "avgLabel": "avg",
+    "previous": "← Previous",
+    "next": "Next →",
+    "levels": {
+      "expert": "Expert",
+      "advanced": "Advanced",
+      "intermediate": "Intermediate",
+      "beginner": "Beginner"
+    },
+    "charts": {
+      "letterPerformance": {
+        "title": "All-Time Letter Performance",
+        "description": "Average, best, and worst reaction times across all tests",
+        "noData": "No letter performance data available",
+        "best": "Best",
+        "average": "Average",
+        "worst": "Worst",
+        "overallBest": "Overall Best",
+        "overallAverage": "Overall Average",
+        "overallWorst": "Overall Worst"
+      },
+      "horizontalChart": {
+        "title": "Letter Performance",
+        "description": "Average, best, and worst reaction times",
+        "best": "Best",
+        "average": "Average",
+        "worst": "Worst"
+      }
+    }
+  },
+  "learn": {
+    "title": "Learn Touch Typing",
+    "description": "Master the art of typing without looking at the keyboard",
+    "loading": "Loading your progress...",
+    "whyLearn": "Why Learn Touch Typing?",
+    "whyLearnDescription": "Touch typing is a skill that dramatically improves your typing speed and accuracy. With just 30 minutes of practice per day, you can increase your WPM from 30-40 to 60-100+.",
+    "benefits": {
+      "speedIncrease": "Typing speed increase",
+      "dailyPractice": "Daily practice needed",
+      "timeToProficient": "To become proficient",
+      "timeToProficientValue": "2-4wk"
+    },
+    "gamifiedNote": "Many people find the learning process enjoyable through gamified typing practice, similar to Monkeytype or TypeRacer.",
+    "getStarted": "Get Started",
+    "getStartedDescription": "First, let's see your current typing speed",
+    "baselineTest": "Baseline Test",
+    "baselineTestDescription": "Type a 30-word passage as quickly and accurately as you can",
+    "baselineTestExplanation": "Before we begin our learning journey, we'll test your current typing speed. This baseline will help track your progress as you learn.",
+    "startBaselineTest": "Start Baseline Test",
+    "afterTestNote": "After the test, you'll begin your personalized learning journey",
+    "readyToLearn": "Ready to Learn!",
+    "readyToLearnDescription": "You've completed your baseline test. Let's start your learning journey!",
+    "startLearning": "Start Learning",
+    "startLearningDescription": "Begin your personalized touch typing lessons",
+    "startLearningExplanation": "Your baseline test results have been saved. Now you can start learning touch typing with personalized lessons designed for your skill level.",
+    "startLessons": "Start Lessons",
+    "testResults": {
+      "title": "Baseline Test Results",
+      "description": "Here's how you did!",
+      "wpm": "Words Per Minute",
+      "accuracy": "Accuracy",
+      "greatJob": "Great job! Now let's begin your personalized learning journey.",
+      "continueToLessons": "Continue to Lessons"
+    },
+    "testScreen": {
+      "title": "Baseline Test",
+      "description": "Type the words as quickly and accurately as you can",
+      "startTyping": "Start typing to begin...",
+      "zenMode": "Type anything you want... Press Esc when done",
+      "restart": "Restart",
+      "signInPrompt": "Sign in to save your progress and track your improvement over time"
+    },
+    "startLearning": "Start Learning",
+    "continueLearning": "Continue Learning"
+  },
+  "postBaseline": {
+    "title": "Welcome to Your Journey!",
+    "subtitle": "Time to break those old habits and build something amazing",
+    "handGifPlaceholder": "Hand GIF Placeholder",
+    "handGifNote": "(You'll add the gif here)",
+    "baselineResults": {
+      "title": "Your Baseline Results",
+      "description": "This is your starting point - we'll track your improvement from here!",
+      "typingSpeed": "Typing Speed",
+      "wordsPerMinute": "Words per minute",
+      "accuracy": "Accuracy",
+      "characterAccuracy": "Character accuracy"
+    },
+    "touchTyping": {
+      "title": "What is Touch Typing?",
+      "description": "The art of typing without looking at your keyboard, using muscle memory.",
+      "bumpExplanation": "Have you ever noticed that F and J keys have a little bump? Those are the touchtyping landmarks to show you where your index fingers should be so you dont have to look down at the keyboard.",
+      "gamerJoke": "I see you there with that hand on WASD, you little gamer! 😏",
+      "choreography": "Don't worry, we've all been there. Your fingers have been doing the same dance for years, and now we're about to teach them a whole new choreography."
+    },
+    "expectations": {
+      "title": "Here's What to Expect",
+      "description": "Your typing journey will have ups and downs, but the destination is worth it",
+      "speedDrop": {
+        "title": "Speed Drop",
+        "description": "Your typing speed will drop at first - this is completely normal!"
+      },
+      "neuralRewiring": {
+        "title": "Neural Rewiring",
+        "description": "Your brain is rewiring neural pathways - it takes time and patience"
+      },
+      "skyrocketSpeed": {
+        "title": "Skyrocket Speed",
+        "description": "After dedicated practice, your speed will skyrocket beyond what you thought possible"
+      }
+    },
+    "encouragement": {
+      "piano": "Think of it like learning to play piano with your feet - awkward at first, but once you get it, you'll wonder how you ever lived without it!",
+      "expert": "Remember: Every expert was once a beginner",
+      "button": "Let's Dive In! 🌊"
+    }
+  },
+  "lessons": {
+    "title": "Your Typing Journey",
+    "subtitle": "Descend into the depths and master each key",
+    "learningLayout": "Learning {{layout}} Layout",
+    "progress": {
+      "completed": "Completed",
+      "chapters": "Chapters", 
+      "minutesToday": "Minutes Today"
+    },
+    "chapter": {
+      "title": "Chapter {{number}}",
+      "depth": "Depth: {{depth}}",
+      "titles": {
+        "1": "Index Fingers",
+        "2": "Middle Fingers", 
+        "3": "Ring Fingers",
+        "4": "Pinky Fingers",
+        "5": "Numbers & Symbols"
+      },
+      "descriptions": {
+        "1": "Master your index fingers",
+        "2": "Extend your middle fingers",
+        "3": "Master your ring fingers", 
+        "4": "Challenge your pinky fingers",
+        "5": "Master numbers and symbols"
+      }
+    },
+    "lesson": {
+      "test": "Test"
+    },
+    "skipDialog": {
+      "title": "Skip to Lesson?",
+      "message": "Are you sure you want to skip to this lesson? You can always come back to previous lessons later.",
+      "continueSequential": "No, Continue Sequential",
+      "skip": "Yes, Skip"
+    }
+  },
+  "lessonsJourney": {
+    "title": "Lessons Journey",
+    "description": "Progress through our structured learning path",
+    "currentLesson": "Current Lesson",
+    "completedLessons": "Completed Lessons",
+    "totalLessons": "Total Lessons"
+  },
+  "lesson": {
+    "title": "Lesson",
+    "instructions": "Instructions",
+    "practice": "Practice",
+    "complete": "Complete",
+    "nextLesson": "Next Lesson",
+    "previousLesson": "Previous Lesson",
+    "loading": {
+      "title": "Loading Lesson...",
+      "description": "Preparing your {{key}} key practice"
+    },
+    "complete": {
+      "title": "Lesson Complete! 🎉",
+      "description": "You've mastered the {{key}} key",
+      "performance": "Your Performance",
+      "averageWpm": "Average WPM: {{wpm}}",
+      "keepPracticing": "Keep practicing to improve your speed!",
+      "savingProgress": "Saving your progress...",
+      "backToRoadmap": "Back to Roadmap",
+      "continue": "Continue"
+    },
+    "rounds": {
+      "part1": "Part 1: {{key}} Only",
+      "part2": "Part 2: {{key}} + Chapter", 
+      "part3": "Part 3: {{key}} + All",
+      "testPart1": "Part 1: {{chapter}} Only",
+      "testPart2": "Part 2: {{chapter}} + Chapter",
+      "testPart3": "Part 3: {{chapter}} + All",
+      "progress": "Part {{current}} of 3 • 30 letters each",
+      "focus": "Focus on accuracy over speed"
+    },
+    "test": {
+      "title": "Test {{number}}"
+    },
+    "lessonTitle": "Lesson {{number}}: Key {{key}}",
+    "wpm": "WPM",
+    "accuracy": "Accuracy"
+  },
+  "compareProgress": {
+    "loading": {
+      "title": "Loading Your Progress..."
+    },
+    "congratulations": {
+      "title": "Congratulations! 🎉",
+      "subtitle": "You've unlocked a new superpower! Your fingers now dance across the keyboard with precision and speed."
+    },
+    "achievements": {
+      "lightningFastTitle": "Lightning Fast",
+      "lightningFastDescription": "Your typing speed has transformed from hunt-and-peck to lightning-fast precision!",
+      "pinpointAccuracyTitle": "Pinpoint Accuracy",
+      "pinpointAccuracyDescription": "Every keystroke hits its mark with surgical precision. No more typos slowing you down!",
+      "continuousGrowthTitle": "Continuous Growth",
+      "continuousGrowthDescription": "This is just the beginning! Your typing skills will keep improving with practice."
+    },
+    "progress": {
+      "title": "Your Amazing Progress",
+      "subtitle": "Let's see how far you've come!",
+      "before": "Before (Baseline)",
+      "after": "After (Final Test)",
+      "takeTest": "Take a comparison test to see your final results!",
+      "takeComparisonTest": "Take Comparison Test",
+      "comparisonResults": "Comparison Test Results"
+    },
+    "improvements": {
+      "amazing": "🚀 Amazing! You've improved by {{wpm}} WPM and {{accuracy}}% accuracy!",
+      "speed": "⚡ Great! You've improved by {{wpm}} WPM!",
+      "accuracy": "🎯 Excellent! You've improved by {{accuracy}}% accuracy!",
+      "keepPracticing": "💪 Keep practicing! Every keystroke makes you better!",
+      "wpmImprovement": "🚀 {{improvement}} WPM improvement",
+      "accuracyImprovement": "🎯 {{improvement}}% accuracy improvement"
+    },
+    "test": {
+      "title": "Final Comparison Test",
+      "subtitle": "Let's see how much you've improved!"
+    },
+    "actions": {
+      "backToRoadmap": "Back to Roadmap",
+      "takeComparisonTest": "Take Comparison Test"
+    }
+  },
+  "practice": {
+    "title": "Practice Mode",
+    "description": "Practice your typing skills with various exercises",
+    "startPractice": "Start Practice",
+    "selectExercise": "Select Exercise"
+  },
+  "generate": {
+    "title": "Generate Layout",
+    "description": "Create your personalized keyboard layout",
+    "generateLayout": "Generate Layout",
+    "downloadLayout": "Download Layout"
+  },
+  "auth": {
+    "title": "Authentication",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "comparisonResults": {
+    "loading": {
+      "title": "Loading Your Results...",
+      "debug": "Debug: isLoading={{isLoading}}, baselineResults={{baseline}}, comparisonResults={{comparison}}"
+    },
+    "error": {
+      "title": "Results Not Available",
+      "description": "We couldn't load your comparison results. Please try again.",
+      "retryButton": "Take Comparison Test Again"
+    },
+    "congratulations": {
+      "title": "Your Progress Results! 🎉",
+      "improvement": "🐟 Amazing! You've improved by {{wpm}} WPM and {{accuracy}}% accuracy!",
+      "subtitle": "See how much you've improved since day one!",
+      "noBaselineSubtitle": "Here are your comparison test results!"
+    },
+    "results": {
+      "baseline": {
+        "title": "Baseline Test",
+        "description": "Your starting point"
+      },
+      "comparison": {
+        "title": "Final Comparison Test",
+        "description": "Your current level"
+      },
+      "improvement": {
+        "title": "Your Amazing Improvement",
+        "speedImprovement": "Speed Improvement",
+        "accuracyImprovement": "Accuracy Improvement"
+      }
+    },
+    "motivation": {
+      "title": "🐟 The Sky's the Limit!",
+      "description": "Now you can practice as much as you want! Your typing journey has just begun, and with consistent practice, you'll continue to improve and reach new heights.",
+      "startPracticing": "Start Practicing"
+    },
+    "units": {
+      "wpm": "WPM",
+      "accuracy": "Accuracy"
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist",
+    "goHome": "Go Home"
+  },
+  "practice": {
+    "modes": {
+      "words": "words",
+      "time": "time",
+      "quote": "quote",
+      "zen": "zen",
+      "custom": "custom"
+    },
+    "placeholders": {
+      "savedTexts": "saved texts",
+      "newText": "new text",
+      "keyboard": "keyboard"
+    },
+    "titles": {
+      "hideKeyboard": "Hide keyboard image",
+      "showKeyboard": "Show keyboard image",
+      "deleteText": "Delete current text"
+    },
+    "noCustomText": {
+      "title": "No Custom Text Selected",
+      "description": "Select a saved text or create a new one to start practicing",
+      "createButton": "Create New Text"
+    }
+  },
+  "customTextModal": {
+    "title": "Add Custom Text",
+    "form": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter a title for your text...",
+      "textLabel": "Text Content",
+      "textPlaceholder": "Enter your custom text here... (minimum 10 characters)",
+      "charactersCount": "characters",
+      "minimumChars": "Minimum 10 characters"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "textRequired": "Text is required",
+      "textMinLength": "Text must be at least 10 characters long"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save Text"
+    }
+  },
+  "testResults": {
+    "title": "Test Complete!",
+    "subtitle": "Great job! Here are your results",
+    "metrics": {
+      "wordsPerMinute": "Words Per Minute",
+      "rawWpm": "Raw WPM",
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "seconds": "Seconds"
+    },
+    "actions": {
+      "tryAgain": "Try Again",
+      "continue": "Continue",
+      "escapeHint": "Or press Escape to start a new test"
+    }
+  },
+  "generate": {
+    "title": "Generate Custom Layout",
+    "subtitle": "Optimize your keyboard layout for your specific needs",
+    "tabs": {
+      "curated": "Curated Applications",
+      "custom": "Custom Data",
+      "manual": "Manual Entry"
+    },
+    "curated": {
+      "title": "Choose Your Application",
+      "programming": "Programming Languages",
+      "human": "Human Languages",
+      "languages": {
+        "programming": {
+          "C": "C",
+          "C#": "C#",
+          "C++": "C++",
+          "Java": "Java",
+          "JavaScript": "JavaScript",
+          "TypeScript": "TypeScript",
+          "Python": "Python",
+          "Ruby": "Ruby",
+          "Go": "Go",
+          "Rust": "Rust",
+          "PHP": "PHP",
+          "Swift": "Swift"
+        },
+        "human": {
+          "English": "English",
+          "Portuguese": "Portuguese",
+          "Spanish": "Spanish",
+          "French": "French",
+          "Italian": "Italian",
+          "German": "German",
+          "Dutch": "Dutch"
+        }
+      }
+    },
+    "manual": {
+      "title": "Edit Layout String (45 characters)",
+      "placeholder": "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./",
+      "length": "Length: {{current}}/45",
+      "mustBe45": " (Must be exactly 45 characters)",
+      "currentlyActive": "Currently Active",
+      "setQwerty": "Set to QWERTY",
+      "clear": "Clear"
+    },
+    "custom": {
+      "pasteText": "Paste Your Text",
+      "pastePlaceholder": "Paste text that represents what you'll be typing...",
+      "uploadFile": "Upload a File",
+      "chooseFile": "Choose File",
+      "supportedFormats": "Supported: TXT, PDF, YAML, JSON, MD",
+      "or": "OR"
+    },
+    "results": {
+      "manualTitle": "Manual Layout Entered",
+      "generatedTitle": "Your Optimized Layout",
+      "manualSubtitle": "Custom layout string configured",
+      "generatedSubtitle": "Generated based on {{source}}",
+      "manualLayout": "Manual Layout",
+      "generatedLayout": "Generated Layout",
+      "efficiencyGain": "Efficiency Gain",
+      "homeRowUsage": "Home Row Usage",
+      "lessFingerTravel": "Less Finger Travel"
+    },
+    "actions": {
+      "learnLayout": "Learn This Layout",
+      "generateLayout": "Generate Layout",
+      "generating": "Generating...",
+      "generateAnother": "Generate Another",
+      "learnHint": "Click \"Learn This Layout\" to activate this layout and start practicing"
+    },
+    "toasts": {
+      "fileUploaded": "File uploaded",
+      "fileReady": "{{filename}} is ready for processing",
+      "layoutGenerated": "Layout Generated!",
+      "layoutReady": "Your optimized keyboard layout is ready",
+      "layoutSwitched": "Layout Switched",
+      "progressReset": "Your progress has been reset for the new layout",
+      "error": "Error",
+      "switchFailed": "Failed to switch layouts",
+      "invalidLayout": "Invalid Layout",
+      "mustBe45Chars": "Layout string must be exactly 45 characters"
+    }
+  },
+  "auth": {
+    "title": "BagreType",
+    "description": "Sign in to save your typing progress across devices",
+    "tabs": {
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "form": {
+      "email": "Email",
+      "password": "Password",
+      "emailPlaceholder": "your@email.com",
+      "passwordPlaceholder": "••••••••"
+    },
+    "buttons": {
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "signingIn": "Signing in...",
+      "creatingAccount": "Creating account...",
+      "continueWithoutAccount": "Continue without account"
+    },
+    "validation": {
+      "invalidEmail": "Invalid email address",
+      "passwordMinLength": "Password must be at least 6 characters"
+    },
+    "toasts": {
+      "validationError": "Validation Error",
+      "signUpFailed": "Sign Up Failed",
+      "signInFailed": "Sign In Failed",
+      "success": "Success!",
+      "checkEmail": "Check your email to confirm your account.",
+      "welcomeBack": "Welcome back!",
+      "signedInSuccessfully": "You have successfully signed in.",
+      "resetPasswordSent": "Password reset email sent!",
+      "resetPasswordSuccess": "Check your email to reset your password.",
+      "resetPasswordFailed": "Failed to send password reset email"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email and we'll send you a link to reset your password",
+      "emailLabel": "Email",
+      "emailPlaceholder": "your@email.com",
+      "sendResetLink": "Send Reset Link",
+      "backToSignIn": "Back to Sign In",
+      "sending": "Sending..."
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Track your progress and typing statistics",
+    "loading": "Loading profile...",
+    "anonymous": "Anonymous User",
+    "memberSince": "Member since",
+    "lessonsCompleted": "Lessons Completed",
+    "testsCompleted": "Tests Completed",
+    "averageWPM": "Average WPM",
+    "bestWPM": "Best WPM",
+    "timeSpent": "Time Spent",
+    "currentStreak": "Current Streak",
+    "baselineWPM": "Baseline WPM",
+    "baselineAccuracy": "Baseline Accuracy",
+    "continueLearning": "Continue Learning",
+    "practice": "Practice",
+    "signOut": "Sign Out"
+  },
+  "language": {
+    "select": "Select Language",
+    "english": "English",
+    "portuguese": "Português (Brasil)"
+  }
+}

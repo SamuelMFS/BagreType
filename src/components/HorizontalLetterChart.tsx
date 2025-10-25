@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocalization } from "@/hooks/useLocalization";
 
 interface TypingData {
   letter: string;
@@ -13,6 +14,7 @@ interface HorizontalLetterChartProps {
 
 const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
   const [hoveredMetric, setHoveredMetric] = useState<'best' | 'average' | 'worst' | null>(null);
+  const { t } = useLocalization();
 
   const calculateLetterStats = () => {
     const letterMap = new Map<string, number[]>();
@@ -72,8 +74,8 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
     <div className="space-y-4">
       {/* Chart Title */}
       <div className="text-center">
-        <h4 className="text-lg font-semibold text-primary">Letter Performance</h4>
-        <p className="text-sm text-muted-foreground">Average, best, and worst reaction times</p>
+        <h4 className="text-lg font-semibold text-primary">{t('results.charts.horizontalChart.title')}</h4>
+        <p className="text-sm text-muted-foreground">{t('results.charts.horizontalChart.description')}</p>
       </div>
 
       {/* Interactive Legend */}
@@ -85,7 +87,7 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
           onMouseLeave={() => setHoveredMetric(null)}
         >
           <div className="w-3 h-3 bg-green-400 rounded"></div>
-          <span className="text-muted-foreground">Best</span>
+          <span className="text-muted-foreground">{t('results.charts.horizontalChart.best')}</span>
         </div>
         <div 
           className="flex items-center gap-2 cursor-pointer transition-opacity"
@@ -94,7 +96,7 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
           onMouseLeave={() => setHoveredMetric(null)}
         >
           <div className="w-3 h-3 bg-blue-400 rounded"></div>
-          <span className="text-muted-foreground">Average</span>
+          <span className="text-muted-foreground">{t('results.charts.horizontalChart.average')}</span>
         </div>
         <div 
           className="flex items-center gap-2 cursor-pointer transition-opacity"
@@ -103,7 +105,7 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
           onMouseLeave={() => setHoveredMetric(null)}
         >
           <div className="w-3 h-3 bg-red-400 rounded"></div>
-          <span className="text-muted-foreground">Worst</span>
+          <span className="text-muted-foreground">{t('results.charts.horizontalChart.worst')}</span>
         </div>
       </div>
 
@@ -244,19 +246,19 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
           <div className="text-lg font-semibold text-green-400">
             {Math.min(...letterStats.map(s => s.best).filter(b => b > 0))}ms
           </div>
-          <div className="text-sm text-muted-foreground">Best</div>
+          <div className="text-sm text-muted-foreground">{t('results.charts.horizontalChart.best')}</div>
         </div>
         <div className="text-center">
           <div className="text-lg font-semibold text-blue-400">
             {Math.round(letterStats.filter(s => s.count > 0).reduce((sum, s) => sum + s.average, 0) / letterStats.filter(s => s.count > 0).length)}ms
           </div>
-          <div className="text-sm text-muted-foreground">Average</div>
+          <div className="text-sm text-muted-foreground">{t('results.charts.horizontalChart.average')}</div>
         </div>
         <div className="text-center">
           <div className="text-lg font-semibold text-red-400">
             {Math.max(...letterStats.map(s => s.worst))}ms
           </div>
-          <div className="text-sm text-muted-foreground">Worst</div>
+          <div className="text-sm text-muted-foreground">{t('results.charts.horizontalChart.worst')}</div>
         </div>
       </div>
     </div>

@@ -5,10 +5,11 @@ export interface LessonConfig {
   lessonLetter: string;
   chapterLetters: string[];
   allLearnedLetters: string[];
+  language?: string;
 }
 
 // Word bank organized by letters - real English words
-const WORD_BANK: Record<string, string[]> = {
+const ENGLISH_WORD_BANK: Record<string, string[]> = {
   // Chapter 1: Index Fingers (f, j, r, u, n, v, t, y, g, h, b, m)
   'f': ['fun', 'fast', 'find', 'first', 'friend', 'family', 'fire', 'food', 'face', 'fight', 'feel', 'free', 'full', 'fine', 'form'],
   'j': ['just', 'jump', 'join', 'job', 'joy', 'judge', 'jungle', 'joke', 'jacket', 'journey'],
@@ -56,17 +57,73 @@ const WORD_BANK: Record<string, string[]> = {
   '0': ['zero', 'hero', 'nero', 'fero', 'mero', 'sero', 'vero', 'cero', 'dero', 'tero']
 };
 
+// Word bank organized by letters - real Portuguese words
+const PORTUGUESE_WORD_BANK: Record<string, string[]> = {
+  // Chapter 1: Index Fingers (f, j, r, u, n, v, t, y, g, h, b, m)
+  'f': ['falar', 'fazer', 'festa', 'fogo', 'frio', 'fundo', 'fácil', 'famoso', 'favor', 'feliz', 'firme', 'forte', 'futuro', 'falar', 'fazer'],
+  'j': ['jogo', 'junto', 'jovem', 'jantar', 'jardim', 'jornada', 'jornal', 'julgar', 'junho', 'julho'],
+  'r': ['rua', 'rio', 'rosa', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato', 'rato'],
+  'u': ['um', 'uma', 'uns', 'umas', 'universo', 'unidade', 'urgente', 'útil', 'último', 'único'],
+  'n': ['não', 'nada', 'nunca', 'novo', 'nome', 'noite', 'norte', 'nossa', 'nosso', 'número', 'nascer', 'natureza', 'necessário', 'negócio', 'ninguém'],
+  'v': ['ver', 'vez', 'vida', 'viver', 'voz', 'vila', 'valor', 'vários', 'vídeo', 'voto', 'vital'],
+  't': ['ter', 'tão', 'tudo', 'tempo', 'trabalho', 'tipo', 'tanto', 'tarde', 'tarde', 'tarde', 'tarde', 'tarde', 'tarde', 'tarde', 'tarde'],
+  'y': ['yoga', 'yogurt', 'yakissoba', 'yakissoba', 'yakissoba', 'yakissoba', 'yakissoba', 'yakissoba', 'yakissoba', 'yakissoba'],
+  'g': ['gato', 'gente', 'grande', 'graça', 'grupo', 'golpe', 'garra', 'garra', 'garra', 'garra', 'garra', 'garra', 'garra', 'garra', 'garra'],
+  'h': ['hoje', 'homem', 'hora', 'história', 'hospital', 'hotel', 'hora', 'hora', 'hora', 'hora', 'hora', 'hora', 'hora', 'hora', 'hora'],
+  'b': ['bem', 'boa', 'bom', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem', 'bem'],
+  'm': ['meu', 'minha', 'muito', 'mais', 'maior', 'menor', 'mundo', 'mãe', 'mão', 'mês', 'mês', 'mês', 'mês', 'mês', 'mês'],
+  
+  // Chapter 2: Middle Fingers (d, k, e, i, c, ,)
+  'd': ['dia', 'dar', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus', 'deus'],
+  'k': ['karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê', 'karaokê'],
+  'e': ['ele', 'ela', 'eles', 'elas', 'está', 'estão', 'estou', 'estamos', 'estava', 'estavam', 'estava', 'estavam', 'estava', 'estavam', 'estava'],
+  'i': ['isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso', 'isso'],
+  'c': ['casa', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada', 'cada'],
+  
+  // Chapter 3: Ring Fingers (s, l, w, o, x, .)
+  's': ['ser', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são', 'são'],
+  'l': ['lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá', 'lá'],
+  'w': ['wifi', 'wifi', 'wifi', 'wifi', 'wifi', 'wifi', 'wifi', 'wifi', 'wifi', 'wifi'],
+  'o': ['o', 'os', 'o', 'os', 'o', 'os', 'o', 'os', 'o', 'os', 'o', 'os', 'o', 'os', 'o'],
+  'x': ['xerox', 'xerox', 'xerox', 'xerox', 'xerox', 'xerox', 'xerox', 'xerox', 'xerox', 'xerox'],
+  
+  // Chapter 4: Pinky Fingers (a, ;, q, p, z, /)
+  'a': ['a', 'as', 'a', 'as', 'a', 'as', 'a', 'as', 'a', 'as', 'a', 'as', 'a', 'as', 'a'],
+  'q': ['que', 'que', 'que', 'que', 'que', 'que', 'que', 'que', 'que', 'que'],
+  'p': ['para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para', 'para'],
+  'z': ['zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero'],
+  
+  // Chapter 5: Numbers & Symbols
+  '1': ['um', 'um', 'um', 'um', 'um', 'um', 'um', 'um', 'um', 'um'],
+  '2': ['dois', 'dois', 'dois', 'dois', 'dois', 'dois', 'dois', 'dois', 'dois', 'dois'],
+  '3': ['três', 'três', 'três', 'três', 'três', 'três', 'três', 'três', 'três', 'três'],
+  '4': ['quatro', 'quatro', 'quatro', 'quatro', 'quatro', 'quatro', 'quatro', 'quatro', 'quatro', 'quatro'],
+  '5': ['cinco', 'cinco', 'cinco', 'cinco', 'cinco', 'cinco', 'cinco', 'cinco', 'cinco', 'cinco'],
+  '6': ['seis', 'seis', 'seis', 'seis', 'seis', 'seis', 'seis', 'seis', 'seis', 'seis'],
+  '7': ['sete', 'sete', 'sete', 'sete', 'sete', 'sete', 'sete', 'sete', 'sete', 'sete'],
+  '8': ['oito', 'oito', 'oito', 'oito', 'oito', 'oito', 'oito', 'oito', 'oito', 'oito'],
+  '9': ['nove', 'nove', 'nove', 'nove', 'nove', 'nove', 'nove', 'nove', 'nove', 'nove'],
+  '0': ['zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero', 'zero']
+};
+
 export class LessonGenerator {
   private lessonLetter: string;
   private chapterLetters: string[];
   private allLearnedLetters: string[];
   private isTest: boolean;
+  private language: string;
 
   constructor(config: LessonConfig, isTest: boolean = false) {
     this.lessonLetter = config.lessonLetter.toLowerCase();
     this.chapterLetters = config.chapterLetters.map(l => l.toLowerCase());
     this.allLearnedLetters = config.allLearnedLetters.map(l => l.toLowerCase());
     this.isTest = isTest;
+    this.language = config.language || 'en';
+  }
+
+  // Get the correct word bank based on language
+  private getWordBank(): Record<string, string[]> {
+    return this.language === 'pt-BR' ? PORTUGUESE_WORD_BANK : ENGLISH_WORD_BANK;
   }
 
   // Generate text for part 1: only lesson letter and spaces
@@ -196,12 +253,21 @@ export class LessonGenerator {
 
   private generateTestPart2(): string {
     // Part 2: 15 random common words
-    const commonWordBank = [
+    const englishCommonWords = [
       'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'it',
       'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
       'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
       'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their'
     ];
+    
+    const portugueseCommonWords = [
+      'o', 'a', 'de', 'que', 'e', 'do', 'da', 'em', 'um', 'para',
+      'é', 'com', 'não', 'uma', 'os', 'no', 'se', 'na', 'por', 'mais',
+      'as', 'dos', 'como', 'mas', 'foi', 'ao', 'ele', 'das', 'tem', 'à',
+      'seu', 'sua', 'ou', 'ser', 'quando', 'muito', 'há', 'nos', 'já', 'está'
+    ];
+    
+    const commonWordBank = this.language === 'pt-BR' ? portugueseCommonWords : englishCommonWords;
     
     const words: string[] = [];
     let wordCount = 0;
@@ -219,28 +285,31 @@ export class LessonGenerator {
   }
 
   private async generateTestPart3(): Promise<string> {
-    // Part 3: A quote from public/quotes.txt
+    // Part 3: A quote from quotes file based on language
+    const quotesFile = this.language === 'pt-BR' ? '/quotes-pt-BR.txt' : '/quotes.txt';
     try {
-      const response = await fetch('/quotes.txt');
+      const response = await fetch(quotesFile);
       const text = await response.text();
       
       // Parse quotes (lines that don't start with #)
       const quotes = text
         .split('\n')
         .filter(line => line.trim() && !line.startsWith('#'))
-        .filter(line => line.match(/^".+"$/)); // Only lines that are quoted
+        .map(line => line.trim());
       
       if (quotes.length > 0) {
-        // Pick a random quote and remove the quotes
+        // Pick a random quote
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        return randomQuote.replace(/^"/, '').replace(/"$/, ''); // Remove surrounding quotes
+        return randomQuote;
       }
     } catch (error) {
       console.error('Error loading quotes:', error);
     }
     
     // Fallback quote if file can't be loaded
-    return "The quick brown fox jumps over the lazy dog.";
+    return this.language === 'pt-BR' 
+      ? "A raposa marrom rápida pula sobre o cão preguiçoso."
+      : "The quick brown fox jumps over the lazy dog.";
   }
 
   private async generateTestWords(partNumber: number): Promise<string> {

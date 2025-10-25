@@ -14,13 +14,15 @@ import { ArrowLeft, BarChart3 } from "lucide-react";
 import { LessonGenerator, getLessonConfig } from "@/lib/lessonGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocalization } from "@/hooks/useLocalization";
 
 type PracticeRound = "lesson" | "chapter" | "all" | "complete";
 
 const Lesson = () => {
   const navigate = useNavigate();
-  const { lessonId, chapterId } = useParams();
+  const { lessonId, chapterId, lang } = useParams();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [currentRound, setCurrentRound] = useState<PracticeRound>("lesson");
   const typingTestRef = useRef<{ reset: () => void }>(null);
   
@@ -52,7 +54,8 @@ const Lesson = () => {
 
   // Initialize lesson generator and session ID
   useEffect(() => {
-    const generator = new LessonGenerator(lessonConfig, isTest);
+    const configWithLanguage = { ...lessonConfig, language: lang };
+    const generator = new LessonGenerator(configWithLanguage, isTest);
     setLessonGenerator(generator);
     
     // Generate session ID for anonymous users
@@ -67,14 +70,7 @@ const Lesson = () => {
   }, [lessonId, chapterId, user]);
 
   function getChapterName(chapterId: string): string {
-    const chapterNames: Record<string, string> = {
-      '1': 'Index Fingers',
-      '2': 'Middle Fingers', 
-      '3': 'Ring Fingers',
-      '4': 'Pinky Fingers',
-      '5': 'Numbers & Symbols'
-    };
-    return chapterNames[chapterId] || 'Unknown Chapter';
+    return t(`lessons.chapter.titles.${chapterId}`);
   }
 
   function getLessonNumber(chapterId: string, lessonId: string): number {
@@ -242,21 +238,21 @@ const Lesson = () => {
     if (isTest) {
       // Extract test number (e.g., "test1" -> "1")
       const testNumber = lessonId?.match(/\d+/)?.[0] || '';
-      return `Test ${testNumber}`;
+      return t('lesson.test.title', { number: testNumber });
     }
     
     const lessonNumber = getLessonNumber(chapterId || "1", lessonId || "f");
-    const lessonTitle = `Lesson ${lessonNumber}: Key ${lessonData.key}`;
+    const lessonTitle = t('lesson.lessonTitle', { number: lessonNumber, key: lessonData.key });
     
     switch (currentRound) {
       case "lesson":
-        return `${lessonTitle}`;
+        return lessonTitle;
       case "chapter":
-        return `${lessonTitle}`;
+        return lessonTitle;
       case "all":
-        return `${lessonTitle}`;
+        return lessonTitle;
       case "complete":
-        return "Lesson Complete!";
+        return t('lesson.complete.title');
     }
   };
 
@@ -297,17 +293,17 @@ const Lesson = () => {
     if (isTest) {
       // For tests, use chapter name in the round name
       roundName = currentRound === "lesson" 
-        ? `Part 1: ${lessonData.chapterName} Only` 
+        ? t('lesson.rounds.testPart1', { chapter: lessonData.chapterName })
         : currentRound === "chapter" 
-        ? `Part 2: ${lessonData.chapterName} + Chapter` 
-        : `Part 3: ${lessonData.chapterName} + All`;
+        ? t('lesson.rounds.testPart2', { chapter: lessonData.chapterName })
+        : t('lesson.rounds.testPart3', { chapter: lessonData.chapterName });
     } else {
       // For regular lessons, use the key
       roundName = currentRound === "lesson" 
-        ? `Part 1: ${lessonData.key} Only` 
+        ? t('lesson.rounds.part1', { key: lessonData.key })
         : currentRound === "chapter" 
-        ? `Part 2: ${lessonData.key} + Chapter` 
-        : `Part 3: ${lessonData.key} + All`;
+        ? t('lesson.rounds.part2', { key: lessonData.key })
+        : t('lesson.rounds.part3', { key: lessonData.key });
     }
 
     const newResults = [...results, { round: roundName, wpm, accuracy }];
@@ -344,10 +340,10 @@ const Lesson = () => {
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold text-primary">
-                Loading Lesson...
+                {t('lesson.loading.title')}
               </h1>
               <p className="text-lg text-muted-foreground">
-                Preparing your {lessonData.key} key practice
+                {t('lesson.loading.description', { key: lessonData.key })}
               </p>
             </div>
           </div>
@@ -369,16 +365,16 @@ const Lesson = () => {
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-5xl font-bold text-primary animate-glow">
-                Lesson Complete! 🎉
+                {t('lesson.complete.title')}
               </h1>
               <p className="text-xl text-muted-foreground">
-                You've mastered the {lessonData.key} key
+                {t('lesson.complete.description', { key: lessonData.key })}
               </p>
             </div>
 
             <Card className="p-8 space-y-6 bg-card/50 backdrop-blur">
               <h2 className="text-2xl font-semibold text-center text-accent">
-                Your Performance
+                {t('lesson.complete.performance')}
               </h2>
 
               <div className="space-y-4">
@@ -392,10 +388,10 @@ const Lesson = () => {
                     </span>
                     <div className="flex gap-6 text-sm">
                       <span className="text-primary font-semibold">
-                        {result.wpm} WPM
+                        {result.wpm} {t('lesson.wpm')}
                       </span>
                       <span className="text-accent font-semibold">
-                        {result.accuracy}% Accuracy
+                        {result.accuracy}% {t('lesson.accuracy')}
                       </span>
                     </div>
                   </div>
@@ -404,14 +400,14 @@ const Lesson = () => {
 
               <div className="text-center pt-4">
                 <p className="text-lg font-semibold text-foreground mb-2">
-                  Average WPM: {results.length > 0 ? Math.round(results.reduce((sum, r) => sum + r.wpm, 0) / results.length) : 0}
+                  {t('lesson.complete.averageWpm', { wpm: results.length > 0 ? Math.round(results.reduce((sum, r) => sum + r.wpm, 0) / results.length) : 0 })}
                 </p>
                 <p className="text-muted-foreground">
-                  Keep practicing to improve your speed!
+                  {t('lesson.complete.keepPracticing')}
                 </p>
                 {isSaving && (
                   <p className="text-sm text-primary mt-2">
-                    Saving your progress...
+                    {t('lesson.complete.savingProgress')}
                   </p>
                 )}
               </div>
@@ -423,11 +419,11 @@ const Lesson = () => {
                 <Button
                   size="lg"
                   variant="ocean"
-                  onClick={() => navigate("/lessons")}
+                  onClick={() => navigate(`/${lang}/lessons`)}
                   className="gap-2"
                 >
                   <ArrowLeft size={20} />
-                  Back to Roadmap
+                  {t('lesson.complete.backToRoadmap')}
                 </Button>
                 
                 {/* Show Compare Progress button only for final test (test5) */}
@@ -435,11 +431,11 @@ const Lesson = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => navigate("/compare-progress")}
+                    onClick={() => navigate(`/${lang}/compare-progress`)}
                     className="gap-2"
                   >
                     <BarChart3 size={20} />
-                     Continue
+                    {t('lesson.complete.continue')}
                   </Button>
                 )}
               </div>
@@ -465,7 +461,7 @@ const Lesson = () => {
             <div className="flex items-center justify-center gap-4">
               <Button
                 variant="ghost"
-                onClick={() => navigate("/lessons")}
+                onClick={() => navigate(`/${lang}/lessons`)}
                 className="text-muted-foreground hover:text-foreground"
                 size="sm"
               >
@@ -481,7 +477,7 @@ const Lesson = () => {
                 totalSteps={3}
               />
               <p className="text-sm text-muted-foreground">
-                Part {results.length + 1} of 3 • 30 letters each
+                {t('lesson.rounds.progress', { current: results.length + 1 })}
               </p>
             </div>
           </div>
@@ -490,7 +486,7 @@ const Lesson = () => {
           <div className="space-y-4 flex-1 flex flex-col">
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
-                Focus on accuracy over speed
+                {t('lesson.rounds.focus')}
               </p>
             </div>
             

@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { useLocalization } from "@/hooks/useLocalization";
 
 interface LetterStats {
   letter: string;
@@ -20,6 +21,7 @@ interface LetterPerformanceChartProps {
 
 const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => {
   const [hoveredMetric, setHoveredMetric] = useState<'best' | 'average' | 'worst' | null>(null);
+  const { t } = useLocalization();
 
   // Calculate statistics for each letter
   const calculateLetterStats = (): LetterStats[] => {
@@ -92,7 +94,7 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
     return (
       <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
         <div className="text-center text-muted-foreground">
-          No letter performance data available
+          {t('results.charts.letterPerformance.noData')}
         </div>
       </Card>
     );
@@ -102,9 +104,9 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
     <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50">
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="text-2xl font-semibold text-accent mb-2">All-Time Letter Performance</h3>
+          <h3 className="text-2xl font-semibold text-accent mb-2">{t('results.charts.letterPerformance.title')}</h3>
           <p className="text-muted-foreground">
-            Average, best, and worst reaction times across all tests
+            {t('results.charts.letterPerformance.description')}
           </p>
         </div>
 
@@ -117,7 +119,7 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
             onMouseLeave={() => setHoveredMetric(null)}
           >
             <div className="w-3 h-3 bg-green-400 rounded"></div>
-            <span className="text-muted-foreground">Best</span>
+            <span className="text-muted-foreground">{t('results.charts.letterPerformance.best')}</span>
           </div>
           <div 
             className="flex items-center gap-2 cursor-pointer transition-opacity"
@@ -126,7 +128,7 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
             onMouseLeave={() => setHoveredMetric(null)}
           >
             <div className="w-3 h-3 bg-blue-400 rounded"></div>
-            <span className="text-muted-foreground">Average</span>
+            <span className="text-muted-foreground">{t('results.charts.letterPerformance.average')}</span>
           </div>
           <div 
             className="flex items-center gap-2 cursor-pointer transition-opacity"
@@ -135,7 +137,7 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
             onMouseLeave={() => setHoveredMetric(null)}
           >
             <div className="w-3 h-3 bg-red-400 rounded"></div>
-            <span className="text-muted-foreground">Worst</span>
+            <span className="text-muted-foreground">{t('results.charts.letterPerformance.worst')}</span>
           </div>
         </div>
 
@@ -219,19 +221,19 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
             <div className="text-lg font-semibold text-green-400">
               {Math.min(...letterStats.map(s => s.best))}ms
             </div>
-            <div className="text-sm text-muted-foreground">Overall Best</div>
+            <div className="text-sm text-muted-foreground">{t('results.charts.letterPerformance.overallBest')}</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-blue-400">
               {Math.round(letterStats.reduce((sum, s) => sum + s.average, 0) / letterStats.length)}ms
             </div>
-            <div className="text-sm text-muted-foreground">Overall Average</div>
+            <div className="text-sm text-muted-foreground">{t('results.charts.letterPerformance.overallAverage')}</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-semibold text-red-400">
               {Math.max(...letterStats.map(s => s.worst))}ms
             </div>
-            <div className="text-sm text-muted-foreground">Overall Worst</div>
+            <div className="text-sm text-muted-foreground">{t('results.charts.letterPerformance.overallWorst')}</div>
           </div>
         </div>
       </div>

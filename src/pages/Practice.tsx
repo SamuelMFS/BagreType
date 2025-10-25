@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -12,10 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Settings, X, Plus, Keyboard } from "lucide-react";
+import { useLocalization } from "@/hooks/useLocalization";
 
 type Mode = "words" | "time" | "quote" | "zen" | "custom";
 
 const Practice = () => {
+  const { lang } = useParams();
+  const { t } = useLocalization();
   const [mode, setMode] = useState<Mode>("words");
   const [wordCount, setWordCount] = useState(25);
   const [timeLimit, setTimeLimit] = useState(30);
@@ -37,11 +41,12 @@ const Practice = () => {
     }
   }, []);
 
-  // Load quotes from public/quotes.txt
+  // Load quotes from quotes file based on language
   useEffect(() => {
     const loadQuotes = async () => {
       try {
-        const response = await fetch('/quotes.txt');
+        const quotesFile = lang === 'pt-BR' ? '/quotes-pt-BR.txt' : '/quotes.txt';
+        const response = await fetch(quotesFile);
         const text = await response.text();
         const quoteLines = text
           .split('\n')
@@ -69,7 +74,10 @@ const Practice = () => {
         }
       } catch (error) {
         console.error('Error loading quotes:', error);
-        setSelectedQuote("The quick brown fox jumps over the lazy dog.");
+        const fallbackQuote = lang === 'pt-BR' 
+          ? "A raposa marrom rápida pula sobre o cão preguiçoso."
+          : "The quick brown fox jumps over the lazy dog.";
+        setSelectedQuote(fallbackQuote);
       }
     };
 
@@ -133,11 +141,11 @@ const Practice = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border z-50">
-                <SelectItem value="words">words</SelectItem>
-                <SelectItem value="time">time</SelectItem>
-                <SelectItem value="quote">quote</SelectItem>
-                <SelectItem value="zen">zen</SelectItem>
-                <SelectItem value="custom">custom</SelectItem>
+                <SelectItem value="words">{t('practice.modes.words')}</SelectItem>
+                <SelectItem value="time">{t('practice.modes.time')}</SelectItem>
+                <SelectItem value="quote">{t('practice.modes.quote')}</SelectItem>
+                <SelectItem value="zen">{t('practice.modes.zen')}</SelectItem>
+                <SelectItem value="custom">{t('practice.modes.custom')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -218,7 +226,7 @@ const Practice = () => {
                       }
                     }}>
                       <SelectTrigger className="w-48 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
-                        <SelectValue placeholder={selectedCustomTextTitle || "saved texts"} />
+                        <SelectValue placeholder={selectedCustomTextTitle || t('practice.placeholders.savedTexts')} />
                       </SelectTrigger>
                       <SelectContent className="bg-background border-border z-50">
                         {savedTexts.map((item, index) => (
@@ -240,7 +248,7 @@ const Practice = () => {
                           }
                         }}
                         className="text-muted-foreground hover:text-primary p-1 transition-colors"
-                        title="Delete current text"
+                        title={t('practice.titles.deleteText')}
                       >
                         <X size={14} />
                       </button>
@@ -252,7 +260,7 @@ const Practice = () => {
                   onClick={() => setIsModalOpen(true)}
                 >
                   <Plus size={14} />
-                  new text
+                  {t('practice.placeholders.newText')}
                 </button>
               </div>
             )}
@@ -265,10 +273,10 @@ const Practice = () => {
                   : "text-foreground/50 hover:text-foreground"
               }`}
               onClick={() => setShowKeyboardImage(!showKeyboardImage)}
-              title={showKeyboardImage ? "Hide keyboard image" : "Show keyboard image"}
+              title={showKeyboardImage ? t('practice.titles.hideKeyboard') : t('practice.titles.showKeyboard')}
             >
               <Keyboard size={14} />
-              keyboard
+              {t('practice.placeholders.keyboard')}
             </button>
           </div>
 
@@ -280,9 +288,9 @@ const Practice = () => {
                   <Plus className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-foreground">No Custom Text Selected</h3>
+                  <h3 className="text-xl font-semibold text-foreground">{t('practice.noCustomText.title')}</h3>
                   <p className="text-muted-foreground">
-                    Select a saved text or create a new one to start practicing
+                    {t('practice.noCustomText.description')}
                   </p>
                 </div>
                 <Button
@@ -291,7 +299,7 @@ const Practice = () => {
                   className="mt-4"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Create New Text
+                  {t('practice.noCustomText.createButton')}
                 </Button>
               </div>
             </div>

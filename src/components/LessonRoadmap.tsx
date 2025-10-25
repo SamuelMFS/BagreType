@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { CheckCircle, PlayCircle, Lock, BookOpen, Trophy, Star } from "lucide-re
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { createChaptersForLayout, LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
+import { useLocalization } from "@/hooks/useLocalization";
 
 interface LessonNode {
   id: string;
@@ -27,17 +28,22 @@ interface Chapter {
 
 interface LessonRoadmapProps {
   layoutString?: string;
+  language?: string;
 }
 
-const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
+const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLocalization();
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const [skipTarget, setSkipTarget] = useState<{ chapterId: number; lessonId: string } | null>(null);
   const [dailyTimeSpent, setDailyTimeSpent] = useState(0); // in minutes
   const [persistentLayout, setPersistentLayout] = useState<string | null>(null);
+
+  // Use prop language with fallback to 'en'
+  const currentLanguage = propLanguage || 'en';
 
   // Load persistent layout on mount
   useEffect(() => {
@@ -182,7 +188,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
   
   // Generate chapters dynamically based on the layout
   const chapters: Chapter[] = useMemo(() => {
-    return createChaptersForLayout(currentLayoutString);
+    return createChaptersForLayout(currentLayoutString, t);
   }, [currentLayoutString]);
 
   // Memoize current lesson to avoid recalculating
@@ -384,7 +390,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
 
   const handleSkipConfirm = (confirmed: boolean) => {
     if (confirmed && skipTarget) {
-      navigate(`/lesson/${skipTarget.chapterId}/${skipTarget.lessonId}`);
+      navigate(`/${currentLanguage}/lesson/${skipTarget.chapterId}/${skipTarget.lessonId}`);
     }
     setShowSkipConfirm(false);
     setSkipTarget(null);
@@ -398,19 +404,19 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
           <div className="text-2xl font-bold text-primary">
             {isLoading ? "..." : `${completedCount}/${totalLessons}`}
           </div>
-          <div className="text-xs text-muted-foreground">Completed</div>
+          <div className="text-xs text-muted-foreground">{t('lessons.progress.completed')}</div>
         </Card>
         <Card className="p-4 bg-card/90 backdrop-blur-md border-border/50 text-center">
           <div className="text-2xl font-bold text-accent">
             {isLoading ? "..." : `${completedChapters}/5`}
           </div>
-          <div className="text-xs text-muted-foreground">Chapters</div>
+          <div className="text-xs text-muted-foreground">{t('lessons.progress.chapters')}</div>
         </Card>
         <Card className="p-4 bg-card/90 backdrop-blur-md border-border/50 text-center">
           <div className="text-2xl font-bold text-primary">
             {isLoading ? "..." : `${dailyTimeSpent}/30`}
           </div>
-          <div className="text-xs text-muted-foreground">Minutes Today</div>
+          <div className="text-xs text-muted-foreground">{t('lessons.progress.minutesToday')}</div>
         </Card>
             </div>
 
@@ -450,11 +456,11 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-primary"></div>
-                    <h3 className="font-bold text-primary">Chapter {chapter.id}</h3>
+                    <h3 className="font-bold text-primary">{t('lessons.chapter.title', { number: chapter.id })}</h3>
                   </div>
-                  <div className="text-sm text-muted-foreground">Depth: {chapter.depth}</div>
-                  <div className="text-lg font-semibold text-accent">{chapter.title}</div>
-                  <div className="text-xs text-muted-foreground">{chapter.description}</div>
+                  <div className="text-sm text-muted-foreground">{t('lessons.chapter.depth', { depth: chapter.depth })}</div>
+                  <div className="text-lg font-semibold text-accent">{t(`lessons.chapter.titles.${chapter.id}`)}</div>
+                  <div className="text-xs text-muted-foreground">{t(`lessons.chapter.descriptions.${chapter.id}`)}</div>
                 </div>
               </Card>
             </div>
@@ -492,7 +498,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
           
           if (isCompleted || isCurrent || isSkipped) {
             // Direct navigation for completed, current, or skipped lessons
-            navigate(`/lesson/${chapter.id}/${lesson.id}`);
+            navigate(`/${currentLanguage}/lesson/${chapter.id}/${lesson.id}`);
           } else if (isUnlocked) {
             // Check if this lesson comes after the current lesson
             const allLessons: { chapterId: number; lessonId: string }[] = [];
@@ -516,7 +522,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
               setShowSkipConfirm(true);
             } else {
               // Direct navigation for lessons before current (shouldn't happen with current logic, but safety)
-              navigate(`/lesson/${chapter.id}/${lesson.id}`);
+              navigate(`/${currentLanguage}/lesson/${chapter.id}/${lesson.id}`);
             }
           }
         }}
@@ -547,7 +553,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
                   {lesson.type === 'test' && (
                     <div className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center">
                       <div className="bg-card/90 backdrop-blur-md border border-border rounded-lg px-3 py-1 text-xs font-medium text-primary whitespace-nowrap">
-                        {lesson.title}
+                        {lesson.title || t('lessons.lesson.test')}
                       </div>
                     </div>
                   )}
@@ -570,22 +576,22 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
       {showSkipConfirm && skipTarget && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-card p-6 rounded-lg shadow-lg max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-primary mb-4">Skip to Lesson?</h3>
+            <h3 className="text-lg font-semibold text-primary mb-4">{t('lessons.skipDialog.title')}</h3>
             <p className="text-muted-foreground mb-6">
-              Are you sure you want to skip to this lesson? You can always come back to previous lessons later.
+              {t('lessons.skipDialog.message')}
             </p>
             <div className="flex gap-3 justify-end">
               <Button 
                 variant="outline" 
                 onClick={() => handleSkipConfirm(false)}
               >
-                No, Continue Sequential
+                {t('lessons.skipDialog.continueSequential')}
               </Button>
               <Button 
                 variant="default" 
                 onClick={() => handleSkipConfirm(true)}
               >
-                Yes, Skip
+                {t('lessons.skipDialog.skip')}
               </Button>
             </div>
           </div>

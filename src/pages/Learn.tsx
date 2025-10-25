@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
 import LightRays from "@/components/LightRays";
@@ -12,6 +12,7 @@ import ScrollIndicator from "@/components/ScrollIndicator";
 import { Zap, Clock, Target, TrendingUp, Play, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocalization } from "@/hooks/useLocalization";
 
 const Learn = () => {
   const [showTest, setShowTest] = useState(false);
@@ -21,6 +22,8 @@ const Learn = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLocalization();
+  const { language } = useParams();
 
   // 3D Card Component
   const Card3D = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
@@ -143,7 +146,7 @@ const Learn = () => {
     
     if (!hasSeenPostBaseline) {
       // Navigate directly to post-baseline page
-      navigate('/post-baseline', { 
+      navigate(`/${language}/post-baseline`, { 
         state: { 
           baselineResults: results 
         } 
@@ -164,10 +167,10 @@ const Learn = () => {
           <div className="animate-fade-in space-y-16">
             <div className="text-center space-y-6">
               <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-                Learn Touch Typing
+                {t('learn.title')}
               </h1>
               <p className="text-2xl text-aqua-light max-w-3xl mx-auto">
-                Loading your progress...
+                {t('learn.loading')}
               </p>
             </div>
           </div>
@@ -189,10 +192,10 @@ const Learn = () => {
           <div className="animate-fade-in space-y-12">
             <div className="text-center space-y-6">
               <h1 className="text-5xl font-bold text-primary mb-4 animate-float">
-                Baseline Test Results
+                {t('learn.testResults.title')}
               </h1>
               <p className="text-xl text-muted-foreground">
-                Here's how you did!
+                {t('learn.testResults.description')}
               </p>
             </div>
 
@@ -204,7 +207,7 @@ const Learn = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-6xl font-bold text-primary">{testResults.wpm}</p>
-                    <p className="text-lg text-muted-foreground">Words Per Minute</p>
+                    <p className="text-lg text-muted-foreground">{t('learn.testResults.wpm')}</p>
                   </div>
                 </div>
               </Card>
@@ -216,7 +219,7 @@ const Learn = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-6xl font-bold text-accent">{testResults.accuracy}%</p>
-                    <p className="text-lg text-muted-foreground">Accuracy</p>
+                    <p className="text-lg text-muted-foreground">{t('learn.testResults.accuracy')}</p>
                   </div>
                 </div>
               </Card>
@@ -225,16 +228,16 @@ const Learn = () => {
             <Card className="p-8 bg-card/90 backdrop-blur-md border-border/50 text-center shadow-lg">
               <div className="space-y-6">
                 <p className="text-lg text-foreground/90">
-                  Great job! Now let's begin your personalized learning journey.
+                  {t('learn.testResults.greatJob')}
                 </p>
                 <Button 
                   size="lg"
                   variant="ocean"
                   className="text-lg px-8 py-6 group"
-                  onClick={() => navigate("/lessons")}
+                  onClick={() => navigate(`/${language}/lessons`)}
                 >
                   <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                  Continue to Lessons
+                  {t('learn.testResults.continueToLessons')}
                 </Button>
               </div>
             </Card>
@@ -263,10 +266,10 @@ const Learn = () => {
                   </div>
                   <div className="space-y-2">
                     <h1 className="text-4xl font-bold text-primary">
-                      Baseline Test
+                      {t('learn.testScreen.title')}
                     </h1>
                     <p className="text-lg text-muted-foreground">
-                      Type the words as quickly and accurately as you can
+                      {t('learn.testScreen.description')}
                     </p>
                   </div>
                 </div>
@@ -296,21 +299,19 @@ const Learn = () => {
           {/* Hero Section */}
           <div className="text-center space-y-6">
             <h1 className="text-6xl font-bold text-primary mb-4 animate-float">
-              Learn Touch Typing
+              {t('learn.title')}
             </h1>
             <p className="text-2xl text-aqua-light max-w-3xl mx-auto">
-              Master the art of typing without looking at the keyboard
+              {t('learn.description')}
             </p>
           </div>
 
           {/* Benefits Section */}
           <div className="space-y-8">
             <div className="text-center space-y-4">
-              <h2 className="text-3xl font-semibold text-accent">Why Learn Touch Typing?</h2>
+              <h2 className="text-3xl font-semibold text-accent">{t('learn.whyLearn')}</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Touch typing is a skill that dramatically improves your typing speed and accuracy. 
-                With just <span className="text-primary font-semibold">30 minutes of practice per day</span>, 
-                you can increase your WPM from 30-40 to 60-100+.
+                {t('learn.whyLearnDescription')}
               </p>
             </div>
             
@@ -323,7 +324,7 @@ const Learn = () => {
                     </div>
                     <div className="space-y-2">
                       <p className="text-4xl font-bold text-primary">2-3x</p>
-                      <p className="text-lg text-muted-foreground">Typing speed increase</p>
+                      <p className="text-lg text-muted-foreground">{t('learn.benefits.speedIncrease')}</p>
                     </div>
                   </div>
                 </Card>
@@ -337,7 +338,7 @@ const Learn = () => {
                     </div>
                     <div className="space-y-2">
                       <p className="text-4xl font-bold text-primary">30min</p>
-                      <p className="text-lg text-muted-foreground">Daily practice needed</p>
+                      <p className="text-lg text-muted-foreground">{t('learn.benefits.dailyPractice')}</p>
                     </div>
                   </div>
                 </Card>
@@ -350,8 +351,8 @@ const Learn = () => {
                       <Target className="w-8 h-8 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-4xl font-bold text-primary">2-4wk</p>
-                      <p className="text-lg text-muted-foreground">To become proficient</p>
+                      <p className="text-4xl font-bold text-primary">{t('learn.benefits.timeToProficientValue')}</p>
+                      <p className="text-lg text-muted-foreground">{t('learn.benefits.timeToProficient')}</p>
                     </div>
                   </div>
                 </Card>
@@ -360,8 +361,7 @@ const Learn = () => {
 
             <Card className="p-6 bg-card/90 backdrop-blur-md border-border/50 text-center">
               <p className="text-lg text-muted-foreground italic">
-                Many people find the learning process enjoyable through gamified typing practice, 
-                similar to Monkeytype or TypeRacer.
+                {t('learn.gamifiedNote')}
               </p>
             </Card>
           </div>
@@ -370,9 +370,9 @@ const Learn = () => {
           {!hasCompletedBaseline && (
             <div className="space-y-8">
               <div className="text-center space-y-4">
-                <h2 className="text-3xl font-semibold text-accent">Get Started</h2>
+                <h2 className="text-3xl font-semibold text-accent">{t('learn.getStarted')}</h2>
                 <p className="text-lg text-muted-foreground">
-                  First, let's see your current typing speed
+                  {t('learn.getStartedDescription')}
                 </p>
               </div>
 
@@ -383,17 +383,16 @@ const Learn = () => {
                       <BarChart3 className="w-10 h-10 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-semibold text-accent">Baseline Test</h3>
+                      <h3 className="text-2xl font-semibold text-accent">{t('learn.baselineTest')}</h3>
                       <p className="text-lg text-muted-foreground">
-                        Type a 30-word passage as quickly and accurately as you can
+                        {t('learn.baselineTestDescription')}
                       </p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <p className="text-base text-foreground/90">
-                      Before we begin our learning journey, we'll test your current typing speed. 
-                      This baseline will help track your progress as you learn.
+                      {t('learn.baselineTestExplanation')}
                     </p>
                     
                     <Button 
@@ -403,7 +402,7 @@ const Learn = () => {
                       onClick={() => setShowTest(true)}
                     >
                       <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                      Start Baseline Test
+                      {t('learn.startBaselineTest')}
                     </Button>
                   </div>
                 </div>
@@ -411,7 +410,7 @@ const Learn = () => {
 
               <div className="text-center">
                 <p className="text-base text-muted-foreground">
-                  After the test, you'll begin your personalized learning journey
+                  {t('learn.afterTestNote')}
                 </p>
               </div>
             </div>
@@ -421,9 +420,9 @@ const Learn = () => {
           {hasCompletedBaseline && (
             <div className="space-y-8">
               <div className="text-center space-y-4">
-                <h2 className="text-3xl font-semibold text-accent">Ready to Learn!</h2>
+                <h2 className="text-3xl font-semibold text-accent">{t('learn.readyToLearn')}</h2>
                 <p className="text-lg text-muted-foreground">
-                  You've completed your baseline test. Let's start your learning journey!
+                  {t('learn.readyToLearnDescription')}
                 </p>
               </div>
 
@@ -434,27 +433,26 @@ const Learn = () => {
                       <Play className="w-10 h-10 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-semibold text-accent">Start Learning</h3>
+                      <h3 className="text-2xl font-semibold text-accent">{t('learn.startLearning')}</h3>
                       <p className="text-lg text-muted-foreground">
-                        Begin your personalized touch typing lessons
+                        {t('learn.startLearningDescription')}
                       </p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <p className="text-base text-foreground/90">
-                      Your baseline test results have been saved. Now you can start learning 
-                      touch typing with personalized lessons designed for your skill level.
+                      {t('learn.startLearningExplanation')}
                     </p>
                     
                     <Button 
                       size="lg"
                       variant="ocean"
                       className="text-lg px-8 py-6 group"
-                      onClick={() => navigate("/lessons")}
+                      onClick={() => navigate(`/${language}/lessons`)}
                     >
                       <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                      Start Lessons
+                      {t('learn.startLessons')}
                     </Button>
                   </div>
                 </div>

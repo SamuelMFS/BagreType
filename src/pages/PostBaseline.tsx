@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LightRays from "@/components/LightRays";
 import Bubbles from "@/components/Bubbles";
@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TrendingDown, Brain, Rocket, Zap, Target } from "lucide-react";
 import ScrollIndicator from "@/components/ScrollIndicator";
+import { useLocalization } from "@/hooks/useLocalization";
 
 const PostBaseline = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { language } = useParams();
+  const { t } = useLocalization();
   const [isVisible, setIsVisible] = useState(false);
   const [baselineResults, setBaselineResults] = useState<{ wpm: number; accuracy: number } | null>(null);
 
@@ -74,20 +77,20 @@ const PostBaseline = () => {
   const expectations = [
     {
       icon: TrendingDown,
-      title: "Speed Drop",
-      description: "Your typing speed will drop at first - this is completely normal!",
+      title: t('postBaseline.expectations.speedDrop.title'),
+      description: t('postBaseline.expectations.speedDrop.description'),
       color: "text-orange-400"
     },
     {
       icon: Brain,
-      title: "Neural Rewiring",
-      description: "Your brain is rewiring neural pathways - it takes time and patience",
+      title: t('postBaseline.expectations.neuralRewiring.title'),
+      description: t('postBaseline.expectations.neuralRewiring.description'),
       color: "text-purple-400"
     },
     {
       icon: Rocket,
-      title: "Skyrocket Speed",
-      description: "After dedicated practice, your speed will skyrocket beyond what you thought possible",
+      title: t('postBaseline.expectations.skyrocketSpeed.title'),
+      description: t('postBaseline.expectations.skyrocketSpeed.description'),
       color: "text-green-400"
     }
   ];
@@ -95,7 +98,7 @@ const PostBaseline = () => {
   const handleContinue = () => {
     // Mark that user has seen this page
     localStorage.setItem('bagre-post-baseline-seen', 'true');
-    navigate('/lessons');
+    navigate(`/${language}/lessons`);
   };
 
   return (
@@ -113,23 +116,11 @@ const PostBaseline = () => {
           <div className="text-center space-y-8">
             <div className="space-y-6">
               <h1 className="text-6xl md:text-7xl font-bold text-primary animate-float drop-shadow-[0_2px_10px_hsl(var(--primary)/0.5)]">
-                Welcome to Your Journey!
+                {t('postBaseline.title')}
               </h1>
               <p className="text-2xl text-aqua-light font-light max-w-4xl mx-auto leading-relaxed">
-                Time to break those old habits and build something 
-                <span className="text-primary font-semibold"> amazing</span>
+                {t('postBaseline.subtitle')}
               </p>
-            </div>
-          </div>
-
-          {/* Hand GIF Section */}
-          <div className="flex justify-center">
-            <div className="w-80 h-80 bg-card/20 backdrop-blur-md rounded-2xl border border-border/30 flex items-center justify-center shadow-2xl">
-              <div className="text-center space-y-4">
-                <div className="text-6xl animate-bounce">👋</div>
-                <p className="text-lg text-muted-foreground">Hand GIF Placeholder</p>
-                <p className="text-sm text-muted-foreground/70">(You'll add the gif here)</p>
-              </div>
             </div>
           </div>
 
@@ -137,9 +128,9 @@ const PostBaseline = () => {
           {baselineResults && (
             <div className="space-y-8">
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-accent mb-4">Your Baseline Results</h2>
+                <h2 className="text-4xl font-bold text-accent mb-4">{t('postBaseline.baselineResults.title')}</h2>
                 <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  This is your starting point - we'll track your improvement from here!
+                  {t('postBaseline.baselineResults.description')}
                 </p>
               </div>
 
@@ -151,9 +142,9 @@ const PostBaseline = () => {
                         <Zap className="w-6 h-6 text-yellow-400" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-primary mb-2">Typing Speed</h3>
+                        <h3 className="text-xl font-semibold text-primary mb-2">{t('postBaseline.baselineResults.typingSpeed')}</h3>
                         <p className="text-3xl font-bold text-primary">{baselineResults.wpm}</p>
-                        <p className="text-muted-foreground">Words per minute</p>
+                        <p className="text-muted-foreground">{t('postBaseline.baselineResults.wordsPerMinute')}</p>
                       </div>
                     </div>
                   </Card>
@@ -166,9 +157,9 @@ const PostBaseline = () => {
                         <Target className="w-6 h-6 text-green-400" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-primary mb-2">Accuracy</h3>
+                        <h3 className="text-xl font-semibold text-primary mb-2">{t('postBaseline.baselineResults.accuracy')}</h3>
                         <p className="text-3xl font-bold text-primary">{baselineResults.accuracy}%</p>
-                        <p className="text-muted-foreground">Character accuracy</p>
+                        <p className="text-muted-foreground">{t('postBaseline.baselineResults.characterAccuracy')}</p>
                       </div>
                     </div>
                   </Card>
@@ -180,23 +171,33 @@ const PostBaseline = () => {
           {/* Touch Typing Introduction */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-accent mb-4">What is Touch Typing?</h2>
+              <h2 className="text-4xl font-bold text-accent mb-4">{t('postBaseline.touchTyping.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                The art of typing without looking at your keyboard, using muscle memory.
+                {t('postBaseline.touchTyping.description')}
               </p>
+            </div>
+
+            {/* Hand GIF Section */}
+            <div className="flex justify-center">
+              <div className="w-80 h-80 bg-card/20 backdrop-blur-md rounded-2xl border border-border/30 flex items-center justify-center shadow-2xl">
+                <div className="text-center space-y-4">
+                  <div className="text-6xl animate-bounce">👋</div>
+                  <p className="text-lg text-muted-foreground">{t('postBaseline.handGifPlaceholder')}</p>
+                  <p className="text-sm text-muted-foreground/70">{t('postBaseline.handGifNote')}</p>
+                </div>
+              </div>
             </div>
 
             <div className="text-center space-y-8 max-w-4xl mx-auto">
               <div className="space-y-6 text-xl leading-relaxed">
                 <p className="text-foreground">
-                  Have you ever noticed that F and J keys have a little bump? Those are the touchtyping landmarks to show you where your index fingers should be so you dont have to look down at the keyboard.
+                  {t('postBaseline.touchTyping.bumpExplanation')}
                 </p>
                 <p className="text-foreground">
-                  I see you there with that hand on WASD, you little gamer! 😏
+                  {t('postBaseline.touchTyping.gamerJoke')}
                 </p>
                 <p className="text-foreground/90">
-                  Don't worry, we've all been there. Your fingers have been doing the same dance for years, 
-                  and now we're about to teach them a whole new choreography.
+                  {t('postBaseline.touchTyping.choreography')}
                 </p>
               </div>
             </div>
@@ -205,9 +206,9 @@ const PostBaseline = () => {
           {/* Expectations Section */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-accent mb-4">Here's What to Expect</h2>
+              <h2 className="text-4xl font-bold text-accent mb-4">{t('postBaseline.expectations.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Your typing journey will have ups and downs, but the destination is worth it
+                {t('postBaseline.expectations.description')}
               </p>
             </div>
 
@@ -237,11 +238,10 @@ const PostBaseline = () => {
           <div className="text-center space-y-8">
             <div className="space-y-4">
               <p className="text-2xl text-foreground/90 max-w-3xl mx-auto leading-relaxed">
-                Think of it like learning to play piano with your feet - awkward at first, 
-                but once you get it, you'll wonder how you ever lived without it!
+                {t('postBaseline.encouragement.piano')}
               </p>
               <p className="text-lg text-muted-foreground">
-                Remember: Every expert was once a beginner
+                {t('postBaseline.encouragement.expert')}
               </p>
             </div>
             
@@ -263,7 +263,7 @@ const PostBaseline = () => {
                 size="lg"
                 className="group text-xl px-12 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)]"
               >
-                Let's Dive In! 🌊
+                {t('postBaseline.encouragement.button')}
               </Button>
             </div>
           </div>

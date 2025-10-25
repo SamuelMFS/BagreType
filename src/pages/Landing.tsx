@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useLocalization } from "@/hooks/useLocalization";
 import SplitText from "@/components/SplitText";
 
 const Landing = () => {
   const [showLogo, setShowLogo] = useState(true);
   const navigate = useNavigate();
+  const { lang } = useParams();
+  const { t } = useLocalization();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLogo(false);
       setTimeout(() => {
-        navigate("/intro");
+        navigate(`/${lang}/intro`);
       }, 600);
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, lang]);
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -33,7 +36,7 @@ const Landing = () => {
             stagger={0.08}
             duration={0.8}
           >
-            BagreType
+            {t('landing.title')}
           </SplitText>
           <SplitText 
             className="text-2xl text-aqua-light"
@@ -42,7 +45,7 @@ const Landing = () => {
             stagger={0.05}
             duration={0.6}
           >
-            Discover Your Perfect Keyboard
+            {t('landing.subtitle')}
           </SplitText>
         </div>
       </div>
