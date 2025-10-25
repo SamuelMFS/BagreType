@@ -41,8 +41,10 @@ const Lesson = () => {
   // Get lesson configuration
   const lessonConfig = getLessonConfig(lessonId || "f", chapterId || "1");
   
+  const isTest = lessonId?.toLowerCase().startsWith('test') || false;
+  
   const lessonData = {
-    key: lessonId?.toUpperCase() || "F",
+    key: isTest ? "" : (lessonId?.toUpperCase() || "F"),
     chapter: chapterId || "1",
     chapterName: getChapterName(chapterId || "1"),
     gif: "/placeholder.svg", // Placeholder
@@ -50,7 +52,7 @@ const Lesson = () => {
 
   // Initialize lesson generator and session ID
   useEffect(() => {
-    const generator = new LessonGenerator(lessonConfig);
+    const generator = new LessonGenerator(lessonConfig, isTest);
     setLessonGenerator(generator);
     
     // Generate session ID for anonymous users
@@ -237,6 +239,12 @@ const Lesson = () => {
   };
 
   const getRoundTitle = () => {
+    if (isTest) {
+      // Extract test number (e.g., "test1" -> "1")
+      const testNumber = lessonId?.match(/\d+/)?.[0] || '';
+      return `Test ${testNumber}`;
+    }
+    
     const lessonNumber = getLessonNumber(chapterId || "1", lessonId || "f");
     const lessonTitle = `Lesson ${lessonNumber}: Key ${lessonData.key}`;
     
@@ -252,29 +260,55 @@ const Lesson = () => {
     }
   };
 
-  const getRoundWords = useMemo(() => {
-    if (!lessonGenerator) return "";
+  const [roundWords, setRoundWords] = useState<string>("");
+
+  useEffect(() => {
+    const loadRoundWords = async () => {
+      if (!lessonGenerator) {
+        setRoundWords("");
+        return;
+      }
+      
+      let words = "";
+      switch (currentRound) {
+        case "lesson":
+          words = await lessonGenerator.generatePart1();
+          break;
+        case "chapter":
+          words = await lessonGenerator.generatePart2();
+          break;
+        case "all":
+          words = await lessonGenerator.generatePart3();
+          break;
+        default:
+          words = "";
+      }
+      
+      setRoundWords(words);
+    };
     
-    switch (currentRound) {
-      case "lesson":
-        return lessonGenerator.generatePart1();
-      case "chapter":
-        return lessonGenerator.generatePart2();
-      case "all":
-        return lessonGenerator.generatePart3();
-      default:
-        return "";
-    }
+    loadRoundWords();
   }, [lessonGenerator, currentRound]);
 
   const handleRoundComplete = (wpm: number, accuracy: number) => {
     console.log('handleRoundComplete called:', { currentRound, wpm, accuracy });
     
-    const roundName = currentRound === "lesson" 
-      ? `Part 1: ${lessonData.key} Only` 
-      : currentRound === "chapter" 
-      ? `Part 2: ${lessonData.key} + Chapter` 
-      : `Part 3: ${lessonData.key} + All`;
+    let roundName: string;
+    if (isTest) {
+      // For tests, use chapter name in the round name
+      roundName = currentRound === "lesson" 
+        ? `Part 1: ${lessonData.chapterName} Only` 
+        : currentRound === "chapter" 
+        ? `Part 2: ${lessonData.chapterName} + Chapter` 
+        : `Part 3: ${lessonData.chapterName} + All`;
+    } else {
+      // For regular lessons, use the key
+      roundName = currentRound === "lesson" 
+        ? `Part 1: ${lessonData.key} Only` 
+        : currentRound === "chapter" 
+        ? `Part 2: ${lessonData.key} + Chapter` 
+        : `Part 3: ${lessonData.key} + All`;
+    }
 
     const newResults = [...results, { round: roundName, wpm, accuracy }];
     setResults(newResults);
@@ -463,7 +497,7 @@ const Lesson = () => {
             <div className="flex-1 flex items-center justify-center">
               <TypingTest 
                 ref={typingTestRef}
-                customText={getRoundWords}
+                customText={roundWords}
                 onComplete={(wpm, accuracy) => handleRoundComplete(wpm, accuracy)}
                 hideCompletionScreen={true}
                 onCurrentCharChange={setCurrentChar}

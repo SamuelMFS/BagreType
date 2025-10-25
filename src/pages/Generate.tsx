@@ -110,7 +110,7 @@ const Generate = () => {
         const currentLayout = localStorage.getItem('persistent_layout');
         const isDifferentLayout = currentLayout && currentLayout !== layoutToUse;
         
-        // If switching to a different layout, reset progress
+        // Always reset progress when switching layouts (or starting fresh)
         if (isDifferentLayout) {
           if (user) {
             // Delete all lesson progress from Supabase
@@ -128,9 +128,25 @@ const Generate = () => {
           }
           
           toast({
-            title: "Layout Changed",
+            title: "Layout Switched",
             description: "Your progress has been reset for the new layout",
           });
+        } else if (!currentLayout) {
+          // First time setting a layout, clear any existing progress just in case
+          if (user) {
+            // Delete all lesson progress from Supabase
+            const { error } = await supabase
+              .from('lesson_progress')
+              .delete()
+              .eq('user_id', user.id);
+            
+            if (error) {
+              console.error('Error deleting lesson progress:', error);
+            }
+          } else {
+            // Clear lesson progress from localStorage for anonymous users
+            localStorage.removeItem('lesson_progress');
+          }
         }
         
         // Store the layout in context
