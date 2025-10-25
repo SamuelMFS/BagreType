@@ -14,6 +14,7 @@ interface TypingTestProps {
   onComplete?: (wpm: number, accuracy: number) => void;
   onRestart?: () => void;
   hideCompletionScreen?: boolean; // New prop to hide completion screen
+  onCurrentCharChange?: (char: string) => void; // New prop to track current character
 }
 
 const commonWords = [
@@ -37,10 +38,10 @@ const generateWords = (count: number): string[] => {
   return words;
 };
 
-const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false }, ref) => {
+const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false, onCurrentCharChange }, ref) => {
   const [words, setWords] = useState<string[]>(() => {
     // Initialize words on first render
-    if (customText) {
+    if (customText && typeof customText === 'string') {
       return customText.trim().split(/\s+/);
     } else if (timeLimit) {
       // For time mode, generate a large initial set of words
@@ -74,7 +75,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
   };
 
   const resetTest = () => {
-    if (customText) {
+    if (customText && typeof customText === 'string') {
       setWords(customText.trim().split(/\s+/));
     } else if (zenMode) {
       setWords([]);
@@ -121,9 +122,30 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     }
   }, [timeRemaining, startTime, isComplete]);
 
+  // Handle customText changes (including when it loads async)
+  useEffect(() => {
+    if (customText && typeof customText === 'string') {
+      setWords(customText.trim().split(/\s+/));
+      setUserInput('');
+      setCurrentIndex(0);
+      setErrors(new Set());
+      setIsComplete(false);
+      setCompletionHandled(false);
+    }
+  }, [customText]);
+  
   useEffect(() => {
     resetTest();
-  }, [wordCount, customText, zenMode, timeLimit]);
+  }, [wordCount, zenMode, timeLimit]);
+
+  // Notify parent component of current character changes
+  useEffect(() => {
+    if (onCurrentCharChange && words.length > 0) {
+      const fullText = words.join(' ');
+      const currentChar = fullText[currentIndex] || '';
+      onCurrentCharChange(currentChar);
+    }
+  }, [currentIndex, words, onCurrentCharChange]);
 
   useEffect(() => {
     if (isComplete) return;

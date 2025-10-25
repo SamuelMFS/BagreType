@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
@@ -7,6 +7,7 @@ import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import TypingTest from "@/components/TypingTest";
 import SegmentedProgressBar from "@/components/SegmentedProgressBar";
+import { KeyboardImage } from "@/components/KeyboardImage";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, BarChart3 } from "lucide-react";
@@ -35,6 +36,7 @@ const Lesson = () => {
   const [lessonGenerator, setLessonGenerator] = useState<LessonGenerator | null>(null);
   const [sessionId, setSessionId] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [currentChar, setCurrentChar] = useState<string>("");
 
   // Get lesson configuration
   const lessonConfig = getLessonConfig(lessonId || "f", chapterId || "1");
@@ -250,7 +252,7 @@ const Lesson = () => {
     }
   };
 
-  const getRoundWords = () => {
+  const getRoundWords = useMemo(() => {
     if (!lessonGenerator) return "";
     
     switch (currentRound) {
@@ -263,7 +265,7 @@ const Lesson = () => {
       default:
         return "";
     }
-  };
+  }, [lessonGenerator, currentRound]);
 
   const handleRoundComplete = (wpm: number, accuracy: number) => {
     console.log('handleRoundComplete called:', { currentRound, wpm, accuracy });
@@ -461,27 +463,22 @@ const Lesson = () => {
             <div className="flex-1 flex items-center justify-center">
               <TypingTest 
                 ref={typingTestRef}
-                customText={getRoundWords()}
+                customText={getRoundWords}
                 onComplete={(wpm, accuracy) => handleRoundComplete(wpm, accuracy)}
                 hideCompletionScreen={true}
+                onCurrentCharChange={setCurrentChar}
               />
             </div>
           </div>
 
-          {/* GIF Placeholder */}
-          <Card className="p-6 bg-card/50 backdrop-blur">
-            <div className="aspect-video w-full max-w-md mx-auto rounded-lg bg-muted/30 border border-primary/20 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <div className="text-4xl">🎬</div>
-                <p className="text-muted-foreground text-sm">
-                  Hand position GIF placeholder
-                </p>
-                <p className="text-xs text-primary font-semibold">
-                  Demonstrating: {lessonData.key} key
-                </p>
-              </div>
-            </div>
-          </Card>
+          {/* Keyboard Image */}
+          <div className="aspect-video w-full max-w-md mx-auto flex items-center justify-center">
+            <KeyboardImage 
+              lessonKey={lessonData.key}
+              currentChar={currentChar}
+              className="w-full h-full"
+            />
+          </div>
         </div>
       </div>
     </div>

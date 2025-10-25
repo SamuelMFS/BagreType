@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Bubbles from "@/components/Bubbles";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, Code, Languages, FileText, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLayout } from "@/contexts/LayoutContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
 
 const programmingLanguages = [
@@ -25,16 +27,30 @@ const humanLanguages = [
 ];
 
 const Generate = () => {
-  const [selectedType, setSelectedType] = useState<"curated" | "custom">("curated");
+  const [selectedType, setSelectedType] = useState<"curated" | "custom" | "manual">("curated");
   const [selectedCategory, setSelectedCategory] = useState<"programming" | "human">("programming");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [customText, setCustomText] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLayout, setGeneratedLayout] = useState<string | null>(null);
+  const [manualLayoutString, setManualLayoutString] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { setCurrentLayout, setLayoutName } = useLayout();
+
+  useEffect(() => {
+    // Load saved manual layout from localStorage and switch to manual tab
+    const savedLayout = localStorage.getItem('persistent_layout');
+    if (savedLayout && savedLayout.length === 45) {
+      setManualLayoutString(savedLayout);
+      // Only switch to manual tab if it's a custom layout (not QWERTY)
+      if (savedLayout !== LAYOUT_STRINGS.qwerty) {
+        setSelectedType("manual");
+      }
+    }
+  }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -76,18 +92,70 @@ const Generate = () => {
     });
   };
 
-  const handleLearnLayout = () => {
-    // Extract the layout string from the generated layout display
-    if (generatedLayout) {
+  const handleLearnLayout = async () => {
+    let layoutToUse: string;
+    
+    if (selectedType === "manual") {
+      layoutToUse = manualLayoutString;
+    } else if (generatedLayout) {
       const lines = generatedLayout.split('\n');
-      const layoutString = lines[lines.length - 1]; // Get the last line which contains the layout string
-      
-      // Store the layout in context
-      setCurrentLayout(layoutString);
-      setLayoutName(getLayoutName(layoutString));
-      
-      // Navigate to lessons
-      navigate("/lessons");
+      layoutToUse = lines[lines.length - 1]; // Get the last line which contains the layout string
+    } else {
+      return;
+    }
+    
+    if (layoutToUse.length === 45) {
+      try {
+        // Check if this is a different layout than the current one
+        const currentLayout = localStorage.getItem('persistent_layout');
+        const isDifferentLayout = currentLayout && currentLayout !== layoutToUse;
+        
+        // If switching to a different layout, reset progress
+        if (isDifferentLayout) {
+          if (user) {
+            // Delete all lesson progress from Supabase
+            const { error } = await supabase
+              .from('lesson_progress')
+              .delete()
+              .eq('user_id', user.id);
+            
+            if (error) {
+              console.error('Error deleting lesson progress:', error);
+            }
+          } else {
+            // Clear lesson progress from localStorage for anonymous users
+            localStorage.removeItem('lesson_progress');
+          }
+          
+          toast({
+            title: "Layout Changed",
+            description: "Your progress has been reset for the new layout",
+          });
+        }
+        
+        // Store the layout in context
+        setCurrentLayout(layoutToUse);
+        setLayoutName(getLayoutName(layoutToUse));
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('persistent_layout', layoutToUse);
+        
+        // Navigate to lessons
+        navigate("/lessons");
+      } catch (error) {
+        console.error('Error handling layout change:', error);
+        toast({
+          title: "Error",
+          description: "Failed to switch layouts",
+          variant: "destructive"
+        });
+      }
+    } else {
+      toast({
+        title: "Invalid Layout",
+        description: "Layout string must be exactly 45 characters",
+        variant: "destructive"
+      });
     }
   };
 
@@ -95,9 +163,13 @@ const Generate = () => {
     if (selectedType === "curated") {
       return selectedLanguage !== "";
     }
+    if (selectedType === "manual") {
+      return manualLayoutString.length === 45;
+    }
     return customText.trim() !== "" || uploadedFile !== null;
   };
 
+  // Only show preview for generated layouts, not manual entry
   if (generatedLayout) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -111,10 +183,12 @@ const Generate = () => {
           <div className="animate-fade-in space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-5xl font-bold text-primary mb-4">
-                Your Optimized Layout
+                {selectedType === "manual" ? "Manual Layout Entered" : "Your Optimized Layout"}
               </h1>
               <p className="text-lg text-muted-foreground">
-                Generated based on {selectedType === "curated" ? selectedLanguage : "your custom data"}
+                {selectedType === "manual" 
+                  ? "Custom layout string configured" 
+                  : `Generated based on ${selectedType === "curated" ? selectedLanguage : "your custom data"}`}
               </p>
             </div>
 
@@ -122,33 +196,41 @@ const Generate = () => {
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div className="text-center">
-                    <h3 className="text-xl font-semibold text-primary mb-2">Generated Layout</h3>
+                    <h3 className="text-xl font-semibold text-primary mb-2">
+                      {selectedType === "manual" ? "Manual Layout" : "Generated Layout"}
+                    </h3>
                     <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
                       <div className="text-lg font-mono text-foreground break-all leading-relaxed">
-                        {generatedLayout.split('\n').map((line, index) => (
-                          <div key={index} className="mb-1">
-                            {line}
-                          </div>
-                        ))}
+                        {selectedType === "manual" ? (
+                          <div>{manualLayoutString}</div>
+                        ) : (
+                          generatedLayout.split('\n').map((line, index) => (
+                            <div key={index} className="mb-1">
+                              {line}
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4 pt-4">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">42%</p>
-                    <p className="text-sm text-muted-foreground">Efficiency Gain</p>
+                {selectedType !== "manual" && (
+                  <div className="grid md:grid-cols-3 gap-4 pt-4">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-accent">42%</p>
+                      <p className="text-sm text-muted-foreground">Efficiency Gain</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-accent">65%</p>
+                      <p className="text-sm text-muted-foreground">Home Row Usage</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-accent">28%</p>
+                      <p className="text-sm text-muted-foreground">Less Finger Travel</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">65%</p>
-                    <p className="text-sm text-muted-foreground">Home Row Usage</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">28%</p>
-                    <p className="text-sm text-muted-foreground">Less Finger Travel</p>
-                  </div>
-                </div>
+                )}
               </div>
             </Card>
 
@@ -163,7 +245,9 @@ const Generate = () => {
                 Learn This Layout
               </Button>
               <Button
-                onClick={() => setGeneratedLayout(null)}
+                onClick={() => {
+                  setGeneratedLayout(null);
+                }}
                 variant="outline"
                 size="lg"
               >
@@ -195,8 +279,8 @@ const Generate = () => {
             </p>
           </div>
 
-          <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as "curated" | "custom")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
+          <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as "curated" | "custom" | "manual")} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="curated" className="gap-2">
                 <Code className="w-4 h-4" />
                 Curated Applications
@@ -204,6 +288,10 @@ const Generate = () => {
               <TabsTrigger value="custom" className="gap-2">
                 <FileText className="w-4 h-4" />
                 Custom Data
+              </TabsTrigger>
+              <TabsTrigger value="manual" className="gap-2">
+                <Languages className="w-4 h-4" />
+                Manual Entry
               </TabsTrigger>
             </TabsList>
 
@@ -251,6 +339,61 @@ const Generate = () => {
                       </div>
                     </TabsContent>
                   </Tabs>
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="manual" className="space-y-6">
+              <Card className="p-6 bg-card/90 backdrop-blur-md border-border/50">
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Languages className="w-4 h-4" />
+                        Edit Layout String (45 characters)
+                      </label>
+                      {manualLayoutString === localStorage.getItem('persistent_layout') && manualLayoutString.length === 45 && (
+                        <span className="text-xs text-accent bg-accent/10 px-2 py-1 rounded">
+                          Currently Active
+                        </span>
+                      )}
+                    </div>
+                    <Textarea
+                      placeholder="1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./"
+                      value={manualLayoutString}
+                      onChange={(e) => setManualLayoutString(e.target.value)}
+                      maxLength={45}
+                      className="min-h-[100px] bg-background/80 border-border font-mono"
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Length: {manualLayoutString.length}/45
+                        {manualLayoutString.length !== 45 && " (Must be exactly 45 characters)"}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setManualLayoutString(LAYOUT_STRINGS.qwerty);
+                          }}
+                        >
+                          Set to QWERTY
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setManualLayoutString("");
+                            localStorage.removeItem('persistent_layout');
+                          }}
+                          disabled={!manualLayoutString}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Card>
             </TabsContent>
@@ -312,16 +455,27 @@ const Generate = () => {
           </Tabs>
 
           <div className="flex justify-center pt-4">
-            <Button
-              onClick={handleGenerate}
-              variant="ocean"
-              size="lg"
-              disabled={!canGenerate() || isGenerating}
-              className="gap-2 min-w-[200px]"
-            >
-              <Sparkles className="w-5 h-5" />
-              {isGenerating ? "Generating..." : "Generate Layout"}
-            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                onClick={selectedType === "manual" ? handleLearnLayout : handleGenerate}
+                variant="ocean"
+                size="lg"
+                disabled={!canGenerate() || isGenerating}
+                className="gap-2 min-w-[200px]"
+              >
+                <Sparkles className="w-5 h-5" />
+                {selectedType === "manual" 
+                  ? "Learn This Layout" 
+                  : isGenerating 
+                    ? "Generating..." 
+                    : "Generate Layout"}
+              </Button>
+              {selectedType === "manual" && manualLayoutString.length === 45 && (
+                <p className="text-xs text-muted-foreground text-center max-w-[300px]">
+                  Click "Learn This Layout" to activate this layout and start practicing
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -37,6 +37,18 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const [skipTarget, setSkipTarget] = useState<{ chapterId: number; lessonId: string } | null>(null);
   const [dailyTimeSpent, setDailyTimeSpent] = useState(0); // in minutes
+  const [persistentLayout, setPersistentLayout] = useState<string | null>(null);
+
+  // Load persistent layout on mount
+  useEffect(() => {
+    const storedLayout = localStorage.getItem('persistent_layout');
+    if (storedLayout) {
+      setPersistentLayout(storedLayout);
+    }
+  }, []);
+
+  // Use persistent layout if available, otherwise use prop or default to QWERTY
+  const activeLayoutString = persistentLayout || layoutString || LAYOUT_STRINGS.qwerty;
 
   // Load lesson progress
   useEffect(() => {
@@ -166,7 +178,7 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
   } as const;
 
   // Get the layout string to use (default to QWERTY if none provided)
-  const currentLayoutString = layoutString || LAYOUT_STRINGS.qwerty;
+  const currentLayoutString = activeLayoutString;
   
   // Generate chapters dynamically based on the layout
   const chapters: Chapter[] = useMemo(() => {
@@ -540,8 +552,8 @@ const LessonRoadmap = ({ layoutString }: LessonRoadmapProps) => {
                     </div>
                   )}
 
-                  {/* Star only on F lesson (first lesson) */}
-                  {chapter.id === 1 && lesson.id === 'f' && !getLessonStatus(chapter.id, lesson.id).isCompleted && (
+                  {/* Star only on first lesson when it's current */}
+                  {getLessonStatus(chapter.id, lesson.id).isCurrent && chapter.id === 1 && chapters[0]?.lessons[0]?.id === lesson.id && (
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
                       <Star className="w-4 h-4 text-white" />
                     </div>

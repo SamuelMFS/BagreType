@@ -12,6 +12,7 @@ import HorizontalLetterChart from "@/components/HorizontalLetterChart";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface TypingTestData {
   id: string;
@@ -59,7 +60,18 @@ const Results = () => {
         // Load from localStorage for anonymous users
         const savedTests = localStorage.getItem('bagre-typing-tests');
         if (savedTests) {
-          setTypingTests(JSON.parse(savedTests));
+          const tests = JSON.parse(savedTests);
+          // Normalize localStorage data to match Supabase structure
+          const normalizedTests = tests.map((test: any, index: number) => ({
+            ...test,
+            // Generate unique ID if missing
+            id: test.id || `local-${Date.now()}-${index}`,
+            // Use completed_at as created_at for localStorage data
+            created_at: test.created_at || test.completed_at || new Date().toISOString()
+          }));
+          // Sort by date (most recent first)
+          normalizedTests.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          setTypingTests(normalizedTests);
         }
       }
     } catch (error) {
@@ -285,8 +297,12 @@ const Results = () => {
                           <div className="text-sm">
                             {new Date(test.created_at).toLocaleDateString()}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {expandedTestId === test.id ? '▼' : '▶'}
+                          <div className="text-muted-foreground">
+                            {expandedTestId === test.id ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4" />
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-4 text-sm">

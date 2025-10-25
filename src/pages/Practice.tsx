@@ -6,11 +6,12 @@ import FloatingParticles from "@/components/FloatingParticles";
 import SwimmingFish from "@/components/SwimmingFish";
 import TypingTest from "@/components/TypingTest";
 import CustomTextModal from "@/components/CustomTextModal";
+import { KeyboardImage } from "@/components/KeyboardImage";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Settings, X, Plus } from "lucide-react";
+import { Settings, X, Plus, Keyboard } from "lucide-react";
 
 type Mode = "words" | "time" | "quote" | "zen" | "custom";
 
@@ -25,6 +26,8 @@ const Practice = () => {
   const [quotes, setQuotes] = useState<string[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showKeyboardImage, setShowKeyboardImage] = useState(false);
+  const [currentChar, setCurrentChar] = useState<string>("");
 
   // Load saved custom texts from localStorage
   useEffect(() => {
@@ -253,6 +256,20 @@ const Practice = () => {
                 </button>
               </div>
             )}
+
+            {/* Keyboard Image Toggle */}
+            <button
+              className={`text-sm transition-colors flex items-center gap-1 ${
+                showKeyboardImage
+                  ? "text-primary font-semibold"
+                  : "text-foreground/50 hover:text-foreground"
+              }`}
+              onClick={() => setShowKeyboardImage(!showKeyboardImage)}
+              title={showKeyboardImage ? "Hide keyboard image" : "Show keyboard image"}
+            >
+              <Keyboard size={14} />
+              keyboard
+            </button>
           </div>
 
           {/* Typing Test */}
@@ -282,7 +299,19 @@ const Practice = () => {
             <TypingTest 
               ref={testRef}
               {...getTestProps()}
+              onCurrentCharChange={setCurrentChar}
             />
+          )}
+
+          {/* Keyboard Image */}
+          {showKeyboardImage && (
+            <div className="aspect-video w-full max-w-md mx-auto flex items-center justify-center">
+              <KeyboardImage 
+                lessonKey={currentChar || "a"}
+                currentChar={currentChar}
+                className="w-full h-full"
+              />
+            </div>
           )}
         </div>
       </div>
