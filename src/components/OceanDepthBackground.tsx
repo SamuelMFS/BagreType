@@ -1,4 +1,54 @@
+import { useMemo } from 'react';
+
 const OceanDepthBackground = () => {
+  // Memoize random values to prevent background from updating on every render
+  const rays = useMemo(() => {
+    return Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      left: `${15 + i * 20}%`,
+      delay: `${i * 2}s`,
+      opacity: 0.05 + Math.random() * 0.08,
+    }));
+  }, []);
+
+  const smallFish = useMemo(() => {
+    return Array.from({ length: 3 }, (_, i) => ({
+      id: i,
+      top: `${20 + i * 15}vh`,
+      delay: `${i * 8}s`,
+      duration: `${20 + Math.random() * 10}s`,
+    }));
+  }, []);
+
+  const largeFish = useMemo(() => {
+    return Array.from({ length: 3 }, (_, i) => ({
+      id: i,
+      top: `${150 + i * 20}vh`,
+      delay: `${i * 10}s`,
+      duration: `${25 + Math.random() * 10}s`,
+      scale: 1.8 + Math.random() * 0.8,
+    }));
+  }, []);
+
+  const rocks = useMemo(() => {
+    return Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      width: `${30 + Math.random() * 80}px`,
+      height: `${20 + Math.random() * 50}px`,
+      delay: `${Math.random() * 2}s`,
+    }));
+  }, []);
+
+  const seaweed = useMemo(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      left: `${10 + i * 12}%`,
+      height: `${40 + Math.random() * 40}px`,
+      duration: `${2 + Math.random()}s`,
+    }));
+  }, []);
+
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ height: '300vh' }}>
       {/* Darkening gradient from top to bottom */}
@@ -10,12 +60,7 @@ const OceanDepthBackground = () => {
       />
       
       {/* Light rays at the top */}
-      {Array.from({ length: 5 }, (_, i) => ({
-        id: i,
-        left: `${15 + i * 20}%`,
-        delay: `${i * 2}s`,
-        opacity: 0.05 + Math.random() * 0.08,
-      })).map((ray) => (
+      {rays.map((ray) => (
         <div
           key={ray.id}
           className="absolute top-0"
@@ -31,12 +76,7 @@ const OceanDepthBackground = () => {
       ))}
       
       {/* Small fish at top/mid */}
-      {Array.from({ length: 3 }, (_, i) => ({
-        id: i,
-        top: `${20 + i * 15}vh`,
-        delay: `${i * 8}s`,
-        duration: `${20 + Math.random() * 10}s`,
-      })).map((f) => (
+      {smallFish.map((f) => (
         <div
           key={f.id}
           className="absolute"
@@ -68,13 +108,7 @@ const OceanDepthBackground = () => {
       ))}
       
       {/* Large fish at bottom */}
-      {Array.from({ length: 3 }, (_, i) => ({
-        id: i,
-        top: `${150 + i * 20}vh`,
-        delay: `${i * 10}s`,
-        duration: `${25 + Math.random() * 10}s`,
-        scale: 1.8 + Math.random() * 0.8,
-      })).map((f) => (
+      {largeFish.map((f) => (
         <div
           key={f.id}
           className="absolute"
@@ -116,13 +150,7 @@ const OceanDepthBackground = () => {
         />
         
         {/* Rocks */}
-        {Array.from({ length: 15 }, (_, i) => ({
-          id: i,
-          left: `${Math.random() * 100}%`,
-          width: `${30 + Math.random() * 80}px`,
-          height: `${20 + Math.random() * 50}px`,
-          delay: `${Math.random() * 2}s`,
-        })).map((rock) => (
+        {rocks.map((rock) => (
           <div
             key={rock.id}
             className="absolute bottom-0 rounded-t-full opacity-40"
@@ -137,17 +165,17 @@ const OceanDepthBackground = () => {
         ))}
         
         {/* Seaweed */}
-        {Array.from({ length: 8 }, (_, i) => (
+        {seaweed.map((weed) => (
           <div
-            key={`weed-${i}`}
+            key={`weed-${weed.id}`}
             className="absolute bottom-0"
             style={{
-              left: `${10 + i * 12}%`,
+              left: weed.left,
               width: '3px',
-              height: `${40 + Math.random() * 40}px`,
+              height: weed.height,
               background: `linear-gradient(180deg, transparent 0%, hsl(var(--accent) / 0.3) 50%, hsl(var(--accent) / 0.5) 100%)`,
               transformOrigin: 'bottom',
-              animation: `wave ${2 + Math.random()}s ease-in-out infinite`,
+              animation: `wave ${weed.duration}s ease-in-out infinite`,
             }}
           />
         ))}

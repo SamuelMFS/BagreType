@@ -5,12 +5,19 @@ export const useLocalization = () => {
   const { t, i18n } = useTranslation();
 
   const changeLanguage = useCallback((language: string) => {
+    // Persist language to localStorage
+    localStorage.setItem('i18nextLng', language);
+    
+    // Change language in i18n
     i18n.changeLanguage(language);
+    
     // Update URL to include language prefix
     const currentPath = window.location.pathname;
     const pathWithoutLang = currentPath.replace(/^\/(pt-BR|en)/, '');
     const newPath = `/${language}${pathWithoutLang}`;
-    window.history.replaceState({}, '', newPath);
+    
+    // Use navigate to ensure React Router updates properly
+    window.location.href = newPath;
   }, [i18n]);
 
   const getCurrentLanguage = useCallback(() => {

@@ -128,11 +128,22 @@
         "spaceToStart": "Press Space to start",
         "escToStop": "Press Esc to stop",
         "spaceToPlayAgain": "Press Space to play again",
+        "nextPart": "Great! Next part - press Space",
+        "allDone": "That's all I need from you, but I'd love if you typed some more.",
         "focusOnAccuracy": "Focus on accuracy first, then speed will follow naturally",
         "results": "Results →",
         "step": "Step",
         "of": "of",
-        "resetChoices": "Reset Choices"
+        "resetChoices": "Reset Choices",
+        "difficulty": {
+          "title": "Difficulty",
+          "easy": "Easy",
+          "medium": "Medium", 
+          "hard": "Hard",
+          "easyDescription": "Single letters (a, b, c)",
+          "mediumDescription": "Two letters (ab, aa, ba)",
+          "hardDescription": "Three letters (aab, aba, aaa)"
+        }
       }
     }
   },

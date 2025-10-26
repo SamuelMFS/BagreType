@@ -14,7 +14,7 @@ import { useLocalization } from "@/hooks/useLocalization";
 const PostBaseline = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language } = useParams();
+  const { lang } = useParams();
   const { t } = useLocalization();
   const [isVisible, setIsVisible] = useState(false);
   const [baselineResults, setBaselineResults] = useState<{ wpm: number; accuracy: number } | null>(null);
@@ -98,7 +98,7 @@ const PostBaseline = () => {
   const handleContinue = () => {
     // Mark that user has seen this page
     localStorage.setItem('bagre-post-baseline-seen', 'true');
-    navigate(`/${language}/lessons`);
+    navigate(`/${lang}/lessons`);
   };
 
   return (

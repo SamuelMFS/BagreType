@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { createChaptersForLayout, LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
 import { useLocalization } from "@/hooks/useLocalization";
+import { encodeLessonId } from "@/lib/urlEncoder";
 
 interface LessonNode {
   id: string;
@@ -390,7 +391,8 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
 
   const handleSkipConfirm = (confirmed: boolean) => {
     if (confirmed && skipTarget) {
-      navigate(`/${currentLanguage}/lesson/${skipTarget.chapterId}/${skipTarget.lessonId}`);
+      const encodedLessonId = encodeLessonId(skipTarget.lessonId);
+      navigate(`/${currentLanguage}/lesson/${skipTarget.chapterId}/${encodedLessonId}`);
     }
     setShowSkipConfirm(false);
     setSkipTarget(null);
@@ -498,7 +500,8 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
           
           if (isCompleted || isCurrent || isSkipped) {
             // Direct navigation for completed, current, or skipped lessons
-            navigate(`/${currentLanguage}/lesson/${chapter.id}/${lesson.id}`);
+            const encodedLessonId = encodeLessonId(lesson.id);
+            navigate(`/${currentLanguage}/lesson/${chapter.id}/${encodedLessonId}`);
           } else if (isUnlocked) {
             // Check if this lesson comes after the current lesson
             const allLessons: { chapterId: number; lessonId: string }[] = [];
@@ -522,7 +525,8 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
               setShowSkipConfirm(true);
             } else {
               // Direct navigation for lessons before current (shouldn't happen with current logic, but safety)
-              navigate(`/${currentLanguage}/lesson/${chapter.id}/${lesson.id}`);
+              const encodedLessonId = encodeLessonId(lesson.id);
+              navigate(`/${currentLanguage}/lesson/${chapter.id}/${encodedLessonId}`);
             }
           }
         }}

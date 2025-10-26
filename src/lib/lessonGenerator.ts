@@ -132,6 +132,51 @@ export class LessonGenerator {
       return await this.generateTestWords(1); // Part 1: 30 scrambled letters
     }
     
+    // Special handling for symbol lessons - check if lesson letter is a symbol
+    const isSymbol = /[!@#$%^&*()]/.test(this.lessonLetter);
+    if (isSymbol) {
+      const words: string[] = [];
+      let letterCount = 0;
+      
+      // Generate sequences with the symbol
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const word = this.lessonLetter.repeat(wordLength);
+        words.push(word);
+        letterCount += wordLength;
+        
+        if (letterCount < 30) {
+          words.push(' ');
+        }
+      }
+      
+      return words.join('');
+    }
+    
+    // Special handling for shift lessons - generate uppercase letter sequences
+    if (this.lessonLetter === 'a' && this.chapterLetters.length > 0) {
+      // This is likely a shift lesson, generate uppercase letters
+      const words: string[] = [];
+      let letterCount = 0;
+      
+      // Generate words until we have 30 letters total using uppercase versions
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const availableLetters = [this.lessonLetter.toUpperCase(), ...this.chapterLetters.slice(0, 3).map(l => l.toUpperCase())];
+        const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+        const word = randomLetter.repeat(wordLength);
+        words.push(word);
+        letterCount += wordLength;
+        
+        // Add space if we haven't reached 30 letters yet
+        if (letterCount < 30) {
+          words.push(' ');
+        }
+      }
+      
+      return words.join('');
+    }
+    
     const words: string[] = [];
     let letterCount = 0;
     
@@ -155,6 +200,60 @@ export class LessonGenerator {
   async generatePart2(): Promise<string> {
     if (this.isTest) {
       return await this.generateTestWords(2); // Part 2: 15 common words
+    }
+    
+    // Special handling for symbol lessons
+    const isSymbol = /[!@#$%^&*()]/.test(this.lessonLetter);
+    if (isSymbol) {
+      const availableLetters = [this.lessonLetter, ...this.chapterLetters];
+      const letters: string[] = [];
+      let letterCount = 0;
+      
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const word: string[] = [];
+        
+        for (let i = 0; i < wordLength; i++) {
+          const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+          word.push(randomLetter);
+        }
+        
+        if (letters.length > 0) {
+          letters.push(' ');
+        }
+        letters.push(...word);
+        letterCount += wordLength;
+      }
+      
+      return letters.join('');
+    }
+    
+    // Special handling for shift lessons - generate uppercase letter sequences
+    if (this.lessonLetter === 'a' && this.chapterLetters.length > 0) {
+      // This is likely a shift lesson, generate uppercase letters
+      const availableLetters = [this.lessonLetter.toUpperCase(), ...this.chapterLetters.map(l => l.toUpperCase())];
+      
+      const letters: string[] = [];
+      let letterCount = 0;
+      
+      // Generate random sequences of 1-3 letters from lesson + chapter letters
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const word: string[] = [];
+        
+        for (let i = 0; i < wordLength; i++) {
+          const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+          word.push(randomLetter);
+        }
+        
+        if (letters.length > 0) {
+          letters.push(' ');
+        }
+        letters.push(...word);
+        letterCount += wordLength;
+      }
+      
+      return letters.join('');
     }
     
     // If no chapter letters available, fall back to part 1
@@ -192,6 +291,65 @@ export class LessonGenerator {
   async generatePart3(): Promise<string> {
     if (this.isTest) {
       return await this.generateTestWords(3); // Part 3: A quote
+    }
+    
+    // Special handling for symbol lessons
+    const isSymbol = /[!@#$%^&*()]/.test(this.lessonLetter);
+    if (isSymbol) {
+      const availableLetters = this.allLearnedLetters.length > 0 
+        ? [this.lessonLetter, ...this.allLearnedLetters]
+        : [this.lessonLetter, ...this.chapterLetters];
+      
+      const letters: string[] = [];
+      let letterCount = 0;
+      
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const word: string[] = [];
+        
+        for (let i = 0; i < wordLength; i++) {
+          const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+          word.push(randomLetter);
+        }
+        
+        if (letters.length > 0) {
+          letters.push(' ');
+        }
+        letters.push(...word);
+        letterCount += wordLength;
+      }
+      
+      return letters.join('');
+    }
+    
+    // Special handling for shift lessons - generate uppercase letter sequences
+    if (this.lessonLetter === 'a' && this.chapterLetters.length > 0) {
+      // This is likely a shift lesson, generate uppercase letters with all learned letters
+      const availableLetters = this.allLearnedLetters.length > 0 
+        ? [this.lessonLetter.toUpperCase(), ...this.allLearnedLetters.slice(0, 10).map(l => l.toUpperCase())]
+        : [this.lessonLetter.toUpperCase(), ...this.chapterLetters.map(l => l.toUpperCase())];
+      
+      const letters: string[] = [];
+      let letterCount = 0;
+      
+      // Generate random sequences of 1-3 letters from lesson + all learned letters
+      while (letterCount < 30) {
+        const wordLength = Math.min(1 + Math.floor(Math.random() * 3), 30 - letterCount);
+        const word: string[] = [];
+        
+        for (let i = 0; i < wordLength; i++) {
+          const randomLetter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+          word.push(randomLetter);
+        }
+        
+        if (letters.length > 0) {
+          letters.push(' ');
+        }
+        letters.push(...word);
+        letterCount += wordLength;
+      }
+      
+      return letters.join('');
     }
     
     // If no learned letters available, fall back to part 1
@@ -346,6 +504,73 @@ export function getLessonConfig(lessonId: string, chapterId: string): LessonConf
   const chapters = createChaptersForLayout(activeLayoutString);
   const lessonLetter = lessonId.toLowerCase();
   
+  // Handle shift-symbol lessons (shift-1, shift-2, etc.)
+  if (lessonLetter.startsWith('shift-')) {
+    // Extract the number from "shift-1", "shift-2", etc.
+    const num = parseInt(lessonLetter.replace('shift-', ''));
+    const symbolMap: Record<number, string> = {
+      1: '!', 2: '@', 3: '#', 4: '$', 5: '%',
+      6: '^', 7: '&', 8: '*', 9: '(', 10: ')'
+    };
+    const symbol = symbolMap[num] || '';
+    
+    // Find the current chapter and get all previous lessons
+    const currentChapter = chapters.find(ch => ch.id === parseInt(chapterId));
+    if (!currentChapter) {
+      return { lessonLetter: symbol, chapterLetters: [], allLearnedLetters: [] };
+    }
+    
+    // Get all previous symbols from chapter 5
+    const chapter5 = chapters.find(ch => ch.id === 5);
+    const previousSymbols: string[] = [];
+    if (chapter5) {
+      const currentSymbolIndex = chapter5.lessons.findIndex(l => l.id === lessonLetter);
+      if (currentSymbolIndex > 0) {
+        // Get symbols that come before this one
+        const prevLessons = chapter5.lessons.slice(0, currentSymbolIndex);
+        prevLessons.forEach(lesson => {
+          if (lesson.letter && !lesson.letter.includes('⇧')) {
+            previousSymbols.push(lesson.letter);
+          }
+        });
+      }
+    }
+    
+    return {
+      lessonLetter: symbol,
+      chapterLetters: previousSymbols,
+      allLearnedLetters: previousSymbols // Use symbols as learned letters too
+    };
+  }
+  
+  // Handle rshift and lshift lessons
+  if (lessonLetter === 'rshift' || lessonLetter === 'lshift') {
+    // For shift lessons, generate uppercase letters with all learned letters
+    const currentChapter = chapters.find(ch => ch.id === parseInt(chapterId));
+    if (!currentChapter) {
+      return { lessonLetter: 'A', chapterLetters: [], allLearnedLetters: [] };
+    }
+    
+    // Get all learned letters from previous chapters
+    const allLearnedLetters: string[] = [];
+    for (const chapter of chapters) {
+      if (chapter.id < parseInt(chapterId)) {
+        const prevLessonLetters = chapter.lessons
+          .filter(l => l.type === 'letter')
+          .map(l => l.letter?.toLowerCase() || '')
+          .filter(Boolean)
+          .filter(l => l !== 'rshift' && l !== 'lshift'); // Exclude shift keys
+        allLearnedLetters.push(...prevLessonLetters);
+      }
+    }
+    
+    return {
+      lessonLetter: 'A', // Start with A as the shift example
+      chapterLetters: allLearnedLetters.slice(0, 5), // First 5 learned letters
+      allLearnedLetters
+    };
+  }
+  
   // Check if this is a roadmap final test
   if (lessonId.toLowerCase().startsWith('test')) {
     const currentChapter = chapters.find(ch => ch.id === parseInt(chapterId));
@@ -357,7 +582,8 @@ export function getLessonConfig(lessonId: string, chapterId: string): LessonConf
     const currentChapterLetters = currentChapter.lessons
       .filter(l => l.type === 'letter')
       .map(l => l.letter?.toLowerCase() || '')
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(l => !l.includes('⇧') && l !== 'rshift' && l !== 'lshift'); // Exclude shift indicators and shift keys which are not typable
     
     // For tests, use the entire chapter's letters as the "lesson letters"
     // and previous chapters as "learned letters"
@@ -368,7 +594,8 @@ export function getLessonConfig(lessonId: string, chapterId: string): LessonConf
         const prevLessonLetters = chapter.lessons
           .filter(l => l.type === 'letter')
           .map(l => l.letter?.toLowerCase() || '')
-          .filter(Boolean);
+          .filter(Boolean)
+          .filter(l => !l.includes('⇧') && l !== 'rshift' && l !== 'lshift'); // Exclude shift indicators and shift keys which are not typable
         allLearnedLetters.push(...prevLessonLetters);
       }
     }
@@ -394,7 +621,7 @@ export function getLessonConfig(lessonId: string, chapterId: string): LessonConf
   
   // Get letters from the same chapter that come BEFORE the current lesson
   const chapterLetters = lessonIndex > 0 
-    ? currentChapterLessons.slice(0, lessonIndex).map(l => l.letter?.toLowerCase() || '').filter(Boolean)
+    ? currentChapterLessons.slice(0, lessonIndex).map(l => l.letter?.toLowerCase() || '').filter(Boolean).filter(l => !l.includes('⇧') && l !== 'rshift' && l !== 'lshift')
     : [];
   
   // Get all learned letters from previous chapters + letters learned before current lesson in current chapter
@@ -405,7 +632,8 @@ export function getLessonConfig(lessonId: string, chapterId: string): LessonConf
       const prevLessonLetters = chapter.lessons
         .filter(l => l.type === 'letter')
         .map(l => l.letter?.toLowerCase() || '')
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter(l => !l.includes('⇧') && l !== 'rshift' && l !== 'lshift'); // Exclude shift indicators and shift keys
       allLearnedLetters.push(...prevLessonLetters);
     } else if (chapter.id === parseInt(chapterId)) {
       // Add letters from current chapter that come before the current lesson

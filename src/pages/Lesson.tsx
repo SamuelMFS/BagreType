@@ -15,16 +15,20 @@ import { LessonGenerator, getLessonConfig } from "@/lib/lessonGenerator";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocalization } from "@/hooks/useLocalization";
+import { decodeLessonId } from "@/lib/urlEncoder";
 
 type PracticeRound = "lesson" | "chapter" | "all" | "complete";
 
 const Lesson = () => {
   const navigate = useNavigate();
-  const { lessonId, chapterId, lang } = useParams();
+  const { lessonId: encodedLessonId, chapterId, lang } = useParams();
   const { user } = useAuth();
   const { t } = useLocalization();
   const [currentRound, setCurrentRound] = useState<PracticeRound>("lesson");
   const typingTestRef = useRef<{ reset: () => void }>(null);
+  
+  // Decode the lesson ID from URL
+  const lessonId = encodedLessonId ? decodeLessonId(encodedLessonId) : undefined;
   
   // Debug current round changes
   useEffect(() => {

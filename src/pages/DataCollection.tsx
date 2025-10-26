@@ -5,6 +5,7 @@ import SegmentedProgressBar from "@/components/SegmentedProgressBar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocalization } from "@/hooks/useLocalization";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,7 @@ type KeyboardLayout = "ortholinear" | "staggered" | null;
 type TouchTyper = "yes" | "no" | null;
 type WantToLearn = "yes" | "no" | null;
 type ShareData = "yes" | "no" | null;
+type Difficulty = "easy" | "medium" | "hard";
 
 const DataCollection = () => {
   const navigate = useNavigate();
@@ -30,10 +32,29 @@ const DataCollection = () => {
   // Typing test state
   const [isTestActive, setIsTestActive] = useState(false);
   const [currentLetter, setCurrentLetter] = useState<string>("");
+  const [letterRenderedTime, setLetterRenderedTime] = useState<number | null>(null);
   const [testStartTime, setTestStartTime] = useState<number | null>(null);
+  
+  // Helper to set current letter and record render time
+  const setCurrentLetterWithTime = (letter: string) => {
+    setCurrentLetter(letter);
+    setLetterRenderedTime(Date.now());
+  };
   const [letterSequence, setLetterSequence] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [typingData, setTypingData] = useState<Array<{letter: string, reactionTime: number, timestamp: number, correct: boolean}>>([]);
+  const [typingData, setTypingData] = useState<Array<{
+    sequence: string, 
+    sequenceIndex: number,
+    letterTimings: Array<{
+      letter: string,
+      reactionTime: number,
+      timestamp: number,
+      correct: boolean
+    }>,
+    sequenceStartTime: number,
+    sequenceEndTime: number,
+    totalSequenceTime: number
+  }>>([]);
   const [testCompleted, setTestCompleted] = useState(false);
   const [questionnaireResponseId, setQuestionnaireResponseId] = useState<string | null>(null);
   const [showResultsButton, setShowResultsButton] = useState(false);
@@ -42,6 +63,21 @@ const DataCollection = () => {
   const [userJustSelected, setUserJustSelected] = useState(false);
   const [previousStep, setPreviousStep] = useState<string | null>(null);
   const [isExiting, setIsExiting] = useState(false);
+  const [testsCompleted, setTestsCompleted] = useState(0);
+  
+  // Difficulty system state
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [manualDifficultySet, setManualDifficultySet] = useState(false);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const [currentSequenceStartTime, setCurrentSequenceStartTime] = useState<number | null>(null);
+  const [previousKeyTime, setPreviousKeyTime] = useState<number | null>(null);
+  const [currentSequenceResults, setCurrentSequenceResults] = useState<boolean[]>([]);
+  const [currentSequenceLetterTimings, setCurrentSequenceLetterTimings] = useState<Array<{
+    letter: string,
+    reactionTime: number,
+    timestamp: number,
+    correct: boolean
+  }>>([]);
 
   // Generate or retrieve session ID for anonymous users
   useEffect(() => {
@@ -155,7 +191,7 @@ const DataCollection = () => {
         letters[Math.floor(Math.random() * letters.length)]
       );
       setLetterSequence(sequence);
-      setCurrentLetter(sequence[0]);
+      setCurrentLetterWithTime(sequence[0]);
       setCurrentIndex(0);
       setTypingData([]);
       setTestCompleted(false);
@@ -164,6 +200,53 @@ const DataCollection = () => {
       setIsBouncing(false);
     }
   }, [step]);
+
+  // Generate letter sequence for typing test
+  const generateLetterSequence = (difficulty: Difficulty): string[] => {
+    const letters = "abcdefghijklmnopqrstuvwxyz";
+    
+    switch (difficulty) {
+      case "easy":
+        // Single letters
+        return Array.from({ length: 30 }, () => 
+          letters[Math.floor(Math.random() * letters.length)]
+        );
+      case "medium":
+        // Two-letter combinations
+        return Array.from({ length: 30 }, () => 
+          letters[Math.floor(Math.random() * letters.length)] + 
+          letters[Math.floor(Math.random() * letters.length)]
+        );
+      case "hard":
+        // Three-letter combinations
+        return Array.from({ length: 30 }, () => 
+          letters[Math.floor(Math.random() * letters.length)] + 
+          letters[Math.floor(Math.random() * letters.length)] + 
+          letters[Math.floor(Math.random() * letters.length)]
+        );
+    }
+  };
+
+  // Generate letter sequence for typing test
+  useEffect(() => {
+    if (step === "test") {
+      const sequence = generateLetterSequence(difficulty);
+      console.log('Generating new test with difficulty:', difficulty, 'sequence:', sequence);
+      setLetterSequence(sequence);
+      setCurrentLetterWithTime(sequence[0]);
+      setCurrentIndex(0);
+      setCurrentCharIndex(0);
+      setCurrentSequenceStartTime(null);
+      setPreviousKeyTime(null);
+      setCurrentSequenceResults([]);
+      setCurrentSequenceLetterTimings([]);
+      setTypingData([]);
+      setTestCompleted(false);
+      setIsTestActive(false);
+      setLastTypedCorrect(null);
+      setIsBouncing(false);
+    }
+  }, [step, difficulty]);
 
   // Typing test keyboard handler
   useEffect(() => {
@@ -196,8 +279,9 @@ const DataCollection = () => {
       // Handle letter input
       if (e.key.length === 1 && isTestActive && testStartTime && !testCompleted) {
         const now = Date.now();
-        const reactionTime = now - testStartTime;
-        const isCorrect = e.key.toLowerCase() === currentLetter.toLowerCase();
+        const currentSequence = letterSequence[currentIndex];
+        const expectedChar = currentSequence[currentCharIndex];
+        const isCorrect = e.key.toLowerCase() === expectedChar.toLowerCase();
         
         // Set feedback state and trigger bounce animation
         setLastTypedCorrect(isCorrect);
@@ -209,25 +293,89 @@ const DataCollection = () => {
           setLastTypedCorrect(null);
         }, 200);
         
-        setTypingData(prev => [...prev, {
-          letter: currentLetter,
+        // Determine sequence start time for this keystroke
+        let sequenceStartTime = currentSequenceStartTime;
+        if (currentCharIndex === 0) {
+          // For the first sequence, use testStartTime (when user pressed Space) as T0
+          // For subsequent sequences, use letterRenderedTime
+          sequenceStartTime = (currentIndex === 0 && testStartTime) ? testStartTime : (letterRenderedTime || now);
+          setCurrentSequenceStartTime(sequenceStartTime);
+          setCurrentSequenceResults([]);
+          setCurrentSequenceLetterTimings([]);
+        } else {
+          // Use the existing sequence start time
+          sequenceStartTime = currentSequenceStartTime || now;
+        }
+        
+        // Calculate reaction time
+        let reactionTime = 0;
+        if (currentCharIndex === 0) {
+          // First letter: time from sequence rendered to key pressed (T1 - T0)
+          // Use testStartTime for the very first sequence, letterRenderedTime for others
+          const t0 = (currentIndex === 0 && testStartTime) ? testStartTime : letterRenderedTime;
+          reactionTime = t0 ? now - t0 : 0;
+        } else {
+          // Subsequent letters: time from previous key pressed to current key pressed (T2 - T1, T3 - T2, etc.)
+          reactionTime = previousKeyTime ? now - previousKeyTime : 0;
+        }
+        
+        // Add current letter timing to the sequence
+        const letterTiming = {
+          letter: expectedChar,
           reactionTime,
           timestamp: now,
           correct: isCorrect
-        }]);
-
-        // Move to next letter
-        const nextIndex = currentIndex + 1;
-        if (nextIndex < letterSequence.length) {
-          setCurrentIndex(nextIndex);
-          setCurrentLetter(letterSequence[nextIndex]);
-          setTestStartTime(now); // Reset timer for next letter
+        };
+        
+        // Update previous key time for next calculation (this will be used for the next letter)
+        setPreviousKeyTime(now);
+        
+        setCurrentSequenceLetterTimings(prev => [...prev, letterTiming]);
+        setCurrentSequenceResults(prev => [...prev, isCorrect]);
+        
+        console.log('Typing letter:', expectedChar, 'at position:', currentCharIndex, 'in sequence:', currentSequence);
+        
+        // Check if we've completed the current sequence
+        if (currentCharIndex + 1 >= currentSequence.length) {
+          // Complete the current sequence
+          const sequenceEndTime = now;
+          // Total time from when sequence was rendered to when last key was pressed
+          const totalSequenceTime = sequenceStartTime ? now - sequenceStartTime : 0;
+          
+          // Add completed sequence to typing data
+          setTypingData(prev => [...prev, {
+            sequence: currentSequence,
+            sequenceIndex: currentIndex,
+            letterTimings: [...currentSequenceLetterTimings, letterTiming],
+            sequenceStartTime: sequenceStartTime,
+            sequenceEndTime,
+            totalSequenceTime
+          }]);
+          
+          // Move to next sequence
+          const nextIndex = currentIndex + 1;
+          if (nextIndex >= letterSequence.length) {
+            // Test completed (we've finished all sequences, including the last one)
+            setIsTestActive(false);
+            setTestCompleted(true);
+            setShowResultsButton(true);
+            setTestsCompleted(prev => prev + 1);
+          } else {
+            // Move to next sequence
+            setCurrentIndex(nextIndex);
+            setCurrentLetterWithTime(letterSequence[nextIndex]);
+            setCurrentCharIndex(0);
+            setCurrentSequenceStartTime(null);
+            setPreviousKeyTime(null);
+            setCurrentSequenceResults([]);
+            setCurrentSequenceLetterTimings([]);
+            setTestStartTime(now);
+          }
         } else {
-          // Test completed
-          setIsTestActive(false);
-          setTestCompleted(true);
-          setShowResultsButton(true);
-          saveTypingTestData();
+          // Move to next character in current sequence
+          setCurrentCharIndex(prev => prev + 1);
+          setCurrentLetterWithTime(currentSequence[currentCharIndex + 1]);
+          setTestStartTime(now);
         }
       }
     };
@@ -238,13 +386,48 @@ const DataCollection = () => {
 
   // Restart typing test
   const restartTest = () => {
-    const letters = "abcdefghijklmnopqrstuvwxyz";
-    const sequence = Array.from({ length: 30 }, () => 
-      letters[Math.floor(Math.random() * letters.length)]
-    );
+    // Cycle difficulty if not manually set
+    if (!manualDifficultySet) {
+      setDifficulty(prev => {
+        if (prev === "easy") return "medium";
+        if (prev === "medium") return "hard";
+        return "easy";
+      });
+    }
+    
+    const sequence = generateLetterSequence(difficulty);
     setLetterSequence(sequence);
     setCurrentLetter(sequence[0]);
     setCurrentIndex(0);
+    setCurrentCharIndex(0);
+            setCurrentSequenceStartTime(null);
+            setPreviousKeyTime(null);
+            setCurrentSequenceResults([]);
+            setCurrentSequenceLetterTimings([]);
+    setTypingData([]);
+    setTestCompleted(false);
+    setIsTestActive(false);
+    setTestStartTime(null);
+    setLastTypedCorrect(null);
+    setIsBouncing(false);
+    // Don't reset testsCompleted here - let it accumulate
+  };
+
+  // Handle difficulty change
+  const handleDifficultyChange = (newDifficulty: Difficulty) => {
+    setDifficulty(newDifficulty);
+    setManualDifficultySet(true);
+    
+    // Regenerate sequence with new difficulty
+    const sequence = generateLetterSequence(newDifficulty);
+    setLetterSequence(sequence);
+    setCurrentLetter(sequence[0]);
+    setCurrentIndex(0);
+    setCurrentCharIndex(0);
+            setCurrentSequenceStartTime(null);
+            setPreviousKeyTime(null);
+            setCurrentSequenceResults([]);
+            setCurrentSequenceLetterTimings([]);
     setTypingData([]);
     setTestCompleted(false);
     setIsTestActive(false);
@@ -261,6 +444,14 @@ const DataCollection = () => {
     setShareData(null);
     setStep("layout");
     setUserJustSelected(false);
+    setTestsCompleted(0); // Reset test counter when starting fresh
+    setDifficulty("easy");
+    setManualDifficultySet(false);
+    setCurrentCharIndex(0);
+            setCurrentSequenceStartTime(null);
+            setPreviousKeyTime(null);
+            setCurrentSequenceResults([]);
+            setCurrentSequenceLetterTimings([]);
     
     // Clear saved data
     if (user) {
@@ -278,10 +469,23 @@ const DataCollection = () => {
     try {
       if (typingData.length === 0) return;
 
-      const totalDuration = typingData[typingData.length - 1].timestamp - typingData[0].timestamp;
-      const correctAnswers = typingData.filter(d => d.correct).length;
-      const accuracy = (correctAnswers / typingData.length) * 100;
-      const averageReactionTime = typingData.reduce((sum, d) => sum + d.reactionTime, 0) / typingData.length;
+      console.log('Current typingData structure:', typingData);
+      console.log('Number of sequences:', typingData.length);
+      console.log('First sequence details:', typingData[0]);
+      console.log('Last sequence details:', typingData[typingData.length - 1]);
+      console.log('First sequence letterTimings:', typingData[0]?.letterTimings);
+      console.log('Last sequence letterTimings:', typingData[typingData.length - 1]?.letterTimings);
+
+      const totalDuration = Math.abs(typingData[typingData.length - 1].sequenceEndTime - typingData[0].sequenceStartTime);
+      // Calculate total letters from the sequences
+      const totalLetters = typingData.reduce((sum, seq) => sum + seq.letterTimings.length, 0);
+      const correctAnswers = typingData.reduce((sum, seq) => 
+        sum + seq.letterTimings.filter(d => d.correct).length, 0
+      );
+      const accuracy = totalLetters > 0 ? (correctAnswers / totalLetters) * 100 : 0;
+      const averageReactionTime = totalLetters > 0 ? typingData.reduce((sum, seq) => 
+        sum + seq.letterTimings.reduce((seqSum, letter) => seqSum + letter.reactionTime, 0), 0
+      ) / totalLetters : 0;
 
       const testData = {
         user_id: user?.id || null,
@@ -290,29 +494,72 @@ const DataCollection = () => {
         keyboard_layout: keyboardLayout!,
         can_touch_type: canTouchType!,
         test_duration_ms: totalDuration,
-        total_letters: letterSequence.length,
-        completed_letters: typingData.length,
-        typing_data: typingData,
+        total_letters: totalLetters,
+        completed_letters: totalLetters,
+        typing_data: typingData.map(seq => ({
+          sequence: seq.sequence,
+          sequenceIndex: seq.sequenceIndex,
+          letterTimings: seq.letterTimings.map(letter => ({
+            letter: letter.letter,
+            reactionTime: letter.reactionTime,
+            timestamp: letter.timestamp,
+            correct: letter.correct
+          })),
+          sequenceStartTime: seq.sequenceStartTime,
+          sequenceEndTime: seq.sequenceEndTime,
+          totalSequenceTime: seq.totalSequenceTime
+        })),
         average_reaction_time_ms: Math.round(averageReactionTime),
         accuracy_percentage: Math.round(accuracy * 100) / 100,
         completed_at: new Date().toISOString(),
       };
 
-      if (user) {
-        // Save to Supabase for logged-in users
-        const { error } = await supabase
-          .from('typing_test_data')
-          .insert(testData);
+      console.log('Sending this data to database:', testData);
+      console.log('Typing data being sent:', JSON.stringify(testData.typing_data, null, 2));
+      console.log('Test timestamp:', testData.completed_at);
+      console.log('User logged in:', !!user);
+      console.log('Share data consent:', shareData);
+      console.log('Will save to Supabase:', !!(user || shareData === "yes"));
 
-        if (error) throw error;
-        console.log('Typing test data saved to Supabase:', testData);
+      if (user || shareData === "yes") {
+        // Try to save to Supabase for logged-in users OR anonymous users who consented
+        try {
+          const { error } = await supabase
+            .from('typing_test_data')
+            .insert(testData);
+
+          if (error) {
+            console.error('Supabase error details:', error);
+            console.error('Error message:', error.message);
+            console.error('Error details:', error.details);
+            console.error('Error hint:', error.hint);
+            
+            // If Supabase fails, fall back to localStorage
+            console.log('Supabase failed, falling back to localStorage');
+            const existingData = localStorage.getItem('bagre-typing-tests') || '[]';
+            const tests = JSON.parse(existingData);
+            tests.push(testData);
+            localStorage.setItem('bagre-typing-tests', JSON.stringify(tests));
+            console.log('Typing test data saved to localStorage (fallback):', testData);
+          } else {
+            console.log('Typing test data saved to Supabase:', testData);
+          }
+        } catch (supabaseError) {
+          console.error('Supabase connection error:', supabaseError);
+          // Fall back to localStorage
+          const existingData = localStorage.getItem('bagre-typing-tests') || '[]';
+          const tests = JSON.parse(existingData);
+          tests.push(testData);
+          localStorage.setItem('bagre-typing-tests', JSON.stringify(tests));
+          console.log('Typing test data saved to localStorage (connection error):', testData);
+        }
       } else {
-        // Save to localStorage for anonymous users
+        // Save to localStorage for anonymous users who didn't consent
         const existingData = localStorage.getItem('bagre-typing-tests') || '[]';
         const tests = JSON.parse(existingData);
         tests.push(testData);
         localStorage.setItem('bagre-typing-tests', JSON.stringify(tests));
-        console.log('Typing test data saved to localStorage:', testData);
+        console.log('Typing test data saved to localStorage (no consent):', testData);
       }
     } catch (error) {
       console.error('Error saving typing test data:', error);
@@ -385,6 +632,19 @@ const DataCollection = () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [shareData, step]);
+
+  // Auto-save typing test data when test completes
+  useEffect(() => {
+    if (testCompleted && typingData.length > 0) {
+      console.log('Test completed, typingData length:', typingData.length);
+      // Add a small delay to ensure all state updates have propagated
+      const timeout = setTimeout(() => {
+        saveTypingTestData();
+      }, 50);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [testCompleted, typingData.length]);
 
   // Function to handle step transitions with animation
   const transitionToStep = (newStep: string) => {
@@ -607,6 +867,19 @@ const DataCollection = () => {
               <div className="space-y-8">
                 <div className="space-y-3 text-center">
                   <h2 className="text-3xl font-semibold text-accent">{t('dataCollection.steps.test.title')}</h2>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <span>{t('dataCollection.steps.test.difficulty.title')}:</span>
+                    <Select value={difficulty} onValueChange={handleDifficultyChange}>
+                      <SelectTrigger className="w-20 h-7 text-xs border-muted-foreground/30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="easy">{t('dataCollection.steps.test.difficulty.easy')}</SelectItem>
+                        <SelectItem value="medium">{t('dataCollection.steps.test.difficulty.medium')}</SelectItem>
+                        <SelectItem value="hard">{t('dataCollection.steps.test.difficulty.hard')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-8">
@@ -615,23 +888,45 @@ const DataCollection = () => {
                       !isTestActive && !testCompleted ? 'blur-sm' : ''
                     }`}>
                       <div className="absolute top-4 right-4 text-sm text-muted-foreground">
-                        {testCompleted ? `${letterSequence.length} of ${letterSequence.length}` : `${currentIndex + 1} of ${letterSequence.length}`}
+                        {testCompleted ? `${letterSequence.length || 0} of ${letterSequence.length || 0}` : `${currentIndex + 1} of ${letterSequence.length || 0}`}
                       </div>
                       <div className="text-center">
                         {testCompleted ? (
                           <div className="space-y-6">
-                            <div className="text-6xl">↻</div>
-                            <div className="text-lg text-muted-foreground">
-                              {t('dataCollection.steps.test.spaceToPlayAgain')}
-                            </div>
+                            {testsCompleted < 3 ? (
+                              <>
+                                <div className="text-5xl">→</div>
+                                <div className="text-base text-muted-foreground">
+                                  {t('dataCollection.steps.test.nextPart')}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="text-5xl">↻</div>
+                                <div className="text-base text-muted-foreground">
+                                  {t('dataCollection.steps.test.allDone')}
+                                </div>
+                              </>
+                            )}
                           </div>
                         ) : (
-                          <div className={`text-6xl font-bold transition-all duration-150 ${
-                            lastTypedCorrect === true ? 'text-green-500' :
-                            lastTypedCorrect === false ? 'text-red-500' :
-                            'text-primary'
-                          } ${isBouncing ? 'scale-125' : 'scale-100'}`}>
-                            {currentLetter}
+                          <div className="flex justify-center gap-1">
+                            {letterSequence[currentIndex] && letterSequence[currentIndex].split('').map((char, index) => (
+                              <div key={index} className="flex flex-col items-center">
+                                <span
+                                  className={`text-6xl font-bold transition-all duration-150 ${
+                                    index < currentCharIndex ? (
+                                      currentSequenceResults[index] ? 'text-green-500' : 'text-red-500'
+                                    ) : 'text-foreground'
+                                  } ${index === currentCharIndex && isBouncing ? 'scale-125' : 'scale-100'}`}
+                                >
+                                  {char}
+                                </span>
+                                {index === currentCharIndex && (
+                                  <div className="w-8 h-1 bg-primary rounded-full mt-3 animate-pulse"></div>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>

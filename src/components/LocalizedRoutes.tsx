@@ -65,7 +65,7 @@ const LocalizedRoutes = () => {
           <LessonsJourney />
         </ScrollProvider>
       } />
-      <Route path="/:lang/lesson/:chapterId/:lessonId" element={<Lesson />} />
+      <Route path="/:lang/lesson/:chapterId/:lessonId*" element={<Lesson />} />
       <Route path="/:lang/practice" element={<Practice />} />
       <Route path="/:lang/generate" element={<Generate />} />
       <Route path="/:lang/auth" element={<Auth />} />

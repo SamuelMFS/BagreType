@@ -128,11 +128,22 @@
         "spaceToStart": "Pressione Espaço para começar",
         "escToStop": "Pressione Esc para parar",
         "spaceToPlayAgain": "Pressione Espaço para jogar novamente",
+        "nextPart": "Ótimo! Próxima parte - pressione Espaço",
+        "allDone": "Isso é tudo que preciso de você, mas adoraria se você digitasse mais um pouco.",
         "focusOnAccuracy": "Foque na precisão primeiro, depois a velocidade seguirá naturalmente",
         "results": "Resultados →",
         "step": "Etapa",
         "of": "de",
-        "resetChoices": "Redefinir Escolhas"
+        "resetChoices": "Redefinir Escolhas",
+        "difficulty": {
+          "title": "Dificuldade",
+          "easy": "Fácil",
+          "medium": "Médio", 
+          "hard": "Difícil",
+          "easyDescription": "Letras únicas (a, b, c)",
+          "mediumDescription": "Duas letras (ab, aa, ba)",
+          "hardDescription": "Três letras (aab, aba, aaa)"
+        }
       }
     }
   },

@@ -23,10 +23,22 @@ interface TypingTestData {
   total_letters: number;
   completed_letters: number;
   typing_data: Array<{
-    letter: string;
-    reactionTime: number;
-    timestamp: number;
-    correct: boolean;
+    sequence?: string;
+    sequenceIndex?: number;
+    letterTimings?: Array<{
+      letter: string;
+      reactionTime: number;
+      timestamp: number;
+      correct: boolean;
+    }>;
+    sequenceStartTime?: number;
+    sequenceEndTime?: number;
+    totalSequenceTime?: number;
+    // Old format fields (for backward compatibility)
+    letter?: string;
+    reactionTime?: number;
+    timestamp?: number;
+    correct?: boolean;
   }>;
   average_reaction_time_ms: number;
   accuracy_percentage: number;
@@ -60,22 +72,42 @@ const Results = () => {
         if (error) throw error;
         setTypingTests(data || []);
       } else {
-        // Load from localStorage for anonymous users
+        // Load from both Supabase (for anonymous users who consented) and localStorage (for those who didn't)
+        const sessionId = localStorage.getItem('bagre-questionnaire-session');
+        
+        let supabaseTests: any[] = [];
+        if (sessionId) {
+          try {
+            const { data, error } = await supabase
+              .from('typing_test_data')
+              .select('*')
+              .eq('session_id', sessionId)
+              .order('created_at', { ascending: false });
+            
+            if (!error && data) {
+              supabaseTests = data;
+            }
+          } catch (error) {
+            console.error('Error fetching from Supabase:', error);
+          }
+        }
+        
+        // Also check localStorage
         const savedTests = localStorage.getItem('bagre-typing-tests');
+        let localStorageTests: any[] = [];
         if (savedTests) {
           const tests = JSON.parse(savedTests);
-          // Normalize localStorage data to match Supabase structure
-          const normalizedTests = tests.map((test: any, index: number) => ({
+          localStorageTests = tests.map((test: any, index: number) => ({
             ...test,
-            // Generate unique ID if missing
             id: test.id || `local-${Date.now()}-${index}`,
-            // Use completed_at as created_at for localStorage data
             created_at: test.created_at || test.completed_at || new Date().toISOString()
           }));
-          // Sort by date (most recent first)
-          normalizedTests.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          setTypingTests(normalizedTests);
         }
+        
+        // Combine both sources and sort by date
+        const allTests = [...supabaseTests, ...localStorageTests];
+        allTests.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setTypingTests(allTests);
       }
     } catch (error) {
       console.error('Error loading typing test data:', error);
@@ -84,9 +116,35 @@ const Results = () => {
     }
   };
 
+  // Flatten sequence data into individual letter data for charts
+  const flattenSequenceData = (sequenceData: TypingTestData['typing_data']) => {
+    // Check if data is in new sequence format or old individual letter format
+    if (sequenceData.length > 0 && 'sequence' in sequenceData[0]) {
+      // New sequence format
+      console.log('Using new sequence format for charts');
+      return sequenceData.flatMap(sequence => 
+        sequence.letterTimings!.map(letter => ({
+          letter: letter.letter,
+          reactionTime: letter.reactionTime,
+          timestamp: letter.timestamp,
+          correct: letter.correct
+        }))
+      );
+    } else {
+      // Old individual letter format (for backward compatibility)
+      console.log('Using old individual letter format for charts');
+      return sequenceData.map(letter => ({
+        letter: letter.letter!,
+        reactionTime: letter.reactionTime!,
+        timestamp: letter.timestamp!,
+        correct: letter.correct!
+      }));
+    }
+  };
+
   // Aggregate all typing data from all tests
   const getAllTimeTypingData = () => {
-    return typingTests.flatMap(test => test.typing_data || []);
+    return typingTests.flatMap(test => flattenSequenceData(test.typing_data || []));
   };
 
   const getLatestTest = () => {
@@ -317,7 +375,7 @@ const Results = () => {
                       {/* Expanded Chart */}
                       {expandedTestId === test.id && (
                         <div className="p-4 bg-muted/20 rounded-lg">
-                          <HorizontalLetterChart typingData={test.typing_data} />
+                          <HorizontalLetterChart typingData={flattenSequenceData(test.typing_data)} />
                         </div>
                       )}
                     </div>
