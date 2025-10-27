@@ -159,14 +159,19 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
     resetTest();
   }, [wordCount, zenMode, timeLimit]);
 
-  // Notify parent component of current character changes
+  // Notify parent component of current character changes (not for zen mode, handled in key handler)
   useEffect(() => {
-    if (onCurrentCharChange && words.length > 0) {
+    if (zenMode) return; // Zen mode handles currentChar in keydown handler
+    
+    if (onCurrentCharChange && words.length > 0 && !isComplete) {
       const fullText = words.join(' ');
       const currentChar = fullText[currentIndex] || '';
       onCurrentCharChange(currentChar);
+    } else if (onCurrentCharChange && isComplete) {
+      // Clear current char when test is complete
+      onCurrentCharChange('');
     }
-  }, [currentIndex, words, onCurrentCharChange]);
+  }, [currentIndex, words, onCurrentCharChange, isComplete, zenMode]);
 
   useEffect(() => {
     if (isComplete) return;
@@ -177,6 +182,10 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
         e.preventDefault();
         if (zenMode) {
           setIsComplete(true);
+          // Clear current char when zen mode completes
+          if (onCurrentCharChange) {
+            onCurrentCharChange('');
+          }
         } else {
           resetTest();
         }
@@ -199,9 +208,20 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
           setTotalKeystrokes(prev => prev + 1);
           setZenText(prev => prev + e.key);
           setLastKeystrokeTime(Date.now());
+          // Notify parent of the key that was just typed
+          if (onCurrentCharChange) {
+            onCurrentCharChange(e.key);
+          }
         } else if (e.key === 'Backspace') {
           e.preventDefault();
-          setZenText(prev => prev.slice(0, -1));
+          setZenText(prev => {
+            const updated = prev.slice(0, -1);
+            // Get the last character or clear if empty
+            if (onCurrentCharChange) {
+              onCurrentCharChange(updated.slice(-1) || '');
+            }
+            return updated;
+          });
           setLastKeystrokeTime(Date.now());
         }
         return;
@@ -268,7 +288,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode]);
+  }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode, zenText, onCurrentCharChange]);
 
   // Handle keyboard input when test is complete (escape to restart)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+﻿import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { useLocalization } from "@/hooks/useLocalization";
 

@@ -3,208 +3,208 @@
 ## Lowercase Letters (26 images × 2 themes = 52 images)
 
 ### Chapter 1: Index Fingers
-- [ ] qwerty_f_light.png
-- [ ] qwerty_f_dark.png
-- [ ] qwerty_j_light.png
-- [ ] qwerty_j_dark.png
-- [ ] qwerty_r_light.png
-- [ ] qwerty_r_dark.png
-- [ ] qwerty_u_light.png
-- [ ] qwerty_u_dark.png
-- [ ] qwerty_n_light.png
-- [ ] qwerty_n_dark.png
-- [ ] qwerty_v_light.png
-- [ ] qwerty_v_dark.png
-- [ ] qwerty_t_light.png
-- [ ] qwerty_t_dark.png
-- [ ] qwerty_y_light.png
-- [ ] qwerty_y_dark.png
-- [ ] qwerty_g_light.png
-- [ ] qwerty_g_dark.png
-- [ ] qwerty_h_light.png
-- [ ] qwerty_h_dark.png
-- [ ] qwerty_b_light.png
-- [ ] qwerty_b_dark.png
-- [ ] qwerty_m_light.png
-- [ ] qwerty_m_dark.png
+- [x] qwerty_f_light.png
+- [x] qwerty_f_dark.png
+- [x] qwerty_j_light.png
+- [x] qwerty_j_dark.png
+- [x] qwerty_r_light.png
+- [x] qwerty_r_dark.png
+- [x] qwerty_u_light.png
+- [x] qwerty_u_dark.png
+- [x] qwerty_n_light.png
+- [x] qwerty_n_dark.png
+- [x] qwerty_v_light.png
+- [x] qwerty_v_dark.png
+- [x] qwerty_t_light.png
+- [x] qwerty_t_dark.png
+- [x] qwerty_y_light.png
+- [x] qwerty_y_dark.png
+- [x] qwerty_g_light.png
+- [x] qwerty_g_dark.png
+- [x] qwerty_h_light.png
+- [x] qwerty_h_dark.png
+- [x] qwerty_b_light.png
+- [x] qwerty_b_dark.png
+- [x] qwerty_m_light.png
+- [x] qwerty_m_dark.png
 
 ### Chapter 2: Middle Fingers
-- [ ] qwerty_d_light.png
-- [ ] qwerty_d_dark.png
-- [ ] qwerty_k_light.png
-- [ ] qwerty_k_dark.png
-- [ ] qwerty_e_light.png
-- [ ] qwerty_e_dark.png
-- [ ] qwerty_i_light.png
-- [ ] qwerty_i_dark.png
-- [ ] qwerty_c_light.png
-- [ ] qwerty_c_dark.png
+- [x] qwerty_d_light.png
+- [x] qwerty_d_dark.png
+- [x] qwerty_k_light.png
+- [x] qwerty_k_dark.png
+- [x] qwerty_e_light.png
+- [x] qwerty_e_dark.png
+- [x] qwerty_i_light.png
+- [x] qwerty_i_dark.png
+- [x] qwerty_c_light.png
+- [x] qwerty_c_dark.png
 
 ### Chapter 3: Ring Fingers
-- [ ] qwerty_s_light.png
-- [ ] qwerty_s_dark.png
-- [ ] qwerty_l_light.png
-- [ ] qwerty_l_dark.png
-- [ ] qwerty_w_light.png
-- [ ] qwerty_w_dark.png
-- [ ] qwerty_o_light.png
-- [ ] qwerty_o_dark.png
-- [ ] qwerty_x_light.png
-- [ ] qwerty_x_dark.png
+- [x] qwerty_s_light.png
+- [x] qwerty_s_dark.png
+- [x] qwerty_l_light.png
+- [x] qwerty_l_dark.png
+- [x] qwerty_w_light.png
+- [x] qwerty_w_dark.png
+- [x] qwerty_o_light.png
+- [x] qwerty_o_dark.png
+- [x] qwerty_x_light.png
+- [x] qwerty_x_dark.png
 
 ### Chapter 4: Pinky Fingers
-- [ ] qwerty_a_light.png
-- [ ] qwerty_a_dark.png
-- [ ] qwerty_q_light.png
-- [ ] qwerty_q_dark.png
-- [ ] qwerty_p_light.png
-- [ ] qwerty_p_dark.png
-- [ ] qwerty_z_light.png
-- [ ] qwerty_z_dark.png
+- [x] qwerty_a_light.png
+- [x] qwerty_a_dark.png
+- [x] qwerty_q_light.png
+- [x] qwerty_q_dark.png
+- [x] qwerty_p_light.png
+- [x] qwerty_p_dark.png
+- [x] qwerty_z_light.png
+- [x] qwerty_z_dark.png
 
 ## Uppercase Letters (26 images × 2 themes = 52 images)
 
 ### Chapter 1: Index Fingers
-- [ ] qwerty_F_light.png
-- [ ] qwerty_F_dark.png
-- [ ] qwerty_J_light.png
-- [ ] qwerty_J_dark.png
-- [ ] qwerty_R_light.png
-- [ ] qwerty_R_dark.png
-- [ ] qwerty_U_light.png
-- [ ] qwerty_U_dark.png
-- [ ] qwerty_N_light.png
-- [ ] qwerty_N_dark.png
-- [ ] qwerty_V_light.png
-- [ ] qwerty_V_dark.png
-- [ ] qwerty_T_light.png
-- [ ] qwerty_T_dark.png
-- [ ] qwerty_Y_light.png
-- [ ] qwerty_Y_dark.png
-- [ ] qwerty_G_light.png
-- [ ] qwerty_G_dark.png
-- [ ] qwerty_H_light.png
-- [ ] qwerty_H_dark.png
-- [ ] qwerty_B_light.png
-- [ ] qwerty_B_dark.png
-- [ ] qwerty_M_light.png
-- [ ] qwerty_M_dark.png
+- [x] qwerty_shift_F_light.png
+- [x] qwerty_shift_F_dark.png
+- [x] qwerty_shift_J_light.png
+- [x] qwerty_shift_J_dark.png
+- [x] qwerty_shift_R_light.png
+- [x] qwerty_shift_R_dark.png
+- [x] qwerty_shift_U_light.png
+- [x] qwerty_shift_U_dark.png
+- [x] qwerty_shift_N_light.png
+- [x] qwerty_shift_N_dark.png
+- [x] qwerty_shift_V_light.png
+- [x] qwerty_shift_V_dark.png
+- [x] qwerty_shift_T_light.png
+- [x] qwerty_shift_T_dark.png
+- [x] qwerty_shift_Y_light.png
+- [x] qwerty_shift_Y_dark.png
+- [x] qwerty_shift_G_light.png
+- [x] qwerty_shift_G_dark.png
+- [x] qwerty_shift_H_light.png
+- [x] qwerty_shift_H_dark.png
+- [x] qwerty_shift_B_light.png
+- [x] qwerty_shift_B_dark.png
+- [x] qwerty_shift_M_light.png
+- [x] qwerty_shift_M_dark.png
 
 ### Chapter 2: Middle Fingers
-- [ ] qwerty_D_light.png
-- [ ] qwerty_D_dark.png
-- [ ] qwerty_K_light.png
-- [ ] qwerty_K_dark.png
-- [ ] qwerty_E_light.png
-- [ ] qwerty_E_dark.png
-- [ ] qwerty_I_light.png
-- [ ] qwerty_I_dark.png
-- [ ] qwerty_C_light.png
-- [ ] qwerty_C_dark.png
+- [x] qwerty_shift_D_light.png
+- [x] qwerty_shift_D_dark.png
+- [x] qwerty_shift_K_light.png
+- [x] qwerty_shift_K_dark.png
+- [x] qwerty_shift_E_light.png
+- [x] qwerty_shift_E_dark.png
+- [x] qwerty_shift_I_light.png
+- [x] qwerty_shift_I_dark.png
+- [x] qwerty_shift_C_light.png
+- [x] qwerty_shift_C_dark.png
 
 ### Chapter 3: Ring Fingers
-- [ ] qwerty_S_light.png
-- [ ] qwerty_S_dark.png
-- [ ] qwerty_L_light.png
-- [ ] qwerty_L_dark.png
-- [ ] qwerty_W_light.png
-- [ ] qwerty_W_dark.png
-- [ ] qwerty_O_light.png
-- [ ] qwerty_O_dark.png
-- [ ] qwerty_X_light.png
-- [ ] qwerty_X_dark.png
+- [x] qwerty_shift_S_light.png
+- [x] qwerty_shift_S_dark.png
+- [x] qwerty_shift_L_light.png
+- [x] qwerty_shift_L_dark.png
+- [x] qwerty_shift_W_light.png
+- [x] qwerty_shift_W_dark.png
+- [x] qwerty_shift_O_light.png
+- [x] qwerty_shift_O_dark.png
+- [x] qwerty_shift_X_light.png
+- [x] qwerty_shift_X_dark.png
 
 ### Chapter 4: Pinky Fingers
-- [ ] qwerty_A_light.png
-- [ ] qwerty_A_dark.png
-- [ ] qwerty_Q_light.png
-- [ ] qwerty_Q_dark.png
-- [ ] qwerty_P_light.png
-- [ ] qwerty_P_dark.png
-- [ ] qwerty_Z_light.png
-- [ ] qwerty_Z_dark.png
+- [x] qwerty_shift_A_light.png
+- [x] qwerty_shift_A_dark.png
+- [x] qwerty_shift_Q_light.png
+- [x] qwerty_shift_Q_dark.png
+- [x] qwerty_shift_P_light.png
+- [x] qwerty_shift_P_dark.png
+- [x] qwerty_shift_Z_light.png
+- [x] qwerty_shift_Z_dark.png
 
 ## Symbols & Punctuation (18 images × 2 themes = 36 images)
-- [ ] qwerty_comma_light.png
-- [ ] qwerty_comma_dark.png
-- [ ] qwerty_period_light.png
-- [ ] qwerty_period_dark.png
-- [ ] qwerty_semicolon_light.png
-- [ ] qwerty_semicolon_dark.png
-- [ ] qwerty_slash_light.png
-- [ ] qwerty_slash_dark.png
-- [ ] qwerty_space_light.png
-- [ ] qwerty_space_dark.png
-- [ ] qwerty_minus_light.png
-- [ ] qwerty_minus_dark.png
-- [ ] qwerty_equals_light.png
-- [ ] qwerty_equals_dark.png
-- [ ] qwerty_bracket_left_light.png
-- [ ] qwerty_bracket_left_dark.png
-- [ ] qwerty_bracket_right_light.png
-- [ ] qwerty_bracket_right_dark.png
-- [ ] qwerty_backslash_light.png
-- [ ] qwerty_backslash_dark.png
+- [x] qwerty_comma_light.png
+- [x] qwerty_comma_dark.png
+- [x] qwerty_period_light.png
+- [x] qwerty_period_dark.png
+- [x] qwerty_semicolon_light.png
+- [x] qwerty_semicolon_dark.png
+- [x] qwerty_slash_light.png
+- [x] qwerty_slash_dark.png
+- [x] qwerty_space_light.png
+- [x] qwerty_space_dark.png
+- [x] qwerty_minus_light.png
+- [x] qwerty_minus_dark.png
+- [x] qwerty_equals_light.png
+- [x] qwerty_equals_dark.png
+- [x] qwerty_bracket_left_light.png
+- [x] qwerty_bracket_left_dark.png
+- [x] qwerty_bracket_right_light.png
+- [x] qwerty_bracket_right_dark.png
+- [x] qwerty_backslash_light.png
+- [x] qwerty_backslash_dark.png
 
 ## Numbers (10 images × 2 themes = 20 images)
-- [ ] qwerty_1_light.png
-- [ ] qwerty_1_dark.png
-- [ ] qwerty_2_light.png
-- [ ] qwerty_2_dark.png
-- [ ] qwerty_3_light.png
-- [ ] qwerty_3_dark.png
-- [ ] qwerty_4_light.png
-- [ ] qwerty_4_dark.png
-- [ ] qwerty_5_light.png
-- [ ] qwerty_5_dark.png
-- [ ] qwerty_6_light.png
-- [ ] qwerty_6_dark.png
-- [ ] qwerty_7_light.png
-- [ ] qwerty_7_dark.png
-- [ ] qwerty_8_light.png
-- [ ] qwerty_8_dark.png
-- [ ] qwerty_9_light.png
-- [ ] qwerty_9_dark.png
-- [ ] qwerty_0_light.png
-- [ ] qwerty_0_dark.png
+- [x] qwerty_1_light.png
+- [x] qwerty_1_dark.png
+- [x] qwerty_2_light.png
+- [x] qwerty_2_dark.png
+- [x] qwerty_3_light.png
+- [x] qwerty_3_dark.png
+- [x] qwerty_4_light.png
+- [x] qwerty_4_dark.png
+- [x] qwerty_5_light.png
+- [x] qwerty_5_dark.png
+- [x] qwerty_6_light.png
+- [x] qwerty_6_dark.png
+- [x] qwerty_7_light.png
+- [x] qwerty_7_dark.png
+- [x] qwerty_8_light.png
+- [x] qwerty_8_dark.png
+- [x] qwerty_9_light.png
+- [x] qwerty_9_dark.png
+- [x] qwerty_0_light.png
+- [x] qwerty_0_dark.png
 
 ## Shift Symbols (17 images × 2 themes = 34 images)
-- [ ] qwerty_shift_1_light.png (for !)
-- [ ] qwerty_shift_1_dark.png
-- [ ] qwerty_shift_2_light.png (for @)
-- [ ] qwerty_shift_2_dark.png
-- [ ] qwerty_shift_3_light.png (for #)
-- [ ] qwerty_shift_3_dark.png
-- [ ] qwerty_shift_4_light.png (for $)
-- [ ] qwerty_shift_4_dark.png
-- [ ] qwerty_shift_5_light.png (for %)
-- [ ] qwerty_shift_5_dark.png
-- [ ] qwerty_shift_6_light.png (for ^)
-- [ ] qwerty_shift_6_dark.png
-- [ ] qwerty_shift_7_light.png (for &)
-- [ ] qwerty_shift_7_dark.png
-- [ ] qwerty_shift_8_light.png (for *)
-- [ ] qwerty_shift_8_dark.png
-- [ ] qwerty_shift_9_light.png (for ()
-- [ ] qwerty_shift_9_dark.png
-- [ ] qwerty_shift_0_light.png (for ))
-- [ ] qwerty_shift_0_dark.png
-- [ ] qwerty_shift_minus_light.png (for _)
-- [ ] qwerty_shift_minus_dark.png
-- [ ] qwerty_shift_equals_light.png (for +)
-- [ ] qwerty_shift_equals_dark.png
-- [ ] qwerty_shift_bracket_left_light.png (for {)
-- [ ] qwerty_shift_bracket_left_dark.png
-- [ ] qwerty_shift_bracket_right_light.png (for })
-- [ ] qwerty_shift_bracket_right_dark.png
-- [ ] qwerty_shift_backslash_light.png (for |)
-- [ ] qwerty_shift_backslash_dark.png
+- [x] qwerty_shift_1_light.png (for !)
+- [x] qwerty_shift_1_dark.png
+- [x] qwerty_shift_2_light.png (for @)
+- [x] qwerty_shift_2_dark.png
+- [x] qwerty_shift_3_light.png (for #)
+- [x] qwerty_shift_3_dark.png
+- [x] qwerty_shift_4_light.png (for $)
+- [x] qwerty_shift_4_dark.png
+- [x] qwerty_shift_5_light.png (for %)
+- [x] qwerty_shift_5_dark.png
+- [x] qwerty_shift_6_light.png (for ^)
+- [x] qwerty_shift_6_dark.png
+- [x] qwerty_shift_7_light.png (for &)
+- [x] qwerty_shift_7_dark.png
+- [x] qwerty_shift_8_light.png (for *)
+- [x] qwerty_shift_8_dark.png
+- [x] qwerty_shift_9_light.png (for ()
+- [x] qwerty_shift_9_dark.png
+- [x] qwerty_shift_0_light.png (for ))
+- [x] qwerty_shift_0_dark.png
+- [x] qwerty_shift_minus_light.png (for _)
+- [x] qwerty_shift_minus_dark.png
+- [x] qwerty_shift_equals_light.png (for +)
+- [x] qwerty_shift_equals_dark.png
+- [x] qwerty_shift_bracket_left_light.png (for {)
+- [x] qwerty_shift_bracket_left_dark.png
+- [x] qwerty_shift_bracket_right_light.png (for })
+- [x] qwerty_shift_bracket_right_dark.png
+- [x] qwerty_shift_backslash_light.png (for |)
+- [x] qwerty_shift_backslash_dark.png
 
 ## Shift Keys (2 images × 2 themes = 4 images)
-- [ ] qwerty_rshift_light.png
-- [ ] qwerty_rshift_dark.png
-- [ ] qwerty_lshift_light.png
-- [ ] qwerty_lshift_dark.png
+- [x] qwerty_rshift_light.png
+- [x] qwerty_rshift_dark.png
+- [x] qwerty_lshift_light.png
+- [x] qwerty_lshift_dark.png
 
 ## Summary
 - **Total Images Needed:** 218 images

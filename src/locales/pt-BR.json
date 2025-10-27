@@ -625,8 +625,12 @@
       "error": "Erro",
       "switchFailed": "Falha ao alterar layouts",
       "invalidLayout": "Layout Inválido",
-      "mustBe45Chars": "A string de layout deve ter exatamente 45 caracteres"
-    }
+      "mustBe45Chars": "A string de layout deve ter exatamente 45 caracteres",
+      "featureComingSoon": "Recurso Em Breve",
+      "useManualEntry": "Por favor, use a aba Manual para inserir seu próprio layout personalizado"
+    },
+    "featureComingSoon": "Em Breve!",
+    "featureDescription": "O gerador de layout com ML está em desenvolvimento. Use a aba Manual para criar seu próprio layout personalizado."
   },
   "auth": {
     "title": "BagreType",

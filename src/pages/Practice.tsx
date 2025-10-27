@@ -20,26 +20,83 @@ type Mode = "words" | "time" | "quote" | "zen" | "custom";
 const Practice = () => {
   const { lang } = useParams();
   const { t } = useLocalization();
-  const [mode, setMode] = useState<Mode>("words");
-  const [wordCount, setWordCount] = useState(25);
-  const [timeLimit, setTimeLimit] = useState(30);
-  const [quoteLength, setQuoteLength] = useState(100);
+  // Load saved practice configuration from localStorage
+  const loadPracticeConfig = () => {
+    const saved = localStorage.getItem("practice_config");
+    if (saved) {
+      try {
+        const config = JSON.parse(saved);
+        return {
+          mode: config.mode || "words",
+          wordCount: config.wordCount || 25,
+          timeLimit: config.timeLimit || 30,
+          quoteLength: config.quoteLength || 100,
+          showKeyboardImage: config.showKeyboardImage || false,
+          selectedCustomTextTitle: config.selectedCustomTextTitle || ""
+        };
+      } catch (error) {
+        console.error('Error loading practice config:', error);
+      }
+    }
+    return {
+      mode: "words" as Mode,
+      wordCount: 25,
+      timeLimit: 30,
+      quoteLength: 100,
+      showKeyboardImage: false,
+      selectedCustomTextTitle: ""
+    };
+  };
+
+  const initialConfig = loadPracticeConfig();
+  
+  const [mode, setMode] = useState<Mode>(initialConfig.mode);
+  const [wordCount, setWordCount] = useState(initialConfig.wordCount);
+  const [timeLimit, setTimeLimit] = useState(initialConfig.timeLimit);
+  const [quoteLength, setQuoteLength] = useState(initialConfig.quoteLength);
   const [customText, setCustomText] = useState("");
-  const [selectedCustomTextTitle, setSelectedCustomTextTitle] = useState("");
+  const [selectedCustomTextTitle, setSelectedCustomTextTitle] = useState(initialConfig.selectedCustomTextTitle);
   const [savedTexts, setSavedTexts] = useState<{title: string, text: string}[]>([]);
   const [quotes, setQuotes] = useState<string[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showKeyboardImage, setShowKeyboardImage] = useState(false);
+  const [showKeyboardImage, setShowKeyboardImage] = useState(initialConfig.showKeyboardImage);
   const [currentChar, setCurrentChar] = useState<string>("");
+
+  // Save practice configuration to localStorage whenever it changes
+  useEffect(() => {
+    const config = {
+      mode,
+      wordCount,
+      timeLimit,
+      quoteLength,
+      showKeyboardImage,
+      selectedCustomTextTitle
+    };
+    localStorage.setItem("practice_config", JSON.stringify(config));
+  }, [mode, wordCount, timeLimit, quoteLength, showKeyboardImage, selectedCustomTextTitle]);
 
   // Load saved custom texts from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("customTexts");
     if (saved) {
-      setSavedTexts(JSON.parse(saved));
+      const texts = JSON.parse(saved);
+      setSavedTexts(texts);
+      
+      // Load the selected custom text if one was previously selected
+      if (selectedCustomTextTitle) {
+        const selectedText = texts.find((t: {title: string, text: string}) => t.title === selectedCustomTextTitle);
+        if (selectedText) {
+          setCustomText(selectedText.text);
+        }
+      }
     }
-  }, []);
+  }, [selectedCustomTextTitle]);
+
+  // Clear current char when mode changes
+  useEffect(() => {
+    setCurrentChar("");
+  }, [mode]);
 
   // Load quotes from quotes file based on language
   useEffect(() => {
@@ -102,6 +159,7 @@ const Practice = () => {
   };
 
   const testRef = useRef<{ reset: () => void }>(null);
+  const modeSelectRef = useRef<HTMLButtonElement>(null);
 
   const getTestProps = () => {
     switch (mode) {
@@ -136,8 +194,14 @@ const Practice = () => {
             <Select value={mode} onValueChange={(value) => {
               setMode(value as Mode);
               if (testRef.current) testRef.current.reset();
+              // Blur the select after mode change
+              setTimeout(() => {
+                if (modeSelectRef.current) {
+                  modeSelectRef.current.blur();
+                }
+              }, 0);
             }}>
-              <SelectTrigger className="w-32 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
+              <SelectTrigger ref={modeSelectRef} className="w-32 bg-transparent border-none text-foreground/70 hover:text-foreground focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border z-50">
@@ -311,8 +375,8 @@ const Practice = () => {
             />
           )}
 
-          {/* Keyboard Image */}
-          {showKeyboardImage && (
+          {/* Keyboard Image - Only show during active test with valid character */}
+          {showKeyboardImage && currentChar !== '' && currentChar !== null && currentChar !== undefined && (
             <div className="aspect-video w-full max-w-md mx-auto flex items-center justify-center">
               <KeyboardImage 
                 lessonKey={currentChar || "a"}

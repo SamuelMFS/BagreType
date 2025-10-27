@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocalization } from "@/hooks/useLocalization";
 
 interface TypingData {
@@ -14,7 +14,40 @@ interface HorizontalLetterChartProps {
 
 const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
   const [hoveredMetric, setHoveredMetric] = useState<'best' | 'average' | 'worst' | null>(null);
+  const [tooltipData, setTooltipData] = useState<{ letter: string; metric: string; value: number } | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const { t } = useLocalization();
+
+  // Update tooltip position on mouse move
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (tooltipData && tooltipRef.current) {
+        const tooltip = tooltipRef.current;
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        
+        // Use viewport coordinates (clientX/Y)
+        let x = e.clientX + 10;
+        let y = e.clientY - tooltipHeight / 2;
+        
+        // Check if tooltip would go off screen
+        if (x + tooltipWidth > window.innerWidth) {
+          x = e.clientX - tooltipWidth - 10;
+        }
+        if (y < 0) y = 10;
+        if (y + tooltipHeight > window.innerHeight) {
+          y = window.innerHeight - tooltipHeight - 10;
+        }
+        
+        // Update position
+        setTooltipPosition({ x, y });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [tooltipData]);
 
   const calculateLetterStats = () => {
     const letterMap = new Map<string, number[]>();
@@ -133,32 +166,56 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
                       <>
                         {/* Worst Segment (leftmost - largest) */}
                         <div 
-                          className="absolute top-0 left-0 bottom-0 bg-red-400 transition-opacity duration-200 rounded-r-sm"
+                          className="absolute top-0 left-0 bottom-0 bg-red-400 transition-opacity duration-200 rounded-r-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.worst / maxReactionTime) * 100}%`,
                             opacity: getOpacity('worst')
                           }}
-                          title={`Worst: ${stat.worst}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Worst', 
+                              value: stat.worst
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Average Segment (middle) */}
                         <div 
-                          className="absolute top-0 left-0 bottom-0 bg-blue-400 transition-opacity duration-200 rounded-r-sm"
+                          className="absolute top-0 left-0 bottom-0 bg-blue-400 transition-opacity duration-200 rounded-r-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.average / maxReactionTime) * 100}%`,
                             opacity: getOpacity('average')
                           }}
-                          title={`Average: ${stat.average}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Average', 
+                              value: stat.average
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Best Segment (rightmost - smallest) */}
                         <div 
-                          className="absolute top-0 left-0 bottom-0 bg-green-400 transition-opacity duration-200 rounded-r-sm"
+                          className="absolute top-0 left-0 bottom-0 bg-green-400 transition-opacity duration-200 rounded-r-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.best / maxReactionTime) * 100}%`,
                             opacity: getOpacity('best')
                           }}
-                          title={`Best: ${stat.best}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Best', 
+                              value: stat.best
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                       </>
                     )}
@@ -194,32 +251,56 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
                       <>
                         {/* Worst Segment (rightmost - largest) */}
                         <div 
-                          className="absolute top-0 right-0 bottom-0 bg-red-400 transition-opacity duration-200 rounded-l-sm"
+                          className="absolute top-0 right-0 bottom-0 bg-red-400 transition-opacity duration-200 rounded-l-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.worst / maxReactionTime) * 100}%`,
                             opacity: getOpacity('worst')
                           }}
-                          title={`Worst: ${stat.worst}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Worst', 
+                              value: stat.worst
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Average Segment (middle) */}
                         <div 
-                          className="absolute top-0 right-0 bottom-0 bg-blue-400 transition-opacity duration-200 rounded-l-sm"
+                          className="absolute top-0 right-0 bottom-0 bg-blue-400 transition-opacity duration-200 rounded-l-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.average / maxReactionTime) * 100}%`,
                             opacity: getOpacity('average')
                           }}
-                          title={`Average: ${stat.average}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Average', 
+                              value: stat.average
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Best Segment (leftmost - smallest) */}
                         <div 
-                          className="absolute top-0 right-0 bottom-0 bg-green-400 transition-opacity duration-200 rounded-l-sm"
+                          className="absolute top-0 right-0 bottom-0 bg-green-400 transition-opacity duration-200 rounded-l-sm cursor-pointer"
                           style={{ 
                             width: `${(stat.best / maxReactionTime) * 100}%`,
                             opacity: getOpacity('best')
                           }}
-                          title={`Best: ${stat.best}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Best', 
+                              value: stat.best
+                            });
+                            setTooltipPosition({ x: e.clientX, y: e.clientY });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                       </>
                     )}
@@ -261,6 +342,24 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
           <div className="text-sm text-muted-foreground">{t('results.charts.horizontalChart.worst')}</div>
         </div>
       </div>
+
+      {/* Tooltip */}
+      {tooltipData && (
+        <div
+          ref={tooltipRef}
+          className="fixed z-50 pointer-events-none transition-opacity duration-200"
+          style={{
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y}px`,
+          }}
+        >
+          <div className="bg-popover border border-border rounded-lg shadow-lg p-3 min-w-[120px] backdrop-blur-sm">
+            <div className="text-xs font-semibold text-primary mb-1">{tooltipData.letter}</div>
+            <div className="text-xs text-muted-foreground mb-0.5">{tooltipData.metric}</div>
+            <div className="text-lg font-bold text-accent">{tooltipData.value}ms</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

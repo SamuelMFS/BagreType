@@ -36,6 +36,9 @@ const KEY_MAPPING: Record<string, string> = {
   '<': 'comma',    // < uses same position as ,
   '>': 'period',   // > uses same position as .
   '?': 'slash',    // ? uses same position as /
+  ':': 'shift_semicolon', // : uses shift + ;
+  '"': 's_quotes', // " uses dedicated s_quotes image
+  "'": 'quotes', // ' uses dedicated quotes image
   '_': 'shift_minus', // _ uses shift + -
   '+': 'shift_equals', // + uses shift + =
   '{': 'shift_bracket_left', // { uses shift + [
@@ -44,8 +47,8 @@ const KEY_MAPPING: Record<string, string> = {
   '=': 'equals',
   '[': 'bracket_left',
   ']': 'bracket_right',
-  '\\': 'backslash',
-  '|': 'shift_backslash', // | uses shift + \
+  '\\': 'space', // No backslash image, use space bar
+  '|': 'space', // No pipe image, use space bar
   
   // Space bar
   ' ': 'space',
@@ -71,6 +74,11 @@ const SHIFT_ID_MAP: Record<string, string> = {
 export function KeyboardImage({ lessonKey, currentChar, className = "" }: KeyboardImageProps) {
   const { currentLayout, layoutName } = useLayout();
   const { theme } = useTheme();
+  
+  // Normalize accented characters to their base form (á -> a, é -> e, etc.)
+  const normalizeAccents = (str: string): string => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  };
   
   // Get the QWERTY key that corresponds to this lesson key
   const getQwertyKey = (key: string): string => {
@@ -110,40 +118,47 @@ export function KeyboardImage({ lessonKey, currentChar, className = "" }: Keyboa
   // Use currentChar if available, otherwise fall back to lessonKey
   const displayKey = currentChar || lessonKey;
   
+  // Normalize accented characters
+  const normalizedDisplayKey = normalizeAccents(displayKey);
+  const normalizedLessonKey = normalizeAccents(lessonKey);
+  
   // Check if this is a shift-ID (e.g., "shift-1")
-  const isShiftId = typeof lessonKey === 'string' && lessonKey.startsWith('shift-');
+  const isShiftId = typeof normalizedLessonKey === 'string' && normalizedLessonKey.startsWith('shift-');
   let imageKey: string;
   
   if (isShiftId) {
     // Use the shift ID mapping
-    imageKey = SHIFT_ID_MAP[lessonKey] || lessonKey;
-  } else if (displayKey === displayKey.toUpperCase() && displayKey.match(/[A-Z]/)) {
-    // Uppercase letter - use uppercase image
-    const qwertyKey = getQwertyKey(displayKey.toLowerCase());
-    imageKey = qwertyKey.toUpperCase();
+    imageKey = SHIFT_ID_MAP[normalizedLessonKey] || normalizedLessonKey;
+  } else if (normalizedDisplayKey === normalizedDisplayKey.toUpperCase() && normalizedDisplayKey.match(/[A-Z]/)) {
+    // Uppercase letter - use shift prefix naming convention (qwerty_shift_F_light)
+    const qwertyKey = getQwertyKey(normalizedDisplayKey.toLowerCase());
+    imageKey = `shift_${qwertyKey.toUpperCase()}`;
   } else {
     // Regular case - get QWERTY key
-    const qwertyKey = getQwertyKey(displayKey);
+    const qwertyKey = getQwertyKey(normalizedDisplayKey);
     imageKey = qwertyKey;
   }
   
+  // Fallback to space bar for characters without images (like backslash)
+  const safeImageKey = imageKey || 'space';
+  
   const themeSuffix = theme === 'deep' ? 'dark' : 'light';
-  const imagePath = `/keyboard-images/qwerty_${imageKey}_${themeSuffix}.png`;
+  const imagePath = `/keyboard-images/qwerty_${safeImageKey}_${themeSuffix}.png`;
   
   // Create display label showing the QWERTY position, not the actual character
   let displayLabel: string;
-  if (displayKey === ' ') {
+  if (normalizedDisplayKey === ' ') {
     displayLabel = 'Space';
   } else if (isShiftId) {
     // For shift keys, show the shift symbol
-    displayLabel = lessonKey.replace('shift-', 'Shift+');
-  } else if (displayKey === displayKey.toUpperCase() && displayKey.match(/[A-Z]/)) {
+    displayLabel = normalizedLessonKey.replace('shift-', 'Shift+');
+  } else if (normalizedDisplayKey === normalizedDisplayKey.toUpperCase() && normalizedDisplayKey.match(/[A-Z]/)) {
     // For uppercase letters, show the QWERTY position in uppercase
-    const qwertyKey = getQwertyKey(displayKey.toLowerCase());
+    const qwertyKey = getQwertyKey(normalizedDisplayKey.toLowerCase());
     displayLabel = qwertyKey.toUpperCase();
   } else {
     // For regular keys, show the QWERTY position
-    const qwertyKey = getQwertyKey(displayKey);
+    const qwertyKey = getQwertyKey(normalizedDisplayKey);
     // Convert image key back to readable format
     const readableKey = qwertyKey === 'comma' ? ',' : 
                        qwertyKey === 'period' ? '.' : 
@@ -161,7 +176,19 @@ export function KeyboardImage({ lessonKey, currentChar, className = "" }: Keyboa
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div className="text-center space-y-2">
-        <div className="text-4xl">⌨</div>
+        <img 
+          src={imagePath} 
+          alt={`Keyboard key: ${displayLabel}`}
+          className="w-50 h-50 object-contain"
+          onError={(e) => {
+            // Fallback to placeholder if image doesn't exist
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const fallback = target.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'block';
+          }}
+        />
+        <div className="text-4xl hidden" style={{ display: 'none' }}>⌨</div>
         <p className="text-muted-foreground text-sm">Key position: {displayLabel}</p>
       </div>
     </div>

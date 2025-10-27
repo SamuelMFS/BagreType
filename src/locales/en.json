@@ -625,8 +625,12 @@
       "error": "Error",
       "switchFailed": "Failed to switch layouts",
       "invalidLayout": "Invalid Layout",
-      "mustBe45Chars": "Layout string must be exactly 45 characters"
-    }
+      "mustBe45Chars": "Layout string must be exactly 45 characters",
+      "featureComingSoon": "Feature Coming Soon",
+      "useManualEntry": "Please use the Manual tab to enter your own custom layout"
+    },
+    "featureComingSoon": "Coming Soon!",
+    "featureDescription": "The ML layout generator is in development. Use the Manual tab to create your own custom layout."
   },
   "auth": {
     "title": "BagreType",

@@ -67,32 +67,21 @@ const Generate = () => {
   };
 
   const handleGenerate = async () => {
-    setIsGenerating(true);
-    
-    // Simulate generation process
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate a custom layout string based on the selected language
-    // For now, we'll use Dvorak as an example of a different layout
-    // In a real implementation, this would be generated based on the text analysis
-    let layoutString: string;
-    
-    if (selectedLanguage === "Python" || selectedLanguage === "JavaScript") {
-      // Use Dvorak for programming languages
-      layoutString = LAYOUT_STRINGS.dvorak;
-    } else {
-      // Use QWERTY for other cases
-      layoutString = LAYOUT_STRINGS.qwerty;
-    }
-    
-    const layout = `${layoutString}`;
-    setGeneratedLayout(layout);
-    setIsGenerating(false);
+    // TODO: ML Layout Generator - Feature not ready yet
+    // This feature is coming soon. In the meantime, you can:
+    // 1. Use the Manual tab to enter your own custom layout
+    // 2. Use the "Use QWERTY" or "Use Dvorak" options when implemented
     
     toast({
-      title: t('generate.toasts.layoutGenerated'),
-      description: t('generate.toasts.layoutReady'),
+      title: t('generate.toasts.featureComingSoon'),
+      description: t('generate.toasts.useManualEntry'),
+      variant: "default"
     });
+    
+    // Set selectedType to manual to guide users to the working feature
+    setTimeout(() => {
+      setSelectedType("manual");
+    }, 500);
   };
 
   const handleLearnLayout = async () => {
@@ -321,6 +310,17 @@ const Generate = () => {
                     <Languages className="w-5 h-5" />
                     <h3 className="text-xl font-semibold">{t('generate.curated.title')}</h3>
                   </div>
+                  
+                  {/* Feature Coming Soon Message */}
+                  <div className="rounded-lg border border-accent/20 bg-accent/5 p-6 text-center space-y-3">
+                    <Sparkles className="w-8 h-8 mx-auto text-accent" />
+                    <h4 className="text-lg font-semibold text-foreground">
+                      {t('generate.featureComingSoon')}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {t('generate.featureDescription')}
+                    </p>
+                  </div>
 
                   <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as "programming" | "human")}>
                     <TabsList className="grid w-full grid-cols-2">
@@ -329,13 +329,14 @@ const Generate = () => {
                     </TabsList>
 
                     <TabsContent value="programming" className="mt-6">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 opacity-50">
                         {programmingLanguages.map((lang) => (
                           <Button
                             key={lang}
                             variant={selectedLanguage === lang ? "ocean" : "outline"}
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
+                            disabled
                           >
                             {t(`generate.curated.languages.programming.${lang}`)}
                           </Button>
@@ -344,13 +345,14 @@ const Generate = () => {
                     </TabsContent>
 
                     <TabsContent value="human" className="mt-6">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 opacity-50">
                         {humanLanguages.map((lang) => (
                           <Button
                             key={lang}
                             variant={selectedLanguage === lang ? "ocean" : "outline"}
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
+                            disabled
                           >
                             {t(`generate.curated.languages.human.${lang}`)}
                           </Button>
@@ -420,7 +422,18 @@ const Generate = () => {
             <TabsContent value="custom" className="space-y-6">
               <Card className="p-6 bg-card/90 backdrop-blur-md border-border/50">
                 <div className="space-y-6">
-                  <div className="space-y-3">
+                  {/* Feature Coming Soon Message */}
+                  <div className="rounded-lg border border-accent/20 bg-accent/5 p-6 text-center space-y-3">
+                    <Sparkles className="w-8 h-8 mx-auto text-accent" />
+                    <h4 className="text-lg font-semibold text-foreground">
+                      {t('generate.featureComingSoon')}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {t('generate.featureDescription')}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3 opacity-50">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       {t('generate.custom.pasteText')}
@@ -430,10 +443,11 @@ const Generate = () => {
                       value={customText}
                       onChange={(e) => setCustomText(e.target.value)}
                       className="min-h-[200px] bg-background/80 border-border"
+                      disabled
                     />
                   </div>
 
-                  <div className="relative">
+                  <div className="relative opacity-50">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border"></div>
                     </div>
@@ -442,7 +456,7 @@ const Generate = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3 opacity-50">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <Upload className="w-4 h-4" />
                       {t('generate.custom.uploadFile')}
@@ -454,11 +468,13 @@ const Generate = () => {
                         className="hidden"
                         accept=".txt,.pdf,.yaml,.yml,.json,.md"
                         onChange={handleFileUpload}
+                        disabled
                       />
                       <Button
                         variant="outline"
                         onClick={() => document.getElementById("file-upload")?.click()}
                         className="w-full gap-2"
+                        disabled
                       >
                         <Upload className="w-4 h-4" />
                         {uploadedFile ? uploadedFile.name : t('generate.custom.chooseFile')}
