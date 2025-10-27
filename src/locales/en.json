@@ -654,7 +654,12 @@
     },
     "validation": {
       "invalidEmail": "Invalid email address",
-      "passwordMinLength": "Password must be at least 6 characters"
+      "passwordMinLength": "Password must be at least 6 characters",
+      "disposableEmail": "Disposable email addresses are not allowed",
+      "invalidDomain": "Invalid email domain",
+      "suspiciousEmail": "This email appears to be invalid or temporary. Please use a real email address.",
+      "tooManySignups": "Too many signup attempts. Please try again later.",
+      "tooManyResets": "Too many password reset attempts. Please try again later."
     },
     "toasts": {
       "validationError": "Validation Error",

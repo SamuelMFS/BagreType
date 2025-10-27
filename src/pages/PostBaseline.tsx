@@ -10,14 +10,32 @@ import { Card } from "@/components/ui/card";
 import { TrendingDown, Brain, Rocket, Zap, Target } from "lucide-react";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useLocalization } from "@/hooks/useLocalization";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const PostBaseline = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang } = useParams();
   const { t } = useLocalization();
+  const { theme } = useTheme();
   const [isVisible, setIsVisible] = useState(false);
   const [baselineResults, setBaselineResults] = useState<{ wpm: number; accuracy: number } | null>(null);
+  const [currentKeyIndex, setCurrentKeyIndex] = useState(0);
+  const [typedText, setTypedText] = useState('');
+  
+  // Define the sequence of keys to cycle through: B a g r e Space T y p e
+  const keySequence = [
+    { char: 'B', imageKey: 'shift_B' },
+    { char: 'a', imageKey: 'a' },
+    { char: 'g', imageKey: 'g' },
+    { char: 'r', imageKey: 'r' },
+    { char: 'e', imageKey: 'e' },
+    { char: ' ', imageKey: 'space' },
+    { char: 'T', imageKey: 'shift_T' },
+    { char: 'y', imageKey: 'y' },
+    { char: 'p', imageKey: 'p' },
+    { char: 'e', imageKey: 'e' }
+  ];
 
   useEffect(() => {
     // Get baseline results from location state or localStorage
@@ -34,6 +52,31 @@ const PostBaseline = () => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, [location.state]);
+
+  // Preload all keyboard images to prevent blinking
+  useEffect(() => {
+    const themeSuffix = theme === 'deep' ? 'dark' : 'light';
+    keySequence.forEach(key => {
+      const img = new Image();
+      img.src = `/keyboard-images/qwerty_${key.imageKey}_${themeSuffix}.png`;
+    });
+  }, [theme, keySequence]);
+
+  // Cycle through keyboard images and update typed text to match current frame
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentKeyIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % keySequence.length;
+        
+        // Update typed text to match the keyboard image being displayed
+        setTypedText(keySequence.slice(0, nextIndex + 1).map(k => k.char).join(''));
+        
+        return nextIndex;
+      });
+    }, 800); // Change every 800ms
+
+    return () => clearInterval(interval);
+  }, [keySequence]);
 
   // 3D Card Component
   const Card3D = ({ children, className = "" }) => {
@@ -176,18 +219,27 @@ const PostBaseline = () => {
                 {t('postBaseline.touchTyping.description')}
               </p>
             </div>
+          </div>
 
-            {/* Hand GIF Section */}
-            <div className="flex justify-center">
-              <div className="w-80 h-80 bg-card/20 backdrop-blur-md rounded-2xl border border-border/30 flex items-center justify-center shadow-2xl">
-                <div className="text-center space-y-4">
-                  <div className="text-6xl animate-bounce">👋</div>
-                  <p className="text-lg text-muted-foreground">{t('postBaseline.handGifPlaceholder')}</p>
-                  <p className="text-sm text-muted-foreground/70">{t('postBaseline.handGifNote')}</p>
-                </div>
+          {/* Keyboard Images Section with Details */}
+          <div className="space-y-2">
+            {/* Keyboard Images Section */}
+            <div className="flex flex-col items-center">
+              {/* Typed text display */}
+              <div className="text-4xl font-mono font-bold text-primary tracking-wider mb-[-2rem]">
+                {typedText}
+                <span className="animate-pulse text-accent">|</span>
               </div>
+              
+              {/* Keyboard image */}
+              <img 
+                src={`/keyboard-images/qwerty_${keySequence[currentKeyIndex].imageKey}_${theme === 'deep' ? 'dark' : 'light'}.png`}
+                alt={`Keyboard key: ${keySequence[currentKeyIndex].char === ' ' ? 'Space' : keySequence[currentKeyIndex].char}`}
+                className="w-96 h-96 object-contain"
+              />
             </div>
 
+            {/* Touch Typing Details */}
             <div className="text-center space-y-8 max-w-4xl mx-auto">
               <div className="space-y-6 text-xl leading-relaxed">
                 <p className="text-foreground">

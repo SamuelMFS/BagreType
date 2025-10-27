@@ -654,7 +654,12 @@
     },
     "validation": {
       "invalidEmail": "Endereço de email inválido",
-      "passwordMinLength": "A senha deve ter pelo menos 6 caracteres"
+      "passwordMinLength": "A senha deve ter pelo menos 6 caracteres",
+      "disposableEmail": "Endereços de email temporários não são permitidos",
+      "invalidDomain": "Domínio de email inválido",
+      "suspiciousEmail": "Este email parece ser inválido ou temporário. Por favor, use um endereço de email real.",
+      "tooManySignups": "Muitas tentativas de cadastro. Por favor, tente novamente mais tarde.",
+      "tooManyResets": "Muitas tentativas de redefinição de senha. Por favor, tente novamente mais tarde."
     },
     "toasts": {
       "validationError": "Erro de Validação",

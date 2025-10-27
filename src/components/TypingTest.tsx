@@ -385,9 +385,11 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
       const totalChars = fullText.length;
       const wpm = Math.round(((correctChars / 5) / timeSeconds) * 60);
       const rawWpm = Math.round(((totalChars / 5) / timeSeconds) * 60);
-      const accuracy = Math.round((correctChars / totalChars) * 100);
+      
+      // Use the same accuracy calculation as during the test (counts all keystrokes including corrections)
+      const accuracy = totalKeystrokes > 0 ? Math.round(((totalKeystrokes - totalErrors) / totalKeystrokes) * 100) : 100;
 
-      console.log('Test stats:', { wpm, accuracy, timeSeconds, correctChars, totalChars });
+      console.log('Test stats:', { wpm, accuracy, timeSeconds, correctChars, totalChars, totalKeystrokes, totalErrors });
 
       // Call onComplete callback if provided
       if (onComplete) {

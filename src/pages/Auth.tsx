@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import OceanDepthBackground from '@/components/OceanDepthBackground';
 import { useLocalization } from '@/hooks/useLocalization';
+import { validateEmail, isSuspiciousEmail } from '@/lib/emailValidation';
 
 const Auth = () => {
   const { lang } = useParams();
@@ -24,6 +25,21 @@ const Auth = () => {
   const { signUp, signIn, resetPassword, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Rate limiting helper
+  const checkRateLimit = (key: string, maxAttempts: number, windowMs: number): boolean => {
+    const now = Date.now();
+    const attempts = JSON.parse(localStorage.getItem(key) || '[]') as number[];
+    const recentAttempts = attempts.filter(timestamp => now - timestamp < windowMs);
+    
+    if (recentAttempts.length >= maxAttempts) {
+      return false;
+    }
+    
+    recentAttempts.push(now);
+    localStorage.setItem(key, JSON.stringify(recentAttempts));
+    return true;
+  };
 
   useEffect(() => {
     if (user) {
@@ -51,6 +67,45 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateInputs()) return;
+    
+    // Additional email validation for signup
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      let errorMessage = t('auth.validation.invalidEmail');
+      if (emailValidation.reason?.includes('Disposable')) {
+        errorMessage = t('auth.validation.disposableEmail');
+      } else if (emailValidation.reason?.includes('domain')) {
+        errorMessage = t('auth.validation.invalidDomain');
+      }
+      
+      toast({
+        title: t('auth.toasts.signUpFailed'),
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check for suspicious emails
+    if (isSuspiciousEmail(email)) {
+      toast({
+        title: t('auth.toasts.signUpFailed'),
+        description: t('auth.validation.suspiciousEmail'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Rate limiting: max 3 signup attempts per email per hour
+    const rateLimitKey = `signup_attempts_${email}`;
+    if (!checkRateLimit(rateLimitKey, 3, 60 * 60 * 1000)) {
+      toast({
+        title: t('auth.toasts.signUpFailed'),
+        description: t('auth.validation.tooManySignups'),
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsLoading(true);
     const { error } = await signUp(email, password);
@@ -115,6 +170,35 @@ const Auth = () => {
           variant: 'destructive',
         });
       }
+      return;
+    }
+
+    // Additional email validation
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      let errorMessage = t('auth.validation.invalidEmail');
+      if (emailValidation.reason?.includes('Disposable')) {
+        errorMessage = t('auth.validation.disposableEmail');
+      } else if (emailValidation.reason?.includes('domain')) {
+        errorMessage = t('auth.validation.invalidDomain');
+      }
+      
+      toast({
+        title: t('auth.toasts.resetPasswordFailed'),
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Rate limiting: max 2 password reset attempts per email per hour
+    const rateLimitKey = `reset_attempts_${email}`;
+    if (!checkRateLimit(rateLimitKey, 2, 60 * 60 * 1000)) {
+      toast({
+        title: t('auth.toasts.resetPasswordFailed'),
+        description: t('auth.validation.tooManyResets'),
+        variant: 'destructive',
+      });
       return;
     }
 

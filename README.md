@@ -362,6 +362,20 @@ bagre-type-optimizer/
 
 ---
 
+## 📧 Email Configuration
+
+Para configurar o tratamento de emails com bounce e prevenir emails falsos, consulte:
+
+**📖 [SUPABASE_EMAIL_CONFIG.md](./SUPABASE_EMAIL_CONFIG.md)**
+
+Este guia inclui:
+- Configuração de bounce handling no Supabase Dashboard
+- Rate limiting de emails
+- Limpeza automática de contas não verificadas
+- Configuração de SMTP personalizado
+
+---
+
 ## 📝 License
 
 This project is developed as part of the Graduation Thesis at Universidade de Franca (UniFran).

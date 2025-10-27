@@ -259,11 +259,43 @@ const DataCollection = () => {
       }
 
       if (e.key === ' ') {
-        if (!isTestActive && !testCompleted) {
+        if (testCompleted) {
+          // Start next test immediately when space is pressed after completion
+          e.preventDefault();
+          
+          // Calculate next difficulty synchronously
+          let nextDifficulty = difficulty;
+          if (!manualDifficultySet) {
+            if (difficulty === "easy") nextDifficulty = "medium";
+            else if (difficulty === "medium") nextDifficulty = "hard";
+            else nextDifficulty = "easy";
+          }
+          
+          const sequence = generateLetterSequence(nextDifficulty);
+          setLetterSequence(sequence);
+          setCurrentLetter(sequence[0]);
+          setCurrentIndex(0);
+          setCurrentCharIndex(0);
+          setCurrentSequenceStartTime(null);
+          setPreviousKeyTime(null);
+          setCurrentSequenceResults([]);
+          setCurrentSequenceLetterTimings([]);
+          setTypingData([]);
+          setTestCompleted(false);
           setIsTestActive(true);
           setTestStartTime(Date.now());
-        } else if (testCompleted) {
-          restartTest();
+          setLastTypedCorrect(null);
+          setIsBouncing(false);
+          
+          // Update difficulty after setting everything else
+          if (!manualDifficultySet) {
+            setDifficulty(nextDifficulty);
+          }
+          
+          return;
+        } else if (!isTestActive && !testCompleted) {
+          setIsTestActive(true);
+          setTestStartTime(Date.now());
         }
         return;
       }
@@ -382,10 +414,10 @@ const DataCollection = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isTestActive, testStartTime, currentLetter, currentIndex, letterSequence, typingData, testCompleted, step]);
+  }, [isTestActive, testStartTime, currentLetter, currentIndex, letterSequence, typingData, testCompleted, step, manualDifficultySet, difficulty]);
 
   // Restart typing test
-  const restartTest = () => {
+  const restartTest = (autoStart = false) => {
     // Cycle difficulty if not manually set
     if (!manualDifficultySet) {
       setDifficulty(prev => {
@@ -406,8 +438,8 @@ const DataCollection = () => {
             setCurrentSequenceLetterTimings([]);
     setTypingData([]);
     setTestCompleted(false);
-    setIsTestActive(false);
-    setTestStartTime(null);
+    setIsTestActive(autoStart);
+    setTestStartTime(autoStart ? Date.now() : null);
     setLastTypedCorrect(null);
     setIsBouncing(false);
     // Don't reset testsCompleted here - let it accumulate
@@ -883,21 +915,30 @@ const DataCollection = () => {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="text-center space-y-6">
-                    <Card className={`p-12 bg-card/90 backdrop-blur-md border-border/50 max-w-md mx-auto relative transition-all duration-200 ${
-                      !isTestActive && !testCompleted ? 'blur-sm' : ''
-                    }`}>
+                  <div className="text-center">
+                    <Card className={`p-12 bg-card/90 backdrop-blur-md border-border/50 max-w-md mx-auto relative transition-all duration-200 min-h-[250px] flex items-center justify-center`}>
                       <div className="absolute top-4 right-4 text-sm text-muted-foreground">
                         {testCompleted ? `${letterSequence.length || 0} of ${letterSequence.length || 0}` : `${currentIndex + 1} of ${letterSequence.length || 0}`}
                       </div>
-                      <div className="text-center">
+                      <div className="text-center transition-all duration-200">
                         {testCompleted ? (
                           <div className="space-y-6">
                             {testsCompleted < 3 ? (
                               <>
                                 <div className="text-5xl">→</div>
-                                <div className="text-base text-muted-foreground">
-                                  {t('dataCollection.steps.test.nextPart')}
+                                <div className="space-y-2">
+                                  <div className="text-base text-muted-foreground">
+                                    {t('dataCollection.steps.test.nextPart').split(' - ')[0]}
+                                  </div>
+                                  <div className="text-sm font-medium text-foreground/80">
+                                    {t('dataCollection.steps.test.spaceToStart').split(' ').map((word, index, array) => 
+                                      word.toLowerCase() === 'espaço' || word.toLowerCase() === 'space' ? (
+                                        <span key={index} className="inline-block px-2 py-1 bg-background border border-border/50 rounded text-sm font-mono font-semibold text-primary shadow-sm">{word}</span>
+                                      ) : (
+                                        <span key={index}>{word}{index < array.length - 1 ? ' ' : ''}</span>
+                                      )
+                                    )}
+                                  </div>
                                 </div>
                               </>
                             ) : (
@@ -909,8 +950,21 @@ const DataCollection = () => {
                               </>
                             )}
                           </div>
+                        ) : !isTestActive ? (
+                          <div className="space-y-6">
+                            <div className="text-5xl text-primary">⌨</div>
+                            <div className="text-lg font-medium text-foreground/80">
+                              {t('dataCollection.steps.test.spaceToStart').split(' ').map((word, index, array) => 
+                                word.toLowerCase() === 'espaço' || word.toLowerCase() === 'space' ? (
+                                  <span key={index} className="inline-block px-2 py-1 bg-background border border-border/50 rounded text-sm font-mono font-semibold text-primary shadow-sm">{word}</span>
+                                ) : (
+                                  <span key={index}>{word}{index < array.length - 1 ? ' ' : ''}</span>
+                                )
+                              )}
+                            </div>
+                          </div>
                         ) : (
-                          <div className="flex justify-center gap-1">
+                          <div className={`flex justify-center gap-1 transition-all duration-200 ${!isTestActive && !testCompleted ? 'blur-sm' : ''}`}>
                             {letterSequence[currentIndex] && letterSequence[currentIndex].split('').map((char, index) => (
                               <div key={index} className="flex flex-col items-center">
                                 <span
@@ -932,33 +986,34 @@ const DataCollection = () => {
                       </div>
                     </Card>
                     
-                    {!testCompleted && (
-                    <p className="text-base text-muted-foreground">
-                      {t('dataCollection.steps.test.spaceToStart')} • 
-                      {t('dataCollection.steps.test.escToStop')}
-                    </p>
-                    )}
-                    
-                    <div className="text-lg text-muted-foreground space-y-1">
-                      <p>{t('dataCollection.steps.test.instructions')}</p>
-                      <p>{t('dataCollection.steps.test.duration')}</p>
+                    <div className="text-center py-2 px-6 mt-1">
+                      <p className="text-lg font-medium text-foreground/90">
+                        {t('dataCollection.steps.test.escToStop').split(' ').map((word, index, array) => 
+                          word.toLowerCase() === 'esc' ? (
+                            <span key={index} className="inline-block px-3 py-1.5 bg-card border border-border/50 rounded text-base font-mono font-semibold text-primary shadow-sm">{word}</span>
+                          ) : (
+                            <span key={index}>{word}{index < array.length - 1 ? ' ' : ''}</span>
+                          )
+                        )}
+                      </p>
                     </div>
+                  </div>
                     
-                    {showResultsButton && (
-                      <div className={`transition-opacity duration-1000 ${showResultsButton ? 'opacity-100' : 'opacity-0'}`}>
-                        <button 
-                          onClick={() => navigate(`/${lang}/results`)}
-                          className="text-lg font-semibold text-primary hover:text-accent transition-colors"
-                        >
-                          {t('dataCollection.steps.test.results')}
-                        </button>
-                      </div>
-                    )}
+                  <div className="text-center text-base text-muted-foreground space-y-1">
+                    <p>{t('dataCollection.steps.test.instructions')}</p>
+                    <p>{t('dataCollection.steps.test.duration')}</p>
                   </div>
-
-                  <div className="text-center text-base text-muted-foreground">
-                    <p>{t('dataCollection.steps.test.focusOnAccuracy')}</p>
-                  </div>
+                    
+                  {showResultsButton && (
+                    <div className={`text-center transition-opacity duration-1000 ${showResultsButton ? 'opacity-100' : 'opacity-0'}`}>
+                      <button 
+                        onClick={() => navigate(`/${lang}/results`)}
+                        className="px-8 py-3 text-lg font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      >
+                        {t('dataCollection.steps.test.results')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
