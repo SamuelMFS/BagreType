@@ -1,5 +1,6 @@
 ﻿import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLocalization } from "@/hooks/useLocalization";
 
 interface LetterStats {
@@ -21,7 +22,40 @@ interface LetterPerformanceChartProps {
 
 const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => {
   const [hoveredMetric, setHoveredMetric] = useState<'best' | 'average' | 'worst' | null>(null);
+  const [tooltipData, setTooltipData] = useState<{ letter: string; metric: string; value: number } | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const { t } = useLocalization();
+
+  // Update tooltip position on mouse move
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (tooltipData && tooltipRef.current) {
+        const tooltip = tooltipRef.current;
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        
+        // Use viewport coordinates (clientX/Y)
+        let x = e.clientX + 10;
+        let y = e.clientY - tooltipHeight / 2;
+        
+        // Check if tooltip would go off screen
+        if (x + tooltipWidth > window.innerWidth) {
+          x = e.clientX - tooltipWidth - 10;
+        }
+        if (y < 0) y = 10;
+        if (y + tooltipHeight > window.innerHeight) {
+          y = window.innerHeight - tooltipHeight - 10;
+        }
+        
+        // Update position
+        setTooltipPosition({ x, y });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [tooltipData]);
 
   // Calculate statistics for each letter
   const calculateLetterStats = (): LetterStats[] => {
@@ -165,32 +199,56 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
                       <>
                         {/* Worst Segment (bottom layer - largest) */}
                         <div 
-                          className="absolute bottom-0 left-0 right-0 bg-red-400 transition-opacity duration-200 rounded-t-sm"
+                          className="absolute bottom-0 left-0 right-0 bg-red-400 transition-opacity duration-200 rounded-t-sm cursor-pointer"
                           style={{ 
                             height: `${(stat.worst / maxReactionTime) * 100}%`,
                             opacity: getOpacity('worst')
                           }}
-                          title={`Worst: ${stat.worst}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Worst', 
+                              value: stat.worst
+                            });
+                            setTooltipPosition({ x: e.clientX + 10, y: e.clientY - 30 });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Average Segment (middle layer) */}
                         <div 
-                          className="absolute bottom-0 left-0 right-0 bg-blue-400 transition-opacity duration-200 rounded-t-sm"
+                          className="absolute bottom-0 left-0 right-0 bg-blue-400 transition-opacity duration-200 rounded-t-sm cursor-pointer"
                           style={{ 
                             height: `${(stat.average / maxReactionTime) * 100}%`,
                             opacity: getOpacity('average')
                           }}
-                          title={`Average: ${stat.average}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Average', 
+                              value: stat.average
+                            });
+                            setTooltipPosition({ x: e.clientX + 10, y: e.clientY - 30 });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                         
                         {/* Best Segment (top layer - smallest) */}
                         <div 
-                          className="absolute bottom-0 left-0 right-0 bg-green-400 transition-opacity duration-200 rounded-t-sm"
+                          className="absolute bottom-0 left-0 right-0 bg-green-400 transition-opacity duration-200 rounded-t-sm cursor-pointer"
                           style={{ 
                             height: `${(stat.best / maxReactionTime) * 100}%`,
                             opacity: getOpacity('best')
                           }}
-                          title={`Best: ${stat.best}ms`}
+                          onMouseEnter={(e) => {
+                            setTooltipData({ 
+                              letter: stat.letter.toUpperCase(), 
+                              metric: 'Best', 
+                              value: stat.best
+                            });
+                            setTooltipPosition({ x: e.clientX + 10, y: e.clientY - 30 });
+                          }}
+                          onMouseLeave={() => setTooltipData(null)}
                         ></div>
                       </>
                     )}
@@ -237,6 +295,26 @@ const LetterPerformanceChart = ({ typingData }: LetterPerformanceChartProps) => 
           </div>
         </div>
       </div>
+
+      {/* Tooltip - using React Portal to avoid parent container positioning issues */}
+      {tooltipData && createPortal(
+        <div
+          ref={tooltipRef}
+          className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+          style={{
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y}px`,
+            transform: 'none',
+          }}
+        >
+          <div className="bg-popover border border-border rounded-lg shadow-lg p-3 min-w-[120px] backdrop-blur-sm">
+            <div className="text-xs font-semibold text-primary mb-1">{tooltipData.letter}</div>
+            <div className="text-xs text-muted-foreground mb-0.5">{tooltipData.metric}</div>
+            <div className="text-lg font-bold text-accent">{tooltipData.value}ms</div>
+          </div>
+        </div>,
+        document.body
+      )}
     </Card>
   );
 };

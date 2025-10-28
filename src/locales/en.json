@@ -129,6 +129,7 @@
         "escToStop": "Press Esc to stop",
         "spaceToPlayAgain": "Press Space to play again",
         "nextPart": "Great! Next part - press Space",
+        "spaceToRepeat": "Press Space to repeat",
         "allDone": "That's all I need from you, but I'd love if you typed some more.",
         "focusOnAccuracy": "Focus on accuracy first, then speed will follow naturally",
         "results": "Results →",
@@ -149,7 +150,7 @@
   },
   "results": {
     "title": "Your Results",
-    "description": "Performance analysis from your typing test",
+    "description": "Performance analysis from your last typing test",
     "loading": "Loading your performance data...",
     "noData": "No test data found",
     "takeTest": "Take a Test",

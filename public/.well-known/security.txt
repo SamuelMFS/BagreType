@@ -1,0 +1,7 @@
+Contact: mailto:security@bagretype.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, pt-BR
+Canonical: https://bagretype.com/.well-known/security.txt
+Policy: https://bagretype.com/policy
+
+

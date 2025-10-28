@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLocalization } from "@/hooks/useLocalization";
 
 interface TypingData {
@@ -343,14 +344,15 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
         </div>
       </div>
 
-      {/* Tooltip */}
-      {tooltipData && (
+      {/* Tooltip - using React Portal to avoid parent container positioning issues */}
+      {tooltipData && createPortal(
         <div
           ref={tooltipRef}
-          className="fixed z-50 pointer-events-none transition-opacity duration-200"
+          className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
+            transform: 'none',
           }}
         >
           <div className="bg-popover border border-border rounded-lg shadow-lg p-3 min-w-[120px] backdrop-blur-sm">
@@ -358,7 +360,8 @@ const HorizontalLetterChart = ({ typingData }: HorizontalLetterChartProps) => {
             <div className="text-xs text-muted-foreground mb-0.5">{tooltipData.metric}</div>
             <div className="text-lg font-bold text-accent">{tooltipData.value}ms</div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

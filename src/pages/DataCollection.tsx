@@ -137,6 +137,53 @@ const DataCollection = () => {
     loadSavedData();
   }, [user]);
 
+  // Check if user has existing test data (for showing Results button permanently)
+  useEffect(() => {
+    const checkExistingTestData = async () => {
+      try {
+        if (user) {
+          // For logged-in users, check Supabase
+          const { data, error } = await supabase
+            .from('typing_test_data')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1);
+
+          if (data && data.length > 0) {
+            setShowResultsButton(true);
+          }
+        } else {
+          // For anonymous users, check localStorage and Supabase
+          const savedTests = localStorage.getItem('bagre-typing-tests');
+          if (savedTests && JSON.parse(savedTests).length > 0) {
+            setShowResultsButton(true);
+            return;
+          }
+
+          // Also check Supabase with session ID
+          const sessionId = localStorage.getItem('bagre-questionnaire-session');
+          if (sessionId) {
+            const { data, error } = await supabase
+              .from('typing_test_data')
+              .select('id')
+              .eq('session_id', sessionId)
+              .limit(1);
+
+            if (data && data.length > 0 && !error) {
+              setShowResultsButton(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing test data:', error);
+      }
+    };
+
+    if (!isLoading) {
+      checkExistingTestData();
+    }
+  }, [user, isLoading]);
+
   // Save questionnaire data
   const saveQuestionnaireData = async () => {
     try {
@@ -390,8 +437,14 @@ const DataCollection = () => {
             // Test completed (we've finished all sequences, including the last one)
             setIsTestActive(false);
             setTestCompleted(true);
-            setShowResultsButton(true);
-            setTestsCompleted(prev => prev + 1);
+            // Only show Results button after first full cycle (3 tests: easy, medium, hard)
+            setTestsCompleted(prev => {
+              const newValue = prev + 1;
+              if (newValue >= 3) {
+                setShowResultsButton(true);
+              }
+              return newValue;
+            });
           } else {
             // Move to next sequence
             setCurrentIndex(nextIndex);
@@ -944,8 +997,19 @@ const DataCollection = () => {
                             ) : (
                               <>
                                 <div className="text-5xl">↻</div>
-                                <div className="text-base text-muted-foreground">
-                                  {t('dataCollection.steps.test.allDone')}
+                                <div className="space-y-2">
+                                  <div className="text-base text-muted-foreground">
+                                    {t('dataCollection.steps.test.allDone')}
+                                  </div>
+                                  <div className="text-sm font-medium text-foreground/80">
+                                    {t('dataCollection.steps.test.spaceToRepeat').split(' ').map((word, index, array) => 
+                                      word.toLowerCase() === 'espaço' || word.toLowerCase() === 'space' ? (
+                                        <span key={index} className="inline-block px-2 py-1 bg-background border border-border/50 rounded text-sm font-mono font-semibold text-primary shadow-sm">{word}</span>
+                                      ) : (
+                                        <span key={index}>{word}{index < array.length - 1 ? ' ' : ''}</span>
+                                      )
+                                    )}
+                                  </div>
                                 </div>
                               </>
                             )}
@@ -1022,15 +1086,20 @@ const DataCollection = () => {
           {/* Progress bar and Reset button - locked in position */}
           <div className="fixed left-1/2 transform -translate-x-1/2 bottom-16 z-10">
             <div className="flex flex-col items-center space-y-2">
-              <SegmentedProgressBar 
-                currentStep={getCurrentStepNumber()} 
-                totalSteps={totalSteps}
-              />
-              <p className="text-sm text-muted-foreground">
-                {t('dataCollection.steps.test.step')} {getCurrentStepNumber()} {t('dataCollection.steps.test.of')} {totalSteps}
-              </p>
+              {/* Progress bar - hide when on test step */}
+              {step !== "test" && (
+                <>
+                  <SegmentedProgressBar 
+                    currentStep={getCurrentStepNumber()} 
+                    totalSteps={totalSteps}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {t('dataCollection.steps.test.step')} {getCurrentStepNumber()} {t('dataCollection.steps.test.of')} {totalSteps}
+                  </p>
+                </>
+              )}
               
-              {/* Reset Choices button - extra small */}
+              {/* Reset Choices button - always visible */}
               {(keyboardLayout || canTouchType || wantToLearn || shareData) && (
                 <button
                   onClick={resetQuestionnaire}

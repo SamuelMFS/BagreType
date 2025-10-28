@@ -71,6 +71,7 @@ Documentamos os achados, destacando tanto otimizações universais quanto espec�
 - **Tailwind CSS** - Framework CSS utilitário
 - **Shadcn/ui** - Componentes de UI modernos
 - **Supabase** - Backend como serviço
+- **Resend** - Provedor SMTP para entrega de emails
 - **GSAP** - Biblioteca de animações
 - **React Router** - Roteamento
 - **i18next** - Internacionalização
@@ -101,10 +102,11 @@ bun install
 ```
 
 3. Configure as variáveis de ambiente:
-Crie um arquivo `.env` na raiz do projeto com suas credenciais do Supabase:
+Crie um arquivo `.env` na raiz do projeto com suas credenciais:
 ```
 VITE_SUPABASE_URL=sua_url_do_supabase
 VITE_SUPABASE_ANON_KEY=sua_chave_anonima
+RESEND_API_KEY=sua_chave_resend  # Opcional: para envio de emails customizados
 ```
 
 4. Inicie o servidor de desenvolvimento:
@@ -259,6 +261,7 @@ Document findings, highlighting both universal and language-specific optimizatio
 - **Tailwind CSS** - Utility-first CSS framework
 - **Shadcn/ui** - Modern UI components
 - **Supabase** - Backend as a service
+- **Resend** - SMTP provider for email delivery
 - **GSAP** - Animation library
 - **React Router** - Routing
 - **i18next** - Internationalization
@@ -289,10 +292,11 @@ bun install
 ```
 
 3. Configure environment variables:
-Create a `.env` file in the project root with your Supabase credentials:
+Create a `.env` file in the project root with your credentials:
 ```
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_anon_key
+RESEND_API_KEY=your_resend_api_key  # Optional: for custom email sending
 ```
 
 4. Start the development server:
@@ -369,10 +373,11 @@ Para configurar o tratamento de emails com bounce e prevenir emails falsos, cons
 **📖 [SUPABASE_EMAIL_CONFIG.md](./SUPABASE_EMAIL_CONFIG.md)**
 
 Este guia inclui:
+- Configuração de Resend como provedor SMTP
 - Configuração de bounce handling no Supabase Dashboard
 - Rate limiting de emails
 - Limpeza automática de contas não verificadas
-- Configuração de SMTP personalizado
+- Configuração de SMTP personalizado com Resend
 
 ---
 

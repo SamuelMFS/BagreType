@@ -70,7 +70,17 @@ const Results = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setTypingTests(data || []);
+        // Validate and sanitize data structure
+        const validatedData = (data || []).map((test: any) => ({
+          ...test,
+          typing_data: (test.typing_data || []) as TypingTestData['typing_data'],
+          accuracy_percentage: test.accuracy_percentage != null ? test.accuracy_percentage : 0,
+          average_reaction_time_ms: test.average_reaction_time_ms != null ? test.average_reaction_time_ms : 0,
+          test_duration_ms: test.test_duration_ms || 0,
+          total_letters: test.total_letters || 0,
+          completed_letters: test.completed_letters || 0,
+        }));
+        setTypingTests(validatedData as TypingTestData[]);
       } else {
         // Load from both Supabase (for anonymous users who consented) and localStorage (for those who didn't)
         const sessionId = localStorage.getItem('bagre-questionnaire-session');
@@ -85,7 +95,16 @@ const Results = () => {
               .order('created_at', { ascending: false });
             
             if (!error && data) {
-              supabaseTests = data;
+              // Validate and sanitize Supabase data for anonymous users
+              supabaseTests = data.map(test => ({
+                ...test,
+                typing_data: test.typing_data || [],
+                accuracy_percentage: test.accuracy_percentage != null ? test.accuracy_percentage : 0,
+                average_reaction_time_ms: test.average_reaction_time_ms != null ? test.average_reaction_time_ms : 0,
+                test_duration_ms: test.test_duration_ms || 0,
+                total_letters: test.total_letters || 0,
+                completed_letters: test.completed_letters || 0,
+              }));
             }
           } catch (error) {
             console.error('Error fetching from Supabase:', error);
@@ -96,18 +115,35 @@ const Results = () => {
         const savedTests = localStorage.getItem('bagre-typing-tests');
         let localStorageTests: any[] = [];
         if (savedTests) {
-          const tests = JSON.parse(savedTests);
-          localStorageTests = tests.map((test: any, index: number) => ({
-            ...test,
-            id: test.id || `local-${Date.now()}-${index}`,
-            created_at: test.created_at || test.completed_at || new Date().toISOString()
-          }));
+          try {
+            const tests = JSON.parse(savedTests);
+            localStorageTests = tests.map((test: any, index: number) => ({
+              ...test,
+              id: test.id || `local-${Date.now()}-${index}`,
+              created_at: test.created_at || test.completed_at || new Date().toISOString(),
+              typing_data: test.typing_data || [],
+              accuracy_percentage: test.accuracy_percentage != null ? test.accuracy_percentage : 0,
+              average_reaction_time_ms: test.average_reaction_time_ms != null ? test.average_reaction_time_ms : 0,
+              test_duration_ms: test.test_duration_ms || 0,
+              total_letters: test.total_letters || 0,
+              completed_letters: test.completed_letters || 0,
+            }));
+          } catch (error) {
+            console.error('Error parsing localStorage tests:', error);
+          }
         }
         
         // Combine both sources and sort by date
         const allTests = [...supabaseTests, ...localStorageTests];
         allTests.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        setTypingTests(allTests);
+        
+        // Sanitize final data
+        const sanitizedTests = allTests.map(test => ({
+          ...test,
+          keyboard_layout: test.keyboard_layout || 'unknown',
+          can_touch_type: test.can_touch_type || 'unknown',
+        }));
+        setTypingTests(sanitizedTests);
       }
     } catch (error) {
       console.error('Error loading typing test data:', error);
@@ -118,27 +154,41 @@ const Results = () => {
 
   // Flatten sequence data into individual letter data for charts
   const flattenSequenceData = (sequenceData: TypingTestData['typing_data']) => {
-    // Check if data is in new sequence format or old individual letter format
-    if (sequenceData.length > 0 && 'sequence' in sequenceData[0]) {
-      // New sequence format
-      console.log('Using new sequence format for charts');
-      return sequenceData.flatMap(sequence => 
-        sequence.letterTimings!.map(letter => ({
-          letter: letter.letter,
-          reactionTime: letter.reactionTime,
-          timestamp: letter.timestamp,
-          correct: letter.correct
-        }))
-      );
-    } else {
-      // Old individual letter format (for backward compatibility)
-      console.log('Using old individual letter format for charts');
-      return sequenceData.map(letter => ({
-        letter: letter.letter!,
-        reactionTime: letter.reactionTime!,
-        timestamp: letter.timestamp!,
-        correct: letter.correct!
-      }));
+    if (!sequenceData || sequenceData.length === 0) {
+      return [];
+    }
+
+    try {
+      // Check if data is in new sequence format or old individual letter format
+      const firstItem = sequenceData[0];
+      
+      if (firstItem && 'sequence' in firstItem && firstItem.letterTimings) {
+        // New sequence format
+        console.log('Using new sequence format for charts');
+        return sequenceData.flatMap(sequence => 
+          sequence.letterTimings?.map(letter => ({
+            letter: letter?.letter || '',
+            reactionTime: letter?.reactionTime || 0,
+            timestamp: letter?.timestamp || 0,
+            correct: letter?.correct || false
+          })) || []
+        ).filter(item => item.letter !== '');
+      } else if (firstItem && 'letter' in firstItem) {
+        // Old individual letter format (for backward compatibility)
+        console.log('Using old individual letter format for charts');
+        return sequenceData.map(letter => ({
+          letter: letter.letter || '',
+          reactionTime: letter.reactionTime || 0,
+          timestamp: letter.timestamp || 0,
+          correct: letter.correct || false
+        })).filter(item => item.letter !== '');
+      } else {
+        console.warn('Unknown data format, returning empty array');
+        return [];
+      }
+    } catch (error) {
+      console.error('Error flattening sequence data:', error);
+      return [];
     }
   };
 
@@ -157,9 +207,13 @@ const Results = () => {
   };
 
   const getPerformanceLevel = (accuracy: number, avgReactionTime: number) => {
-    if (accuracy >= 95 && avgReactionTime <= 300) return { level: t('results.levels.expert'), color: "text-green-500" };
-    if (accuracy >= 90 && avgReactionTime <= 500) return { level: t('results.levels.advanced'), color: "text-blue-500" };
-    if (accuracy >= 80 && avgReactionTime <= 800) return { level: t('results.levels.intermediate'), color: "text-yellow-500" };
+    // Add defensive checks for NaN, null, or undefined values
+    const safeAccuracy = isNaN(accuracy) || accuracy == null ? 0 : accuracy;
+    const safeAvgReactionTime = isNaN(avgReactionTime) || avgReactionTime == null ? 1000 : avgReactionTime;
+    
+    if (safeAccuracy >= 95 && safeAvgReactionTime <= 300) return { level: t('results.levels.expert'), color: "text-green-500" };
+    if (safeAccuracy >= 90 && safeAvgReactionTime <= 500) return { level: t('results.levels.advanced'), color: "text-blue-500" };
+    if (safeAccuracy >= 80 && safeAvgReactionTime <= 800) return { level: t('results.levels.intermediate'), color: "text-yellow-500" };
     return { level: t('results.levels.beginner'), color: "text-orange-500" };
   };
 
@@ -236,7 +290,13 @@ const Results = () => {
     );
   }
 
-  const performance = getPerformanceLevel(latestTest.accuracy_percentage, latestTest.average_reaction_time_ms);
+  // Get numeric values with fallbacks for safety
+  const accuracy = latestTest.accuracy_percentage != null && !isNaN(latestTest.accuracy_percentage) 
+    ? latestTest.accuracy_percentage : 0;
+  const avgReactionTime = latestTest.average_reaction_time_ms != null && !isNaN(latestTest.average_reaction_time_ms)
+    ? latestTest.average_reaction_time_ms : 0;
+  
+  const performance = getPerformanceLevel(accuracy, avgReactionTime);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -271,13 +331,13 @@ const Results = () => {
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <div className="text-3xl font-bold text-primary">
-                      {latestTest.accuracy_percentage}%
+                      {accuracy}%
                     </div>
                     <p className="text-sm text-muted-foreground">{t('results.accuracy')}</p>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-accent">
-                      {latestTest.average_reaction_time_ms}ms
+                      {avgReactionTime}ms
                     </div>
                     <p className="text-sm text-muted-foreground">{t('results.avgReaction')}</p>
                   </div>
@@ -293,19 +353,21 @@ const Results = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('results.duration')}</span>
-                    <span className="font-semibold">{formatDuration(latestTest.test_duration_ms)}</span>
+                    <span className="font-semibold">{formatDuration(latestTest.test_duration_ms || 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('results.lettersTyped')}</span>
-                    <span className="font-semibold">{latestTest.completed_letters}/{latestTest.total_letters}</span>
+                    <span className="font-semibold">{latestTest.completed_letters || 0}/{latestTest.total_letters || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('results.keyboard')}</span>
-                    <span className="font-semibold capitalize">{latestTest.keyboard_layout}</span>
+                    <span className="font-semibold capitalize">{latestTest.keyboard_layout || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('results.touchTyping')}</span>
-                    <span className="font-semibold">{t(`results.touchTypingValues.${latestTest.can_touch_type}`)}</span>
+                    <span className="font-semibold">
+                      {latestTest.can_touch_type ? t(`results.touchTypingValues.${latestTest.can_touch_type}`) : 'N/A'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -367,8 +429,8 @@ const Results = () => {
                           </div>
                         </div>
                         <div className="flex gap-4 text-sm">
-                          <span>{test.accuracy_percentage}% {t('results.accuracyLabel')}</span>
-                          <span>{test.average_reaction_time_ms}ms {t('results.avgLabel')}</span>
+                          <span>{test.accuracy_percentage != null ? test.accuracy_percentage : 0}% {t('results.accuracyLabel')}</span>
+                          <span>{test.average_reaction_time_ms != null ? test.average_reaction_time_ms : 0}ms {t('results.avgLabel')}</span>
                         </div>
                       </div>
 

@@ -129,6 +129,7 @@
         "escToStop": "Pressione Esc para parar",
         "spaceToPlayAgain": "Pressione Espaço para jogar novamente",
         "nextPart": "Ótimo! Próxima parte - pressione Espaço",
+        "spaceToRepeat": "Pressione Espaço para repetir",
         "allDone": "Isso é tudo que preciso de você, mas adoraria se você digitasse mais um pouco.",
         "focusOnAccuracy": "Foque na precisão primeiro, depois a velocidade seguirá naturalmente",
         "results": "Resultados →",
@@ -149,7 +150,7 @@
   },
   "results": {
     "title": "Seus Resultados",
-    "description": "Análise de performance do seu teste de digitação",
+    "description": "Análise de performance do seu último teste de digitação",
     "loading": "Carregando seus dados de performance...",
     "noData": "Nenhum dado de teste encontrado",
     "takeTest": "Fazer um Teste",
