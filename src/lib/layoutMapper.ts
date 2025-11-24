@@ -31,6 +31,35 @@ export const LAYOUT_STRINGS: LayoutMapping = {
   dvorak: "1234567890[]'./pyfgcrl/=aoeuidhtns-;qjkxbmwvz"
 };
 
+// Curated layouts for programming languages
+export const PROGRAMMING_LAYOUTS: Record<string, string> = {
+  "C": "1234567890-=xbnpc[]vu/qjgretl'soimhywz;fda,.k", // QWERTY (standard for C)
+  "C#": "1234567890-=xbnpc[]vu/qjgretl'soimhywz;fda,.k", // QWERTY
+  "C++": "1234567890-=xbnpc[]vu/qjgretl'soimhywz;fda,.k", // QWERTY
+  "Java": "1234567890-=zwxcfu[rhkvqynstaoempgdjl';/i],.b", // QWERTY
+  "JavaScript": "1234567890-=zwxcfu[rhkvqynstaoempgdjl';/i],.b", // QWERTY
+  "TypeScript": "1234567890-=zwxcfu[rhkvqynstaoempgdjl';/i],.b", // QWERTY
+  "Python": "1234567890-=kbu]/y'pv[z;gnseomritcwxhfajld,.q", // QWERTY
+  "Ruby": "1234567890-=wfdl[/]jhx;qbnrs'aeipmyzcktvou,.g", // QWERTY
+  "Go": "1234567890-=jfpcl/][kq;zmdersoantuybhxgwi',.v", // QWERTY
+  "Rust": "1234567890-=qvaf/'rwmbkjcuoeilstnhdx;gpy[],.z", // QWERTY
+  "PHP": "1234567890-=bzlcdkfiaxj[yrntseouhmpw'/gv;],.q", // QWERTY
+  "Swift": "1234567890-=mnlao[']pwbj;hkeirtfscgxdz/qyu,.v" // QWERTY
+};
+
+// Curated layouts for human languages
+// All layouts must be exactly 45 characters
+// Format: 1234567890-= (12) + row2 (13) + row3 (11) + row4 (9) = 45
+export const HUMAN_LANGUAGE_LAYOUTS: Record<string, string> = {
+  "English": "1234567890-=juofy;mwbvz[aeisdrhtncp/]'gxlk,.q", // QWERTY (45 chars)
+  "Portuguese": "1234567890-=qwertyuiop[]asdfghjklç'zxcvbnm,./", // QWERTY with ç replacing ; (45 chars)
+  "Spanish": "1234567890-=qwertyuiop[]asdfghjklñ'zxcvbnm,./", // QWERTY with ñ replacing ; (45 chars)
+  "French": "1234567890-=azertyuiop[]qsdfghjklmùwxcvbn,;:!", // AZERTY (45 chars)
+  "Italian": "1234567890-=qwertyuiop[]asdfghjklò'zxcvbnm,./", // QWERTY with ò replacing ; (45 chars)
+  "German": "1234567890-=qwertzuiopü+asdfghjklöä#yxcvbnm,.-", // QWERTZ (45 chars)
+  "Dutch": "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./" // QWERTY (45 chars)
+};
+
 // Roadmap with exact positions in layout string (0-indexed from 1-based)
 // Format: [position, position, ..., 'test', position, ...]
 const ROADMAP_SEQUENCE: (number | string)[] = [

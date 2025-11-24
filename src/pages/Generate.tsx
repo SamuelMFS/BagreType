@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LAYOUT_STRINGS, getLayoutName } from "@/lib/layoutMapper";
+import { LAYOUT_STRINGS, getLayoutName, PROGRAMMING_LAYOUTS, HUMAN_LANGUAGE_LAYOUTS } from "@/lib/layoutMapper";
 import { useLocalization } from "@/hooks/useLocalization";
 
 const Generate = () => {
@@ -67,31 +67,62 @@ const Generate = () => {
   };
 
   const handleGenerate = async () => {
-    // TODO: ML Layout Generator - Feature not ready yet
-    // This feature is coming soon. In the meantime, you can:
-    // 1. Use the Manual tab to enter your own custom layout
-    // 2. Use the "Use QWERTY" or "Use Dvorak" options when implemented
-    
-    toast({
-      title: t('generate.toasts.featureComingSoon'),
-      description: t('generate.toasts.useManualEntry'),
-      variant: "default"
-    });
-    
-    // Set selectedType to manual to guide users to the working feature
-    setTimeout(() => {
-      setSelectedType("manual");
-    }, 500);
+    if (selectedType === "curated" && selectedLanguage) {
+      // Get the curated layout for the selected language
+      let layoutToUse: string | undefined;
+      
+      if (selectedCategory === "programming") {
+        layoutToUse = PROGRAMMING_LAYOUTS[selectedLanguage];
+      } else if (selectedCategory === "human") {
+        layoutToUse = HUMAN_LANGUAGE_LAYOUTS[selectedLanguage];
+      }
+      
+      if (layoutToUse && layoutToUse.length === 45) {
+        setGeneratedLayout(layoutToUse);
+        toast({
+          title: t('generate.toasts.layoutGenerated'),
+          description: t('generate.toasts.layoutReady'),
+        });
+      } else {
+        toast({
+          title: t('generate.toasts.error'),
+          description: t('generate.toasts.switchFailed'),
+          variant: "destructive"
+        });
+      }
+    } else if (selectedType === "custom") {
+      // TODO: ML Layout Generator - Feature not ready yet
+      toast({
+        title: t('generate.toasts.featureComingSoon'),
+        description: t('generate.toasts.useManualEntry'),
+        variant: "default"
+      });
+    }
   };
 
   const handleLearnLayout = async () => {
     let layoutToUse: string;
+    let layoutNameToUse: string;
     
     if (selectedType === "manual") {
       layoutToUse = manualLayoutString;
+      layoutNameToUse = getLayoutName(layoutToUse);
     } else if (generatedLayout) {
-      const lines = generatedLayout.split('\n');
-      layoutToUse = lines[lines.length - 1]; // Get the last line which contains the layout string
+      // For curated layouts, generatedLayout is the layout string directly
+      // For other generated layouts, it might be multi-line
+      if (generatedLayout.includes('\n')) {
+        const lines = generatedLayout.split('\n');
+        layoutToUse = lines[lines.length - 1]; // Get the last line which contains the layout string
+      } else {
+        layoutToUse = generatedLayout;
+      }
+      
+      // Set layout name based on selected language for curated layouts
+      if (selectedType === "curated" && selectedLanguage) {
+        layoutNameToUse = selectedLanguage.toLowerCase().replace(/\s+/g, '-');
+      } else {
+        layoutNameToUse = getLayoutName(layoutToUse);
+      }
     } else {
       return;
     }
@@ -143,7 +174,7 @@ const Generate = () => {
         
         // Store the layout in context
         setCurrentLayout(layoutToUse);
-        setLayoutName(getLayoutName(layoutToUse));
+        setLayoutName(layoutNameToUse);
         
         // Save to localStorage for persistence
         localStorage.setItem('persistent_layout', layoutToUse);
@@ -211,12 +242,14 @@ const Generate = () => {
                       <div className="text-lg font-mono text-foreground break-all leading-relaxed">
                         {selectedType === "manual" ? (
                           <div>{manualLayoutString}</div>
-                        ) : (
+                        ) : generatedLayout.includes('\n') ? (
                           generatedLayout.split('\n').map((line, index) => (
                             <div key={index} className="mb-1">
                               {line}
                             </div>
                           ))
+                        ) : (
+                          <div>{generatedLayout}</div>
                         )}
                       </div>
                     </div>
@@ -310,33 +343,24 @@ const Generate = () => {
                     <Languages className="w-5 h-5" />
                     <h3 className="text-xl font-semibold">{t('generate.curated.title')}</h3>
                   </div>
-                  
-                  {/* Feature Coming Soon Message */}
-                  <div className="rounded-lg border border-accent/20 bg-accent/5 p-6 text-center space-y-3">
-                    <Sparkles className="w-8 h-8 mx-auto text-accent" />
-                    <h4 className="text-lg font-semibold text-foreground">
-                      {t('generate.featureComingSoon')}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {t('generate.featureDescription')}
-                    </p>
-                  </div>
 
-                  <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as "programming" | "human")}>
+                  <Tabs value={selectedCategory} onValueChange={(v) => {
+                    setSelectedCategory(v as "programming" | "human");
+                    setSelectedLanguage(""); // Reset selection when switching categories
+                  }}>
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="programming">{t('generate.curated.programming')}</TabsTrigger>
                       <TabsTrigger value="human">{t('generate.curated.human')}</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="programming" className="mt-6">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 opacity-50">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {programmingLanguages.map((lang) => (
                           <Button
                             key={lang}
                             variant={selectedLanguage === lang ? "ocean" : "outline"}
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
-                            disabled
                           >
                             {t(`generate.curated.languages.programming.${lang}`)}
                           </Button>
@@ -345,14 +369,13 @@ const Generate = () => {
                     </TabsContent>
 
                     <TabsContent value="human" className="mt-6">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 opacity-50">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {humanLanguages.map((lang) => (
                           <Button
                             key={lang}
                             variant={selectedLanguage === lang ? "ocean" : "outline"}
                             onClick={() => setSelectedLanguage(lang)}
                             className="h-12"
-                            disabled
                           >
                             {t(`generate.curated.languages.human.${lang}`)}
                           </Button>
