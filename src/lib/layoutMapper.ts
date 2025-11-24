@@ -28,7 +28,8 @@ export interface LayoutMapping {
 
 export const LAYOUT_STRINGS: LayoutMapping = {
   qwerty: "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./",
-  dvorak: "1234567890[]'./pyfgcrl/=aoeuidhtns-;qjkxbmwvz"
+  dvorak: "1234567890[]',.pyfgcrl/=aoeuidhtns-;qjkxbmwvz",
+  colemak: "1234567890-=qwfpgjluy;[]arstdhneio'zxcvbkm,./"
 };
 
 // Curated layouts for programming languages

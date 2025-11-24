@@ -30,13 +30,33 @@ export function VisualKeyboard({ layoutString, className = "" }: VisualKeyboardP
   const { theme } = useTheme();
   const keyboardRef = useRef<any>(null);
   const accentButtonTheme = useMemo(
-    () => [
-      {
-        class: 'vk-accent',
-        buttons: ACCENT_KEYS.join(' ')
+    () => {
+      const themes = [
+        {
+          class: 'vk-accent',
+          buttons: ACCENT_KEYS.join(' ')
+        }
+      ];
+      
+      // Add styling for question mark keys in preview mode
+      if (layoutString && layoutString.includes('?')) {
+        const questionMarkKeys: string[] = [];
+        for (let i = 0; i < QWERTY_POSITIONS.length && i < layoutString.length; i++) {
+          if (layoutString[i] === '?') {
+            questionMarkKeys.push(QWERTY_POSITIONS[i]);
+          }
+        }
+        if (questionMarkKeys.length > 0) {
+          themes.push({
+            class: 'vk-preview',
+            buttons: questionMarkKeys.join(' ')
+          });
+        }
       }
-    ],
-    []
+      
+      return themes;
+    },
+    [layoutString]
   );
 
   const palette = {
@@ -64,7 +84,9 @@ export function VisualKeyboard({ layoutString, className = "" }: VisualKeyboardP
     rowGap: '0.35rem'
   };
 
-  // Validate layout string
+  // Validate layout string - allow question marks for preview mode
+  const isPreviewMode = layoutString && layoutString.includes('?');
+  
   if (!layoutString || layoutString.length !== 45) {
     return (
       <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
@@ -95,14 +117,25 @@ export function VisualKeyboard({ layoutString, className = "" }: VisualKeyboardP
   // Create display map: QWERTY key -> layout character
   const displayMap = useMemo(() => {
     const display: Record<string, string> = {};
+    const hasQuestionMarks = layoutString.includes('?');
+    
     for (let i = 0; i < QWERTY_POSITIONS.length && i < layoutString.length; i++) {
       const qwertyKey = QWERTY_POSITIONS[i];
       const layoutChar = layoutString[i];
-      // Map the key exactly as it appears (lowercase for letters)
-      display[qwertyKey] = layoutChar;
-      // Also map uppercase version
-      if (qwertyKey.match(/[a-z]/)) {
-        display[qwertyKey.toUpperCase()] = layoutChar.toUpperCase();
+      
+      // Handle question marks in preview mode
+      if (layoutChar === '?') {
+        display[qwertyKey] = '?';
+        if (qwertyKey.match(/[a-z]/)) {
+          display[qwertyKey.toUpperCase()] = '?';
+        }
+      } else {
+        // Map the key exactly as it appears (lowercase for letters)
+        display[qwertyKey] = layoutChar;
+        // Also map uppercase version
+        if (qwertyKey.match(/[a-z]/)) {
+          display[qwertyKey.toUpperCase()] = layoutChar.toUpperCase();
+        }
       }
     }
 
@@ -241,6 +274,12 @@ export function VisualKeyboard({ layoutString, className = "" }: VisualKeyboardP
           border-color: ${palette.accentBorder} !important;
           box-shadow: none;
           font-size: 0.85rem;
+        }
+        .hg-theme-default .hg-button.vk-preview {
+          opacity: 0.5;
+          border-style: dashed;
+          border-color: ${palette.keyBorder} !important;
+          background: ${palette.keyBg} !important;
         }
         .hg-theme-default .hg-button:hover {
           background: ${palette.keyBgHover};

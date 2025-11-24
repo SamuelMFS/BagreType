@@ -18,6 +18,9 @@ import { LAYOUT_STRINGS, getLayoutName, PROGRAMMING_LAYOUTS, HUMAN_LANGUAGE_LAYO
 import { useLocalization } from "@/hooks/useLocalization";
 import { VisualKeyboard } from "@/components/VisualKeyboard";
 import { useMemo } from "react";
+import { runPythonGA, PythonRunOptions } from "@/lib/pythonRunner";
+import { getCachedLayout, cacheLayout, hashCorpus } from "@/lib/indexedDBCache";
+import { Progress } from "@/components/ui/progress";
 
 // Seeded random number generator
 const seededRandom = (seed: string): number => {
@@ -58,6 +61,10 @@ const Generate = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLayout, setGeneratedLayout] = useState<string | null>(null);
   const [manualLayoutString, setManualLayoutString] = useState("");
+  const [usedCharacters, setUsedCharacters] = useState<Set<string>>(new Set());
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationMessage, setGenerationMessage] = useState("");
+  const [isInitializingPython, setIsInitializingPython] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -74,6 +81,7 @@ const Generate = () => {
     const savedLayout = localStorage.getItem('persistent_layout');
     if (savedLayout && savedLayout.length === 45) {
       setManualLayoutString(savedLayout);
+      setUsedCharacters(new Set(savedLayout.split('')));
       // Only switch to manual tab if it's a custom layout (not QWERTY)
       if (savedLayout !== LAYOUT_STRINGS.qwerty) {
         setSelectedType("manual");
@@ -81,14 +89,27 @@ const Generate = () => {
     }
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
-      toast({
-        title: t('generate.toasts.fileUploaded'),
-        description: t('generate.toasts.fileReady', { filename: file.name }),
-      });
+      
+      // Read file content as text
+      try {
+        const text = await file.text();
+        setCustomText(text);
+        toast({
+          title: t('generate.toasts.fileUploaded'),
+          description: t('generate.toasts.fileReady', { filename: file.name }),
+        });
+      } catch (error) {
+        console.error('Error reading file:', error);
+        toast({
+          title: t('generate.toasts.error'),
+          description: 'Failed to read file content',
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -117,12 +138,119 @@ const Generate = () => {
         });
       }
     } else if (selectedType === "custom") {
-      // TODO: ML Layout Generator - Feature not ready yet
-      toast({
-        title: t('generate.toasts.featureComingSoon'),
-        description: t('generate.toasts.useManualEntry'),
-        variant: "default"
-      });
+      // Get corpus text from either textarea or uploaded file
+      const corpusText = customText.trim();
+      
+      if (!corpusText) {
+        toast({
+          title: t('generate.toasts.error'),
+          description: 'Please provide text or upload a file with corpus data',
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('[Generate] Starting layout generation');
+      console.log(`[Generate] Corpus text length: ${corpusText.length} characters`);
+      
+      setIsGenerating(true);
+      setGenerationProgress(0);
+      setGenerationMessage("Initializing Python environment...");
+      setIsInitializingPython(true);
+
+      try {
+        // Check cache first
+        console.log('[Generate] Checking cache for existing layout...');
+        const cached = await getCachedLayout(corpusText);
+        if (cached && cached.layout) {
+          console.log('[Generate] Found cached layout, using it');
+          setGeneratedLayout(cached.layout);
+          setIsGenerating(false);
+          setIsInitializingPython(false);
+          toast({
+            title: t('generate.toasts.layoutGenerated'),
+            description: 'Layout loaded from cache',
+          });
+          return;
+        }
+        console.log('[Generate] No cached layout found, generating new one...');
+
+        // Run Python GA
+        console.log('[Generate] Setting up Python GA options...');
+        const options: PythonRunOptions = {
+          corpus: corpusText,
+          onInitProgress: (message: string, progress?: number) => {
+            console.log(`[Generate Init] ${message}${progress !== undefined ? ` (${progress}%)` : ''}`);
+            setGenerationMessage(message);
+            if (progress !== undefined) {
+              setGenerationProgress(progress);
+            }
+          },
+          onProgress: (message: string, progress?: number) => {
+            setIsInitializingPython(false); // Mark as initialized once we get GA progress
+            setGenerationMessage(message);
+            if (progress !== undefined) {
+              // Map GA progress (0-100) to overall progress (30-100)
+              const overallProgress = 30 + (progress * 0.7);
+              setGenerationProgress(overallProgress);
+            }
+          },
+          onError: (error: string) => {
+            console.error('[Generate] Python execution error:', error);
+            setIsInitializingPython(false);
+            toast({
+              title: t('generate.toasts.error'),
+              description: `Generation failed: ${error}`,
+              variant: "destructive"
+            });
+          }
+        };
+        
+        console.log('[Generate] Calling runPythonGA...');
+        const startTime = Date.now();
+
+        const result = await runPythonGA(options);
+        const totalTime = Date.now() - startTime;
+        console.log(`[Generate] Total generation time: ${totalTime}ms`);
+        setIsInitializingPython(false);
+
+        if (result.success && result.layout) {
+          console.log('[Generate] Layout generated successfully, caching result...');
+          // Cache the result
+          await cacheLayout(corpusText, result.layout, {
+            generations: 300,
+            population: 200,
+            mutationRate: 0.1,
+            crossoverRate: 0.7,
+          });
+          console.log('[Generate] Result cached');
+
+          setGeneratedLayout(result.layout);
+          toast({
+            title: t('generate.toasts.layoutGenerated'),
+            description: t('generate.toasts.layoutReady'),
+          });
+        } else {
+          console.error('[Generate] Generation failed:', result.error);
+          toast({
+            title: t('generate.toasts.error'),
+            description: result.error || 'Failed to generate layout',
+            variant: "destructive"
+          });
+        }
+      } catch (error: any) {
+        console.error('Error generating layout:', error);
+        toast({
+          title: t('generate.toasts.error'),
+          description: error?.message || 'An unexpected error occurred',
+          variant: "destructive"
+        });
+      } finally {
+        setIsGenerating(false);
+        setIsInitializingPython(false);
+        setGenerationProgress(0);
+        setGenerationMessage("");
+      }
     }
   };
 
@@ -456,41 +584,139 @@ const Generate = () => {
                         </span>
                       )}
                     </div>
-                    <Textarea
-                      placeholder={t('generate.manual.placeholder')}
-                      value={manualLayoutString}
-                      onChange={(e) => setManualLayoutString(e.target.value)}
-                      maxLength={45}
-                      className="min-h-[100px] bg-background/80 border-border font-mono"
-                    />
+                    <div className="relative">
+                      <Textarea
+                        placeholder={t('generate.manual.placeholder')}
+                        value={manualLayoutString}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          const validChars = "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./";
+                          
+                          // Handle deletion - if new value is shorter, just update
+                          if (newValue.length <= manualLayoutString.length) {
+                            setManualLayoutString(newValue);
+                            setUsedCharacters(new Set(newValue.split('')));
+                            return;
+                          }
+                          
+                          // Handle addition - filter to only allow valid, non-duplicate characters
+                          let filteredValue = manualLayoutString;
+                          const currentUsedChars = new Set(manualLayoutString.split(''));
+                          
+                          // Process only the new characters (from the end)
+                          const addedChars = newValue.slice(manualLayoutString.length);
+                          
+                          for (const char of addedChars) {
+                            // Check if character is valid
+                            if (validChars.includes(char)) {
+                              // Check if character is already used
+                              if (!currentUsedChars.has(char) && filteredValue.length < 45) {
+                                filteredValue += char;
+                                currentUsedChars.add(char);
+                              }
+                              // If duplicate or invalid, skip it (don't add to string)
+                            }
+                          }
+                          
+                          setManualLayoutString(filteredValue);
+                          setUsedCharacters(currentUsedChars);
+                        }}
+                        maxLength={45}
+                        className="min-h-[100px] bg-background/80 border-border font-mono pr-20"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setManualLayoutString("");
+                          setUsedCharacters(new Set());
+                          localStorage.removeItem('persistent_layout');
+                        }}
+                        disabled={!manualLayoutString}
+                        className="absolute bottom-2 right-2"
+                      >
+                        {t('generate.manual.clear')}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const layout = LAYOUT_STRINGS.qwerty;
+                          setManualLayoutString(layout);
+                          setUsedCharacters(new Set(layout.split('')));
+                        }}
+                      >
+                        QWERTY
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const layout = LAYOUT_STRINGS.dvorak;
+                          setManualLayoutString(layout);
+                          setUsedCharacters(new Set(layout.split('')));
+                        }}
+                      >
+                        Dvorak
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const layout = LAYOUT_STRINGS.colemak;
+                          setManualLayoutString(layout);
+                          setUsedCharacters(new Set(layout.split('')));
+                        }}
+                      >
+                        Colemak
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Visual Keyboard Preview */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
-                        {t('generate.manual.length', { current: manualLayoutString.length })}
-                        {manualLayoutString.length !== 45 && t('generate.manual.mustBe45')}
-                      </p>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setManualLayoutString(LAYOUT_STRINGS.qwerty);
-                          }}
-                        >
-                          {t('generate.manual.setQwerty')}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setManualLayoutString("");
-                            localStorage.removeItem('persistent_layout');
-                          }}
-                          disabled={!manualLayoutString}
-                        >
-                          {t('generate.manual.clear')}
-                        </Button>
+                      <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Languages className="w-4 h-4" />
+                        Keyboard Preview
+                      </label>
+                      <div className="flex flex-col items-end gap-1 min-w-[200px] h-[2.5rem]">
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                          {t('generate.manual.length', { current: manualLayoutString.length })}
+                          {manualLayoutString.length !== 45 && t('generate.manual.mustBe45')}
+                        </p>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                          {manualLayoutString.length > 0 ? (
+                            <>Characters used: {usedCharacters.size}/45 • Remaining: {45 - usedCharacters.size}</>
+                          ) : (
+                            <>&nbsp;</>
+                          )}
+                        </p>
                       </div>
                     </div>
+                    <div className="bg-background/50 rounded-lg p-6 border border-border/50">
+                      <VisualKeyboard 
+                        layoutString={(() => {
+                          // Create a 45-character string with question marks for empty positions
+                          const QWERTY_POSITIONS = "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./";
+                          let displayLayout = "";
+                          for (let i = 0; i < 45; i++) {
+                            if (i < manualLayoutString.length) {
+                              displayLayout += manualLayoutString[i];
+                            } else {
+                              displayLayout += "?";
+                            }
+                          }
+                          return displayLayout;
+                        })()}
+                        className="w-full"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Type characters in the text area above to see them appear on the keyboard. Question marks (?) indicate empty positions.
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -499,18 +725,7 @@ const Generate = () => {
             <TabsContent value="custom" className="space-y-6">
               <Card className="p-6 bg-card/90 backdrop-blur-md border-border/50">
                 <div className="space-y-6">
-                  {/* Feature Coming Soon Message */}
-                  <div className="rounded-lg border border-accent/20 bg-accent/5 p-6 text-center space-y-3">
-                    <Sparkles className="w-8 h-8 mx-auto text-accent" />
-                    <h4 className="text-lg font-semibold text-foreground">
-                      {t('generate.featureComingSoon')}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {t('generate.featureDescription')}
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-3 opacity-50">
+                  <div className="space-y-3">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       {t('generate.custom.pasteText')}
@@ -520,11 +735,16 @@ const Generate = () => {
                       value={customText}
                       onChange={(e) => setCustomText(e.target.value)}
                       className="min-h-[200px] bg-background/80 border-border"
-                      disabled
+                      disabled={isGenerating}
                     />
+                    {customText && (
+                      <p className="text-xs text-muted-foreground">
+                        {customText.length} characters
+                      </p>
+                    )}
                   </div>
 
-                  <div className="relative opacity-50">
+                  <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-border"></div>
                     </div>
@@ -533,7 +753,7 @@ const Generate = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-3 opacity-50">
+                  <div className="space-y-3">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <Upload className="w-4 h-4" />
                       {t('generate.custom.uploadFile')}
@@ -545,13 +765,13 @@ const Generate = () => {
                         className="hidden"
                         accept=".txt,.pdf,.yaml,.yml,.json,.md"
                         onChange={handleFileUpload}
-                        disabled
+                        disabled={isGenerating}
                       />
                       <Button
                         variant="outline"
                         onClick={() => document.getElementById("file-upload")?.click()}
                         className="w-full gap-2"
-                        disabled
+                        disabled={isGenerating}
                       >
                         <Upload className="w-4 h-4" />
                         {uploadedFile ? uploadedFile.name : t('generate.custom.chooseFile')}
@@ -561,6 +781,21 @@ const Generate = () => {
                       {t('generate.custom.supportedFormats')}
                     </p>
                   </div>
+
+                  {isGenerating && (
+                    <div className="space-y-2 pt-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{generationMessage || "Processing..."}</span>
+                        <span className="text-muted-foreground">{Math.round(generationProgress)}%</span>
+                      </div>
+                      <Progress value={generationProgress} className="h-2" />
+                      {isInitializingPython && (
+                        <p className="text-xs text-muted-foreground">
+                          First-time setup: Loading Python environment (this may take a minute)...
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Card>
             </TabsContent>
