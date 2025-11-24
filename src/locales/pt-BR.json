@@ -420,12 +420,6 @@
     "startPractice": "Iniciar Prática",
     "selectExercise": "Selecionar Exercício"
   },
-  "generate": {
-    "title": "Gerar Layout",
-    "description": "Crie seu layout de teclado personalizado",
-    "generateLayout": "Gerar Layout",
-    "downloadLayout": "Baixar Layout"
-  },
   "auth": {
     "title": "Autenticação",
     "signIn": "Entrar",
@@ -611,7 +605,9 @@
     },
     "actions": {
       "learnLayout": "Aprender Este Layout",
+      "useLayout": "Usar Layout",
       "generateLayout": "Gerar Layout",
+      "useLayout": "Usar Layout",
       "generating": "Gerando...",
       "generateAnother": "Gerar Outro",
       "learnHint": "Clique em \"Aprender Este Layout\" para ativar este layout e começar a praticar"

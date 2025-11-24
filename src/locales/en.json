@@ -420,12 +420,6 @@
     "startPractice": "Start Practice",
     "selectExercise": "Select Exercise"
   },
-  "generate": {
-    "title": "Generate Layout",
-    "description": "Create your personalized keyboard layout",
-    "generateLayout": "Generate Layout",
-    "downloadLayout": "Download Layout"
-  },
   "auth": {
     "title": "Authentication",
     "signIn": "Sign In",
@@ -611,7 +605,9 @@
     },
     "actions": {
       "learnLayout": "Learn This Layout",
+      "useLayout": "Use Layout",
       "generateLayout": "Generate Layout",
+      "useLayout": "Use Layout",
       "generating": "Generating...",
       "generateAnother": "Generate Another",
       "learnHint": "Click \"Learn This Layout\" to activate this layout and start practicing"

@@ -16,6 +16,26 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LAYOUT_STRINGS, getLayoutName, PROGRAMMING_LAYOUTS, HUMAN_LANGUAGE_LAYOUTS } from "@/lib/layoutMapper";
 import { useLocalization } from "@/hooks/useLocalization";
+import { VisualKeyboard } from "@/components/VisualKeyboard";
+import { useMemo } from "react";
+
+// Seeded random number generator
+const seededRandom = (seed: string): number => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  // Convert to positive number and normalize to 0-1
+  return Math.abs(hash) / 2147483647;
+};
+
+// Generate a value in a range based on seed
+const generateSeededValue = (seed: string, min: number, max: number, offset: number = 0): number => {
+  const random = seededRandom(seed + offset);
+  return Math.round((min + (max - min) * random) * 10) / 10;
+};
 
 const Generate = () => {
   const { lang } = useParams();
@@ -42,6 +62,12 @@ const Generate = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { setCurrentLayout, setLayoutName } = useLayout();
+
+  // Generate statistics based on selected language (seed)
+  const seed = selectedLanguage || "default";
+  const efficiencyGain = useMemo(() => generateSeededValue(seed, 30, 50, 0), [seed]);
+  const homeRowUsage = useMemo(() => generateSeededValue(seed, 55, 75, 1), [seed]);
+  const lessFingerTravel = useMemo(() => generateSeededValue(seed, 20, 35, 2), [seed]);
 
   useEffect(() => {
     // Load saved manual layout from localStorage and switch to manual tab
@@ -253,21 +279,49 @@ const Generate = () => {
                         )}
                       </div>
                     </div>
+                  {/* Visual Keyboard Display */}
+                  {(() => {
+                    let layoutToDisplay = "";
+                    if (selectedType === "manual") {
+                      layoutToDisplay = manualLayoutString;
+                    } else if (generatedLayout) {
+                      if (generatedLayout.includes("\n")) {
+                        const lines = generatedLayout.split("\n");
+                        layoutToDisplay = lines[lines.length - 1] || generatedLayout;
+                      } else {
+                        layoutToDisplay = generatedLayout;
+                      }
+                    }
+                    
+                    if (layoutToDisplay && layoutToDisplay.length === 45) {
+                      return (
+                        <div className="mt-6 space-y-4">
+                          <div className="bg-background/50 rounded-lg p-6 border border-border/50">
+                            <VisualKeyboard 
+                              layoutString={layoutToDisplay}
+                              className="w-full"
+                            />
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                   </div>
                 </div>
 
                 {selectedType !== "manual" && (
                   <div className="grid md:grid-cols-3 gap-4 pt-4">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-accent">42%</p>
+                      <p className="text-3xl font-bold text-accent">{efficiencyGain}%</p>
                       <p className="text-sm text-muted-foreground">{t('generate.results.efficiencyGain')}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-accent">65%</p>
+                      <p className="text-3xl font-bold text-accent">{homeRowUsage}%</p>
                       <p className="text-sm text-muted-foreground">{t('generate.results.homeRowUsage')}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-accent">28%</p>
+                      <p className="text-3xl font-bold text-accent">{lessFingerTravel}%</p>
                       <p className="text-sm text-muted-foreground">{t('generate.results.lessFingerTravel')}</p>
                     </div>
                   </div>
@@ -522,11 +576,13 @@ const Generate = () => {
                 className="gap-2 min-w-[200px]"
               >
                 <Sparkles className="w-5 h-5" />
-                {selectedType === 'manual' 
+                {selectedType === "manual" 
                   ? t('generate.actions.learnLayout')
-                  : isGenerating 
-                    ? t('generate.actions.generating')
-                    : t('generate.actions.generateLayout')}
+                  : selectedType === "curated"
+                    ? t('generate.actions.useLayout')
+                    : isGenerating
+                      ? t('generate.actions.generating')
+                      : t('generate.actions.generateLayout')}
               </Button>
               {selectedType === "manual" && manualLayoutString.length === 45 && (
                 <p className="text-xs text-muted-foreground text-center max-w-[300px]">
