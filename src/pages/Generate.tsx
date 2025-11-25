@@ -287,43 +287,35 @@ const Generate = () => {
         const currentLayout = localStorage.getItem('persistent_layout');
         const isDifferentLayout = currentLayout && currentLayout !== layoutToUse;
         
-        // Always reset progress when switching layouts (or starting fresh)
-        if (isDifferentLayout) {
-          if (user) {
-            // Delete all lesson progress from Supabase
-            const { error } = await supabase
-              .from('lesson_progress')
-              .delete()
-              .eq('user_id', user.id);
-            
-            if (error) {
-              console.error('Error deleting lesson progress:', error);
-            }
-          } else {
-            // Clear lesson progress from localStorage for anonymous users
-            localStorage.removeItem('lesson_progress');
-          }
+        // Always reset progress when setting/changing a layout (for both logged and anonymous users)
+        if (user) {
+          // Delete all lesson progress from Supabase for logged-in users
+          const { error: deleteError } = await supabase
+            .from('lesson_progress')
+            .delete()
+            .eq('user_id', user.id);
           
+          if (deleteError) {
+            console.error('Error deleting lesson progress:', deleteError);
+            toast({
+              title: t('generate.toasts.error'),
+              description: 'Failed to clear progress. Please try again.',
+              variant: "destructive"
+            });
+          }
+        } else {
+          // Clear lesson progress from localStorage for anonymous users
+          // Also clear session_id to start fresh
+          localStorage.removeItem('lesson_progress');
+          localStorage.removeItem('session_id');
+        }
+        
+        // Show toast notification if layout changed
+        if (isDifferentLayout) {
           toast({
             title: t('generate.toasts.layoutSwitched'),
             description: t('generate.toasts.progressReset'),
           });
-        } else if (!currentLayout) {
-          // First time setting a layout, clear any existing progress just in case
-          if (user) {
-            // Delete all lesson progress from Supabase
-            const { error } = await supabase
-              .from('lesson_progress')
-              .delete()
-              .eq('user_id', user.id);
-            
-            if (error) {
-              console.error('Error deleting lesson progress:', error);
-            }
-          } else {
-            // Clear lesson progress from localStorage for anonymous users
-            localStorage.removeItem('lesson_progress');
-          }
         }
         
         // Store the layout in context
@@ -715,7 +707,7 @@ const Generate = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Type characters in the text area above to see them appear on the keyboard. Question marks (?) indicate empty positions.
+                      {t('generate.manual.keyboardPreviewHint')}
                     </p>
                   </div>
                 </div>

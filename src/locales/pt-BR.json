@@ -582,7 +582,8 @@
       "mustBe45": " (Deve ter exatamente 45 caracteres)",
       "currentlyActive": "Atualmente Ativo",
       "setQwerty": "Definir como QWERTY",
-      "clear": "Limpar"
+      "clear": "Limpar",
+      "keyboardPreviewHint": "Digite caracteres na área de texto acima para vê-los aparecer no teclado. Pontos de interrogação (?) indicam posições vazias."
     },
     "custom": {
       "pasteText": "Cole Seu Texto",

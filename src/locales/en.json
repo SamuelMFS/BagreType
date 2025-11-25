@@ -582,7 +582,8 @@
       "mustBe45": " (Must be exactly 45 characters)",
       "currentlyActive": "Currently Active",
       "setQwerty": "Set to QWERTY",
-      "clear": "Clear"
+      "clear": "Clear",
+      "keyboardPreviewHint": "Type characters in the text area above to see them appear on the keyboard. Question marks (?) indicate empty positions."
     },
     "custom": {
       "pasteText": "Paste Your Text",

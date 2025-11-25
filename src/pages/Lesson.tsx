@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocalization } from "@/hooks/useLocalization";
 import { decodeLessonId } from "@/lib/urlEncoder";
+import { createChaptersForLayout, LAYOUT_STRINGS } from "@/lib/layoutMapper";
 
 type PracticeRound = "lesson" | "chapter" | "all" | "complete";
 
@@ -93,72 +94,34 @@ const Lesson = () => {
   }
 
   function getLessonNumber(chapterId: string, lessonId: string): number {
-    // Define the lesson order across all chapters
-    const lessonOrder = [
-      // Chapter 1: Index Fingers
-      { chapterId: '1', lessonId: 'f' },
-      { chapterId: '1', lessonId: 'j' },
-      { chapterId: '1', lessonId: 'r' },
-      { chapterId: '1', lessonId: 'u' },
-      { chapterId: '1', lessonId: 'n' },
-      { chapterId: '1', lessonId: 'v' },
-      { chapterId: '1', lessonId: 't' },
-      { chapterId: '1', lessonId: 'y' },
-      { chapterId: '1', lessonId: 'g' },
-      { chapterId: '1', lessonId: 'h' },
-      { chapterId: '1', lessonId: 'b' },
-      { chapterId: '1', lessonId: 'm' },
-      // Chapter 2: Middle Fingers
-      { chapterId: '2', lessonId: 'd' },
-      { chapterId: '2', lessonId: 'k' },
-      { chapterId: '2', lessonId: 'e' },
-      { chapterId: '2', lessonId: 'i' },
-      { chapterId: '2', lessonId: 'c' },
-      { chapterId: '2', lessonId: 'comma' },
-      // Chapter 3: Ring Fingers
-      { chapterId: '3', lessonId: 's' },
-      { chapterId: '3', lessonId: 'l' },
-      { chapterId: '3', lessonId: 'w' },
-      { chapterId: '3', lessonId: 'o' },
-      { chapterId: '3', lessonId: 'x' },
-      { chapterId: '3', lessonId: 'period' },
-      // Chapter 4: Pinky Fingers
-      { chapterId: '4', lessonId: 'a' },
-      { chapterId: '4', lessonId: 'semicolon' },
-      { chapterId: '4', lessonId: 'q' },
-      { chapterId: '4', lessonId: 'p' },
-      { chapterId: '4', lessonId: 'z' },
-      { chapterId: '4', lessonId: 'slash' },
-      // Chapter 5: Numbers & Symbols
-      { chapterId: '5', lessonId: '1' },
-      { chapterId: '5', lessonId: '2' },
-      { chapterId: '5', lessonId: '3' },
-      { chapterId: '5', lessonId: '4' },
-      { chapterId: '5', lessonId: '5' },
-      { chapterId: '5', lessonId: '6' },
-      { chapterId: '5', lessonId: '7' },
-      { chapterId: '5', lessonId: '8' },
-      { chapterId: '5', lessonId: '9' },
-      { chapterId: '5', lessonId: '0' },
-      { chapterId: '5', lessonId: 'minus' },
-      { chapterId: '5', lessonId: 'equals' },
-      { chapterId: '5', lessonId: 'bracket-left' },
-      { chapterId: '5', lessonId: 'bracket-right' },
-      { chapterId: '5', lessonId: 'backslash' },
-      { chapterId: '5', lessonId: 'semicolon' },
-      { chapterId: '5', lessonId: 'quote' },
-      { chapterId: '5', lessonId: 'asterisk' },
-      { chapterId: '5', lessonId: 'dollar' },
-      { chapterId: '5', lessonId: 'ampersand' },
-      { chapterId: '5', lessonId: 'percent' },
-      { chapterId: '5', lessonId: 'caret' },
-    ];
-
-    const index = lessonOrder.findIndex(lesson => 
-      lesson.chapterId === chapterId && lesson.lessonId === lessonId
-    );
+    // Get the current layout from localStorage
+    const activeLayoutString = typeof localStorage !== 'undefined' 
+      ? localStorage.getItem('persistent_layout') || LAYOUT_STRINGS.qwerty
+      : LAYOUT_STRINGS.qwerty;
     
-    return index + 1; // Return 1-based lesson number
+    // Generate chapters for the current layout
+    const chapters = createChaptersForLayout(activeLayoutString);
+    
+    // Build a flat list of all lessons in order (excluding tests)
+    let lessonNumber = 0;
+    for (const chapter of chapters) {
+      for (const lesson of chapter.lessons) {
+        // Skip test lessons when counting
+        if (lesson.type === 'test') {
+          continue;
+        }
+        
+        lessonNumber++;
+        
+        // Check if this is the lesson we're looking for
+        if (chapter.id.toString() === chapterId && lesson.id === lessonId) {
+          return lessonNumber;
+        }
+      }
+    }
+    
+    // Fallback: if not found, return 1
+    return 1;
   }
 
   // Save lesson progress

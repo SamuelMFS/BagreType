@@ -46,18 +46,28 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
   // Use prop language with fallback to 'en'
   const currentLanguage = propLanguage || 'en';
 
-  // Load persistent layout on mount
+  // Load persistent layout on mount and watch for changes
   useEffect(() => {
     const storedLayout = localStorage.getItem('persistent_layout');
     if (storedLayout) {
       setPersistentLayout(storedLayout);
     }
+    
+    // Listen for storage changes (when layout is changed from another tab/window)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'persistent_layout') {
+        setPersistentLayout(e.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Use persistent layout if available, otherwise use prop or default to QWERTY
   const activeLayoutString = persistentLayout || layoutString || LAYOUT_STRINGS.qwerty;
 
-  // Load lesson progress
+  // Load lesson progress - reload when layout or user changes
   useEffect(() => {
     const loadProgress = async () => {
       try {
@@ -65,7 +75,6 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
         
         if (user) {
           // Load from Supabase for logged-in users
-          console.log('Loading progress from Supabase for user:', user.id);
           const { data, error } = await supabase
             .from('lesson_progress')
             .select('chapter_id, lesson_id')
@@ -75,15 +84,12 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
             console.error('Supabase loading error:', error);
             throw error;
           }
-          console.log('Supabase progress data:', data);
           progressData = data || [];
         } else {
           // Load from localStorage for anonymous users
-          console.log('Loading progress from localStorage');
           const storedProgress = localStorage.getItem('lesson_progress');
           if (storedProgress) {
             progressData = JSON.parse(storedProgress);
-            console.log('localStorage progress data:', progressData);
           }
         }
         
@@ -92,10 +98,8 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
         progressData.forEach(progress => {
           const lessonKey = `${progress.chapter_id}-${progress.lesson_id}`;
           completedSet.add(lessonKey);
-          console.log('Added completed lesson:', lessonKey);
         });
         
-        console.log('Final completed lessons set:', Array.from(completedSet));
         setCompletedLessons(completedSet);
         
         // Load daily time spent
@@ -154,17 +158,28 @@ const LessonRoadmap = ({ layoutString, language: propLanguage }: LessonRoadmapPr
     // Also reload when component becomes visible (user returns from lesson)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('Page became visible, reloading progress...');
         loadProgress();
       }
     };
+    
+    // Also reload when layout changes (check localStorage periodically)
+    const checkLayoutChange = () => {
+      const currentStoredLayout = localStorage.getItem('persistent_layout');
+      if (currentStoredLayout !== persistentLayout) {
+        setPersistentLayout(currentStoredLayout);
+        loadProgress();
+      }
+    };
+    
+    const layoutCheckInterval = setInterval(checkLayoutChange, 500);
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(layoutCheckInterval);
     };
-  }, [user]);
+  }, [user, persistentLayout, activeLayoutString]);
 
   // Curve positioning configuration
   const CURVE_POSITIONS = {
