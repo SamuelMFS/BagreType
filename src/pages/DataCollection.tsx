@@ -107,9 +107,11 @@ const DataCollection = () => {
             .eq('user_id', user.id)
             .order('updated_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
-          if (data && !error) {
+          if (error) {
+            console.error('Error loading questionnaire data:', error);
+          } else if (data) {
             setKeyboardLayout(data.keyboard_layout as KeyboardLayout);
             setCanTouchType(data.can_touch_type as TouchTyper);
             setWantToLearn(data.want_to_learn as WantToLearn);

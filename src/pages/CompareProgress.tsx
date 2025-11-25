@@ -35,9 +35,11 @@ const CompareProgress = () => {
             .from('user_progress')
             .select('baseline_wpm, baseline_accuracy')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-          if (data && !error && data.baseline_wpm && data.baseline_accuracy) {
+          if (error) {
+            console.error('Error fetching baseline results:', error);
+          } else if (data && data.baseline_wpm && data.baseline_accuracy) {
             setBaselineResults({
               wpm: data.baseline_wpm,
               accuracy: data.baseline_accuracy
@@ -77,9 +79,11 @@ const CompareProgress = () => {
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
-          if (data && !error) {
+          if (error) {
+            console.error('Error loading final test results:', error);
+          } else if (data) {
             setFinalTestResults({
               wpm: data.wpm,
               accuracy: data.accuracy

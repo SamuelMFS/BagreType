@@ -74,10 +74,15 @@ const Learn = () => {
             .from('user_progress')
             .select('baseline_completed')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
-          if (data && !error) {
+          if (error) {
+            console.error('Error fetching baseline status:', error);
+          } else if (data) {
             setHasCompletedBaseline(data.baseline_completed || false);
+          } else {
+            // No row exists yet, user hasn't completed baseline
+            setHasCompletedBaseline(false);
           }
         } else {
           // For anonymous users, check localStorage

@@ -45,7 +45,10 @@ export async function initPyodide(
 
   console.log('[Pyodide] Starting initialization...');
   if (onProgress) {
-    onProgress('Loading Pyodide runtime...', 5);
+    // Queue on event loop to ensure UI can update
+    setTimeout(() => {
+      onProgress('Loading Pyodide runtime...', 5);
+    }, 0);
   }
 
   console.log('[Pyodide] Loading Pyodide from CDN...');
@@ -57,7 +60,10 @@ export async function initPyodide(
   console.log(`[Pyodide] Loaded in ${loadTime}ms`);
 
   if (onProgress) {
-    onProgress('Python environment ready', 30);
+    // Queue on event loop to ensure UI can update
+    setTimeout(() => {
+      onProgress('Python environment ready', 30);
+    }, 0);
   }
 
   // We don't need any additional packages for the genetic algorithm
@@ -350,7 +356,10 @@ export async function runPythonGA(
     const initProgress = options.onInitProgress || options.onProgress;
     
     if (initProgress) {
-      initProgress('Loading Pyodide (this may take a minute on first run)...', 5);
+      // Queue on event loop to ensure UI can update
+      setTimeout(() => {
+        initProgress('Loading Pyodide (this may take a minute on first run)...', 5);
+      }, 0);
     }
     
     console.log('[PythonGA] Initializing Pyodide...');
@@ -360,16 +369,24 @@ export async function runPythonGA(
     console.log(`[PythonGA] Pyodide initialized in ${initTime}ms`);
     
     if (options.onProgress) {
-      options.onProgress('Initializing genetic algorithm...', 35);
+      // Queue on event loop to ensure UI can update
+      setTimeout(() => {
+        options.onProgress!('Initializing genetic algorithm...', 35);
+      }, 0);
     }
     
     console.log('[PythonGA] Setting up Python environment...');
     
-    // Create progress callback wrapper
+    // Create progress callback wrapper that queues updates on the event loop
+    // This ensures React can update the UI even when called from Python execution
     const progressCallback = (message: string, progress?: number) => {
       console.log(`[PythonGA Progress] ${message}${progress !== undefined ? ` (${progress.toFixed(1)}%)` : ''}`);
       if (options.onProgress) {
-        options.onProgress(message, progress);
+        // Use setTimeout to queue the callback on the event loop
+        // This allows React to re-render and prevents UI freezing
+        setTimeout(() => {
+          options.onProgress!(message, progress);
+        }, 0);
       }
     };
 
@@ -381,7 +398,7 @@ export async function runPythonGA(
     
     // Set up Python environment with corpus and progress callback
     console.log('[PythonGA] Setting up Python globals...');
-    pyodide.runPython(`
+    await pyodide.runPythonAsync(`
 # Set up corpus and progress callback
 CORPUS = None
 PROGRESS = None
@@ -394,7 +411,7 @@ PROGRESS = None
     
     // Create a Python wrapper function
     console.log('[PythonGA] Creating Python progress wrapper function...');
-    pyodide.runPython(`
+    await pyodide.runPythonAsync(`
 def progress_wrapper(message, progress=None):
     PROGRESS(message, progress)
     `);
@@ -404,9 +421,12 @@ def progress_wrapper(message, progress=None):
     const script = createPythonScript();
     console.log(`[PythonGA] Python script length: ${script.length} characters`);
     
-    console.log('[PythonGA] Executing genetic algorithm...');
+    console.log('[PythonGA] Executing genetic algorithm (async to prevent UI freeze)...');
     const execStartTime = Date.now();
-    const result = pyodide.runPython(script);
+    
+    // Use runPythonAsync to allow the browser to update the UI during execution
+    // This prevents the UI from freezing by yielding control back to the event loop
+    const result = await pyodide.runPythonAsync(script);
     const execTime = Date.now() - execStartTime;
     console.log(`[PythonGA] Execution completed in ${execTime}ms`);
     

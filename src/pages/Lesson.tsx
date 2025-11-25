@@ -174,10 +174,12 @@ const Lesson = () => {
           .eq('user_id', user.id)
           .eq('chapter_id', progressData.chapter_id)
           .eq('lesson_id', progressData.lesson_id)
-          .single();
+          .maybeSingle();
         
         let result;
-        if (existingData && !checkError) {
+        if (checkError) {
+          console.error('Error checking existing lesson progress:', checkError);
+        } else if (existingData) {
           // Update existing record
           console.log('Updating existing record:', existingData.id);
           result = await supabase

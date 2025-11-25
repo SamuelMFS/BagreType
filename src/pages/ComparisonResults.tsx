@@ -44,18 +44,20 @@ const ComparisonResults = () => {
             .from('user_progress')
             .select('baseline_wpm, baseline_accuracy')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
           console.log('Supabase baseline query result:', { data, error });
           
-          if (data && !error && data.baseline_wpm && data.baseline_accuracy) {
+          if (error) {
+            console.error('Error fetching baseline results:', error);
+          } else if (data && data.baseline_wpm && data.baseline_accuracy) {
             console.log('Setting baseline results:', { wpm: data.baseline_wpm, accuracy: data.baseline_accuracy });
             setBaselineResults({
               wpm: data.baseline_wpm,
               accuracy: data.baseline_accuracy
             });
           } else {
-            console.log('No baseline data found or error occurred');
+            console.log('No baseline data found');
           }
         } else {
           // Load from localStorage for anonymous users

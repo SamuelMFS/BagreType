@@ -116,7 +116,7 @@ const Profile = () => {
         .from('user_progress')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (progressError) {
         console.error('Error loading user progress:', progressError);
