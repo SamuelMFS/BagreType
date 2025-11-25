@@ -78,6 +78,7 @@ const DataCollection = () => {
     timestamp: number,
     correct: boolean
   }>>([]);
+  const [cheatMode, setCheatMode] = useState(false);
 
   // Generate or retrieve session ID for anonymous users
   useEffect(() => {
@@ -295,6 +296,20 @@ const DataCollection = () => {
     }
   }, [step, difficulty]);
 
+  // Cheat mode toggle hotkey handler
+  useEffect(() => {
+    const handleCheatToggle = (e: KeyboardEvent) => {
+      // Ctrl+b to toggle cheat mode
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        setCheatMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleCheatToggle);
+    return () => window.removeEventListener('keydown', handleCheatToggle);
+  }, []);
+
   // Typing test keyboard handler
   useEffect(() => {
     if (step !== "test") return;
@@ -360,7 +375,11 @@ const DataCollection = () => {
         const now = Date.now();
         const currentSequence = letterSequence[currentIndex];
         const expectedChar = currentSequence[currentCharIndex];
-        const isCorrect = e.key.toLowerCase() === expectedChar.toLowerCase();
+        // In cheat mode, all keys are correct except backslash (unless expected is backslash)
+        const typedKey = e.key.toLowerCase();
+        const expectedKey = expectedChar.toLowerCase();
+        const isCheatModeCorrect = cheatMode && !(typedKey === '\\' && expectedKey !== '\\');
+        const isCorrect = isCheatModeCorrect || typedKey === expectedKey;
         
         // Set feedback state and trigger bounce animation
         setLastTypedCorrect(isCorrect);
@@ -467,7 +486,7 @@ const DataCollection = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isTestActive, testStartTime, currentLetter, currentIndex, letterSequence, typingData, testCompleted, step, manualDifficultySet, difficulty]);
+  }, [isTestActive, testStartTime, currentLetter, currentIndex, letterSequence, typingData, testCompleted, step, manualDifficultySet, difficulty, cheatMode]);
 
   // Restart typing test
   const restartTest = (autoStart = false) => {

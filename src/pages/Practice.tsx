@@ -62,6 +62,7 @@ const Practice = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showKeyboardImage, setShowKeyboardImage] = useState(initialConfig.showKeyboardImage);
   const [currentChar, setCurrentChar] = useState<string>("");
+  const [cheatMode, setCheatMode] = useState(false);
 
   // Save practice configuration to localStorage whenever it changes
   useEffect(() => {
@@ -92,6 +93,20 @@ const Practice = () => {
       }
     }
   }, [selectedCustomTextTitle]);
+
+  // Cheat mode toggle hotkey handler
+  useEffect(() => {
+    const handleCheatToggle = (e: KeyboardEvent) => {
+      // Ctrl+b to toggle cheat mode
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        setCheatMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleCheatToggle);
+    return () => window.removeEventListener('keydown', handleCheatToggle);
+  }, []);
 
   // Clear current char when mode changes
   useEffect(() => {
@@ -372,6 +387,7 @@ const Practice = () => {
               ref={testRef}
               {...getTestProps()}
               onCurrentCharChange={setCurrentChar}
+              cheatMode={cheatMode}
             />
           )}
 

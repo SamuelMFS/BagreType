@@ -16,6 +16,7 @@ interface TypingTestProps {
   onRestart?: () => void;
   hideCompletionScreen?: boolean; // New prop to hide completion screen
   onCurrentCharChange?: (char: string) => void; // New prop to track current character
+  cheatMode?: boolean; // Cheat mode where all keys are correct
 }
 
 const commonWordsEnglish = [
@@ -58,7 +59,7 @@ const generateWords = (count: number, language: string = 'en'): string[] => {
   return words;
 };
 
-const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false, onCurrentCharChange }, ref) => {
+const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCount = 30, customText, timeLimit, zenMode = false, onComplete, onRestart, hideCompletionScreen = false, onCurrentCharChange, cheatMode = false }, ref) => {
   const { i18n, t } = useTranslation();
   const [words, setWords] = useState<string[]>(() => {
     // Initialize words on first render
@@ -252,7 +253,9 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
         setUserInput(userInput + typedChar);
 
-        if (typedChar !== expectedChar) {
+        // In cheat mode, all keys are correct except backslash (unless expected is backslash)
+        const isCheatModeCorrect = cheatMode && !(typedChar === '\\' && expectedChar !== '\\');
+        if (!isCheatModeCorrect && typedChar !== expectedChar) {
           // Track every error, regardless of correction
           setTotalErrors(prev => prev + 1);
           setErrors(new Set([...errors, currentIndex]));
@@ -288,7 +291,7 @@ const TypingTest = forwardRef<{ reset: () => void }, TypingTestProps>(({ wordCou
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode, zenText, onCurrentCharChange]);
+  }, [currentIndex, userInput, words, startTime, isComplete, errors, zenMode, zenText, onCurrentCharChange, cheatMode]);
 
   // Handle keyboard input when test is complete (escape to restart)
   useEffect(() => {

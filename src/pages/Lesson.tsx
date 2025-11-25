@@ -43,6 +43,7 @@ const Lesson = () => {
   const [sessionId, setSessionId] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [currentChar, setCurrentChar] = useState<string>("");
+  const [cheatMode, setCheatMode] = useState(false);
 
   // Get lesson configuration
   const lessonConfig = getLessonConfig(lessonId || "f", chapterId || "1");
@@ -55,6 +56,20 @@ const Lesson = () => {
     chapterName: getChapterName(chapterId || "1"),
     gif: "/placeholder.svg", // Placeholder
   };
+
+  // Cheat mode toggle hotkey handler
+  useEffect(() => {
+    const handleCheatToggle = (e: KeyboardEvent) => {
+      // Ctrl+b to toggle cheat mode
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        setCheatMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleCheatToggle);
+    return () => window.removeEventListener('keydown', handleCheatToggle);
+  }, []);
 
   // Initialize lesson generator and session ID
   useEffect(() => {
@@ -501,6 +516,7 @@ const Lesson = () => {
                 onComplete={(wpm, accuracy) => handleRoundComplete(wpm, accuracy)}
                 hideCompletionScreen={true}
                 onCurrentCharChange={setCurrentChar}
+                cheatMode={cheatMode}
               />
             </div>
           </div>
