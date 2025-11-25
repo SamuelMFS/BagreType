@@ -1,0 +1,76 @@
+@startuml BagreType - Diagrama de Estados: Estado do Usuário
+
+title Diagrama de Estados: Estado do Usuário no Sistema
+
+[*] --> NaoCadastrado
+
+state NaoCadastrado {
+  [*] --> VisualizandoSite
+}
+
+NaoCadastrado --> Cadastrando : Iniciar Cadastro
+Cadastrando --> EmailNaoVerificado : Cadastro Concluído
+
+state EmailNaoVerificado {
+  [*] --> AguardandoVerificacao
+  AguardandoVerificacao --> VerificandoEmail : Clicar no Link
+  VerificandoEmail --> EmailVerificado : Link Válido
+  VerificandoEmail --> AguardandoVerificacao : Link Inválido ou Expirado
+}
+
+EmailNaoVerificado --> EmailVerificado : Email Confirmado
+
+state EmailVerificado {
+  [*] --> NaoAutenticado
+  NaoAutenticado --> Autenticando : Fazer Login
+  Autenticando --> Autenticado : Credenciais Válidas
+  Autenticando --> NaoAutenticado : Credenciais Inválidas
+  
+  state Autenticado {
+    [*] --> Navegando
+    Navegando --> ColetandoDados : Iniciar Coleta
+    Navegando --> Aprendendo : Iniciar Jornada
+    Navegando --> Praticando : Iniciar Prática
+    Navegando --> GerandoLayout : Gerar Layout
+    
+    state ColetandoDados {
+      [*] --> RespondendoQuestionario
+      RespondendoQuestionario --> RealizandoTeste
+      RealizandoTeste --> TestePausado : Pressionar ESC
+      TestePausado --> RealizandoTeste : Pressionar ESC
+      RealizandoTeste --> [*] : Teste Completo
+    }
+    
+    state Aprendendo {
+      [*] --> FazendoBaseline
+      FazendoBaseline --> FazendoLicoes : Baseline Completo
+      FazendoLicoes --> [*] : Lição Concluída
+    }
+    
+    state Praticando {
+      [*] --> EscolhendoModo
+      EscolhendoModo --> Digitando
+      Digitando --> [*] : Sessão Completa
+    }
+    
+    state GerandoLayout {
+      [*] --> ConfigurandoParametros
+      ConfigurandoParametros --> Processando : Iniciar Geração
+      Processando --> [*] : Layout Gerado
+    }
+    
+    ColetandoDados --> Navegando : Finalizar
+    Aprendendo --> Navegando : Finalizar
+    Praticando --> Navegando : Finalizar
+    GerandoLayout --> Navegando : Finalizar
+  }
+  
+  Autenticado --> NaoAutenticado : Fazer Logout
+  Autenticado --> NaoAutenticado : Timeout de Sessão
+}
+
+EmailVerificado --> NaoAutenticado : Fazer Logout
+NaoAutenticado --> Autenticado : Fazer Login
+
+@enduml
+

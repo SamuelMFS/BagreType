@@ -1,0 +1,77 @@
+@startuml BagreType - Diagrama de Sequência: Participar da Coleta de Dados
+
+title Diagrama de Sequência: Participar da Coleta de Dados (UC03)
+
+actor Usuário as User
+participant "Front-End UI" as FrontEnd
+participant "Coleta Service" as ColetaService
+participant "Sistema de ML" as MLService
+participant "Banco de Dados" as Database
+
+User -> FrontEnd: Acessar página "Coleta de Dados"
+FrontEnd -> User: Exibir primeira etapa do questionário
+
+User -> FrontEnd: Selecionar tipo de teclado\n(Staggered/Ortholinear)
+FrontEnd -> ColetaService: Salvar resposta do questionário
+ColetaService -> Database: Armazenar resposta
+
+FrontEnd -> User: Exibir segunda etapa:\n"Você sabe digitar à cega?"
+User -> FrontEnd: Informar se sabe touch typing
+FrontEnd -> ColetaService: Salvar resposta
+ColetaService -> Database: Armazenar resposta
+
+FrontEnd -> User: Exibir terceira etapa:\n"Deseja aprender digitação?"
+User -> FrontEnd: Informar interesse em aprender
+FrontEnd -> ColetaService: Salvar resposta
+ColetaService -> Database: Armazenar resposta
+
+FrontEnd -> User: Exibir quarta etapa:\n"Compartilhar dados para pesquisa?"
+User -> FrontEnd: Informar consentimento
+FrontEnd -> ColetaService: Salvar todas as respostas
+ColetaService -> Database: Armazenar questionário completo
+
+FrontEnd -> User: Exibir instruções do teste\ne primeira sequência de caracteres
+
+User -> FrontEnd: Pressionar barra de espaço\npara iniciar teste
+
+FrontEnd -> ColetaService: Iniciar sessão de coleta
+ColetaService -> Database: Criar registro de sessão
+
+loop Sequências até completar número determinado
+    FrontEnd -> User: Exibir sequência de caracteres
+    
+    User -> FrontEnd: Digitar sequência exibida
+    
+    FrontEnd -> ColetaService: Registrar tempo de reação\npara primeira tecla
+    
+    loop Para cada tecla da sequência
+        FrontEnd -> ColetaService: Registrar tempo entre teclas\nconsecutivas e precisão
+        ColetaService -> Database: Armazenar dados da tecla
+    end
+    
+    FrontEnd -> ColetaService: Finalizar sequência atual
+    ColetaService -> Database: Salvar dados da sequência\n(tempos, precisão, sequência)
+    
+    alt Usuário pressiona ESC
+        User -> FrontEnd: Pausar teste
+        FrontEnd -> User: Exibir opção para retomar
+        User -> FrontEnd: Pressionar ESC novamente
+        FrontEnd -> User: Retomar teste do ponto onde parou
+    end
+    
+    FrontEnd -> User: Exibir próxima sequência aleatória
+end
+
+ColetaService -> Database: Finalizar sessão de coleta
+Database -> ColetaService: Confirmar salvamento
+
+alt Dados compartilhados para pesquisa
+    ColetaService -> MLService: Enviar dados anonimizados
+    MLService -> MLService: Processar dados para\nmodelo de custo de digitação
+end
+
+ColetaService -> FrontEnd: Coleta finalizada com sucesso
+FrontEnd -> User: Exibir mensagem de agradecimento\ne botão "Ver Resultados"
+
+@enduml
+

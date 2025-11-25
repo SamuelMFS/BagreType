@@ -53,12 +53,12 @@ export const PROGRAMMING_LAYOUTS: Record<string, string> = {
 // Format: 1234567890-= (12) + row2 (13) + row3 (11) + row4 (9) = 45
 export const HUMAN_LANGUAGE_LAYOUTS: Record<string, string> = {
   "English": "1234567890-=juofy;mwbvz[aeisdrhtncp/]'gxlk,.q", // QWERTY (45 chars)
-  "Portuguese": "1234567890-=qwertyuiop[]asdfghjklç'zxcvbnm,./", // QWERTY with ç replacing ; (45 chars)
-  "Spanish": "1234567890-=qwertyuiop[]asdfghjklñ'zxcvbnm,./", // QWERTY with ñ replacing ; (45 chars)
-  "French": "1234567890-=azertyuiop[]qsdfghjklmùwxcvbn,;:!", // AZERTY (45 chars)
-  "Italian": "1234567890-=qwertyuiop[]asdfghjklò'zxcvbnm,./", // QWERTY with ò replacing ; (45 chars)
-  "German": "1234567890-=qwertzuiopü+asdfghjklöä#yxcvbnm,.-", // QWERTZ (45 chars)
-  "Dutch": "1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./" // QWERTY (45 chars)
+  "Portuguese": "1234567890-=huov;ywcpj/]idesrgatmnb[xkl'fq,.z", // QWERTY with ç replacing ; (45 chars)
+  "Spanish": "1234567890-=xjqcbk;rph[/measdiolnyg'wzt]uf,.v", // QWERTY (45 chars)
+  "French": "1234567890-=qfxphycbz/']doenirstauvgk]jwlm,.;", // QWERTY (45 chars)
+  "Italian": "1234567890-=qufk[zhcs;wyrioaeptmlnb']/jxdg,.v", // QWERTY (45 chars)
+  "German": "1234567890-=zblgk]ypjv'/rnsthaiemwcf[qd;uo,.x", // QWERTY (45 chars)
+  "Dutch": "1234567890-=yhok;/wrgvfqsiaejlntduc[]'pxbm,.z" // QWERTY (45 chars)
 };
 
 // Roadmap with exact positions in layout string (0-indexed from 1-based)

@@ -1,0 +1,65 @@
+@startuml BagreType - Diagrama de Atividades: Coleta de Dados
+
+title Diagrama de Atividades: Participar da Coleta de Dados (UC03)
+
+start
+
+:Acessa página "Coleta de Dados";
+
+:Seleciona tipo de teclado\n(Staggered/Ortholinear);
+
+:Informa se sabe digitar à cega;
+
+:Informa se deseja aprender;
+
+:Informa se deseja compartilhar dados;
+
+:Salvar respostas do questionário;
+
+:Exibir instruções do teste;
+
+:Exibir primeira sequência de caracteres;
+
+:Usuário pressiona barra de espaço;
+
+repeat
+  :Registrar tempo inicial da sequência;
+  
+  repeat :Para cada tecla da sequência
+    :Usuário pressiona tecla;
+    :Registrar tempo de reação;
+    :Validar se tecla está correta;
+    :Armazenar dados da tecla;
+  repeat while (Sequência não completa?) is (sim)
+  
+  :Calcular estatísticas da sequência;
+  :Salvar dados da sequência;
+  
+  if (Usuário pressionou ESC?) then (sim)
+    :Pausar teste;
+    :Aguardar usuário pressionar ESC novamente;
+    :Retomar teste;
+  endif
+  
+  :Exibir próxima sequência aleatória;
+
+repeat while (Número de sequências\nnão atingido?) is (sim)
+
+:Finalizar sessão de coleta;
+
+if (Dados compartilhados?) then (sim)
+  :Anonimizar dados;
+  :Enviar dados para Sistema de ML;
+  :Sistema de ML processa dados;
+endif
+
+:Salvar todos os dados no banco;
+
+:Exibir mensagem de agradecimento;
+
+:Exibir botão "Ver Resultados";
+
+stop
+
+@enduml
+

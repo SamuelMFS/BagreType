@@ -1,0 +1,156 @@
+@startuml BagreType - Diagrama de Classes
+
+skinparam class {
+  BackgroundColor<<Entity>> #E3F2FD
+  BackgroundColor<<ValueObject>> #FFF3E0
+  BorderColor #1976D2
+}
+
+' Entidades Principais
+class Profile <<Entity>> {
+  - id: String {pk}
+  - email: String
+  - created_at: DateTime
+  --
+  + getId(): String
+  + getEmail(): String
+}
+
+class TypingSession <<Entity>> {
+  - id: String {pk}
+  - user_id: String {fk}
+  - wpm: Number
+  - raw_wpm: Number
+  - accuracy: Number
+  - consistency: Number
+  - time_seconds: Number
+  - mode: String
+  - created_at: DateTime
+  --
+  + getWPM(): Number
+  + getAccuracy(): Number
+  + calculateConsistency(): Number
+}
+
+class QuestionnaireResponse <<Entity>> {
+  - id: String {pk}
+  - user_id: String {fk}
+  - keyboard_layout: String
+  - can_touch_type: String
+  - want_to_learn: String
+  - share_data: String
+  - current_step: String
+  - session_id: String
+  - created_at: DateTime
+  - updated_at: DateTime
+  --
+  + getKeyboardLayout(): String
+  + canShareData(): Boolean
+}
+
+class TypingTestData <<Entity>> {
+  - id: String {pk}
+  - user_id: String {fk}
+  - questionnaire_response_id: String {fk}
+  - keyboard_layout: String
+  - can_touch_type: String
+  - test_duration_ms: Number
+  - total_letters: Number
+  - completed_letters: Number
+  - average_reaction_time_ms: Number
+  - accuracy_percentage: Number
+  - started_at: DateTime
+  - completed_at: DateTime
+  - typing_data: JSON
+  --
+  + getAverageReactionTime(): Number
+  + getAccuracy(): Number
+  + calculateStatistics(): Statistics
+}
+
+class UserProgress <<Entity>> {
+  - id: String {pk}
+  - user_id: String {fk}
+  - baseline_completed: Boolean
+  - baseline_wpm: Number
+  - baseline_accuracy: Number
+  - current_lesson: Number
+  - lessons_completed: Number
+  - created_at: DateTime
+  - updated_at: DateTime
+  --
+  + hasCompletedBaseline(): Boolean
+  + getCurrentLesson(): Number
+  + updateProgress(): void
+}
+
+' Objetos de Valor
+class LetterTiming <<ValueObject>> {
+  - letter: String
+  - reactionTime: Number
+  - timestamp: Number
+  - correct: Boolean
+  --
+  + getReactionTime(): Number
+  + isCorrect(): Boolean
+}
+
+class SequenceData <<ValueObject>> {
+  - sequence: String
+  - sequenceIndex: Number
+  - letterTimings: List<LetterTiming>
+  - sequenceStartTime: Number
+  - sequenceEndTime: Number
+  - totalSequenceTime: Number
+  --
+  + getTotalTime(): Number
+  + getAccuracy(): Number
+}
+
+class Statistics <<ValueObject>> {
+  - averageWPM: Number
+  - bestWPM: Number
+  - averageAccuracy: Number
+  - totalTimeSpent: Number
+  - totalSessions: Number
+  --
+  + calculateAverage(): Number
+  + getBestPerformance(): Number
+}
+
+' Relacionamentos
+Profile ||--o{ TypingSession : possui
+Profile ||--o{ QuestionnaireResponse : possui
+Profile ||--o{ TypingTestData : possui
+Profile ||--|| UserProgress : possui
+
+QuestionnaireResponse ||--o{ TypingTestData : gera
+
+TypingTestData *-- SequenceData : contém
+SequenceData *-- LetterTiming : contém
+
+TypingTestData ..> Statistics : calcula
+UserProgress ..> Statistics : utiliza
+
+note right of Profile
+  Representa o usuário do sistema.
+  Armazena informações básicas
+  de autenticação.
+end note
+
+note right of TypingTestData
+  Armazena dados detalhados
+  de cada teste de digitação,
+  incluindo sequências e
+  tempos de reação.
+end note
+
+note right of LetterTiming
+  Representa o tempo de reação
+  para uma única tecla,
+  incluindo se foi digitada
+  corretamente.
+end note
+
+@enduml
+

@@ -1,0 +1,47 @@
+@startuml BagreType - Diagrama de Estados: Coleta de Dados
+
+title Diagrama de Estados: Sessão de Coleta de Dados
+
+state "INÍCIO" as Inicio {
+  [*] --> AguardandoAcaoUsuario : Início do Fluxo
+  state AguardandoAcaoUsuario
+  state EscolhendoTipoTeclado : Escolhendo Tipo de Teclado
+  state RespondendoQuestionario : Respondendo Questionário
+}
+
+AguardandoAcaoUsuario --> EscolhendoTipoTeclado : Iniciar Coleta
+EscolhendoTipoTeclado --> AguardandoAcaoUsuario : Tipo Selecionado
+EscolhendoTipoTeclado --> RespondendoQuestionario : Questionário Iniciado
+
+state "CICLO DE COLETA" as CicloColeta {
+  state EsperandoSequencia : Esperando Exibição\nda Sequência
+  state UsuarioDigitando : Usuário Digitando
+  state ProcessandoDados : Processando Dados\nda Sequência
+}
+
+RespondendoQuestionario --> EsperandoSequencia : Questionário Completo
+
+EsperandoSequencia --> UsuarioDigitando : Sequência Exibida\nUsuário Pressiona Espaço
+UsuarioDigitando --> ProcessandoDados : Sequência Digitada
+ProcessandoDados --> EsperandoSequencia : Dados Salvos\nPróxima Sequência
+
+UsuarioDigitando --> Pausado : Usuário Pressiona ESC
+Pausado --> UsuarioDigitando : Usuário Pressiona ESC\nNovamente
+
+state "FINALIZAÇÃO" as Finalizacao {
+  state VerificandoCompletude : Verificando se\nColeta Completa
+  state EnviandoParaML : Enviando Dados\nAnonimizados para ML
+  state ColetaFinalizada : Coleta Finalizada
+}
+
+ProcessandoDados --> VerificandoCompletude : Após Cada Sequência
+EsperandoSequencia --> VerificandoCompletude : Número de Sequências\nCompleto
+
+VerificandoCompletude --> EnviandoParaML : Coleta Completa\nDados Compartilhados
+VerificandoCompletude --> ColetaFinalizada : Coleta Completa\nDados Não Compartilhados
+
+EnviandoParaML --> ColetaFinalizada : Dados Enviados
+ColetaFinalizada --> [*] : Fim do Fluxo
+
+@enduml
+

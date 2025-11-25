@@ -1,0 +1,45 @@
+@startuml BagreType - Diagrama de Sequência: Cadastro de Usuário
+
+title Diagrama de Sequência: Cadastro de Usuário (UC01)
+
+actor Usuário as User
+participant "Front-End UI" as FrontEnd
+participant "Serviço de Autenticação" as AuthService
+participant "Banco de Dados" as Database
+
+User -> FrontEnd: Acessar página inicial
+FrontEnd -> User: Exibir página inicial
+
+User -> FrontEnd: Clicar em "Cadastrar-se"
+FrontEnd -> User: Exibir formulário de cadastro\n(e-mail, senha)
+
+User -> FrontEnd: Preencher e-mail e senha\nClicar em "Cadastrar"
+
+FrontEnd -> AuthService: Solicitar validação de e-mail único
+
+alt E-mail já cadastrado
+    AuthService -> FrontEnd: E-mail já está em uso
+    FrontEnd -> User: Exibir erro "E-mail já cadastrado"
+    User -> FrontEnd: Alterar e-mail e reenviar formulário
+    FrontEnd -> AuthService: Solicitar validação de e-mail único
+else E-mail disponível
+    AuthService -> Database: Verificar existência do e-mail
+    Database -> AuthService: Retornar "E-mail não existe"
+    AuthService -> FrontEnd: E-mail disponível
+    
+    FrontEnd -> User: Solicitar confirmação de senha
+    User -> FrontEnd: Reinserir senha e clicar "Confirmar"
+    
+    FrontEnd -> AuthService: Validar força da senha\ne criar conta
+    
+    loop Tentativas de inserção
+        AuthService -> Database: Inserir novo usuário
+        Database -> AuthService: Confirmar inserção
+    end
+    
+    AuthService -> FrontEnd: Conta criada com sucesso
+    FrontEnd -> User: Redirecionar para página de login
+end
+
+@enduml
+

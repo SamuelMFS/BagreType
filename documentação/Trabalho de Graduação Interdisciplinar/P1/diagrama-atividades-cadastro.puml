@@ -1,0 +1,47 @@
+@startuml BagreType - Diagrama de Atividades: Cadastro de Usuário
+
+title Diagrama de Atividades: Cadastro de Usuário (UC01)
+
+start
+
+:Acessa a página inicial;
+
+:Seleciona "Cadastrar-se";
+
+fork
+  :Preenche os campos\n(e-mail, senha);
+fork again
+  :Seleciona "Cadastrar";
+end fork
+
+:Sistema valida e-mail;
+
+if (E-mail válido?) then (sim)
+  if (E-mail já em uso?) then (sim)
+    :Exibir erro "E-mail já cadastrado";
+    stop
+  else (não)
+    :Confirma senha;
+    if (Senha confirmada corretamente?) then (não)
+      :Exibir erro de confirmação;
+      :Confirma senha;
+    else (sim)
+      :Validar força da senha;
+      if (Senha atende requisitos?) then (sim)
+        :Criar conta do usuário;
+        :Enviar e-mail de verificação;
+        :Redirecionar para página de login;
+        stop
+      else (não)
+        :Exibir erro "Senha muito fraca";
+        stop
+      endif
+    endif
+  endif
+else (não)
+  :Exibir erro "E-mail inválido";
+  stop
+endif
+
+@enduml
+

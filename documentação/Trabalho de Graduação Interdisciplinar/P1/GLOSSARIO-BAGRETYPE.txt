@@ -1,0 +1,57 @@
+Responsável: João Pedro de Souza Letro
+Data de criação do documento: 20/04/2025
+
+
+Termo	Definição
+BagreType	Nome do sistema desenvolvido para otimização de layouts de teclado através de aprendizado de máquina e coleta de dados de digitação.
+WPM	Acrônimo para "Words Per Minute" (Palavras Por Minuto), métrica utilizada para medir a velocidade de digitação do usuário.
+Baseline	Avaliação inicial de digitação realizada pelo usuário antes de iniciar a jornada de aprendizado, usada para personalizar as lições conforme o nível do usuário.
+Touch Typing	Método de digitação sem olhar para o teclado, também conhecido como "digitação à cega". Usuários proficientes neste método são preferidos para coleta de dados.
+Staggered	Layout de teclado tradicional com fileiras desalinhadas (offset), onde as teclas não formam uma grade perfeita. É o tipo mais comum de teclado.
+Ortholinear	Layout de teclado onde as teclas são dispostas em uma grade perfeita, sem desalinhamento entre as fileiras. Comum em teclados mecânicos customizados.
+QWERTY	Layout de teclado padrão mais utilizado mundialmente, nomeado pelas primeiras seis letras da fileira superior.
+Dvorak	Layout de teclado alternativo projetado para aumentar a eficiência de digitação, colocando as letras mais usadas nas fileiras principais.
+Colemak	Layout de teclado alternativo moderno, projetado como uma alternativa ergonômica ao QWERTY, mantendo algumas teclas na mesma posição.
+ML	Acrônimo para "Machine Learning" (Aprendizado de Máquina). Sistema de IA responsável por analisar dados de digitação e gerar layouts otimizados.
+Sistema de ML	Módulo do sistema BagreType que utiliza algoritmos de aprendizado de máquina para calcular custos de digitação e gerar layouts otimizados de teclado.
+Layout Otimizado	Layout de teclado gerado pelo sistema de ML que minimiza o custo total de digitação, podendo ser universal (múltiplos idiomas) ou específico por idioma.
+UC	Acrônimo para "Use Case" (Caso de Uso). Identificador numérico usado para referenciar casos de uso do sistema (ex: UC01, UC02).
+RN	Acrônimo para "Regra de Negócio". Identificador numérico usado para referenciar regras de negócio do sistema (ex: RN01, RN02).
+AT	Acrônimo para "Ator". Identificador numérico usado para referenciar atores do sistema (ex: AT01, AT02).
+Requisito Funcional	Descrição de uma funcionalidade que o sistema deve obrigatoriamente oferecer, especificando o que o sistema faz.
+Requisito Não Funcional	Característica de qualidade (desempenho, segurança, usabilidade) que o sistema deve atender, especificando como o sistema deve funcionar.
+Caso de Uso	Descrição de uma sequência de ações realizada por um ator para atingir um objetivo específico no sistema.
+Diagrama de Casos de Uso	Representação visual (UML) que mostra atores, casos de uso e suas interações, ilustrando os serviços que o sistema oferece.
+Ator	Entidade externa (usuário ou sistema) que interage com o sistema para executar um caso de uso.
+Regra de Negócio	Restrição ou condição que define como o sistema deve se comportar em determinadas situações, garantindo a integridade e consistência dos processos.
+Coleta de Dados	Processo de captura de informações de digitação através de questionários e testes, onde o usuário digita sequências de caracteres enquanto o sistema registra tempos de reação e precisão.
+Sequência de Caracteres	Conjunto de letras ou teclas que o usuário deve digitar durante os testes de coleta de dados. Pode ser uma única tecla ou múltiplas teclas consecutivas.
+Tempo de Reação	Intervalo de tempo medido desde o momento em que um caractere/sequência é exibido na tela até o usuário pressionar a tecla correspondente.
+Precisão	Métrica que indica a porcentagem de teclas digitadas corretamente durante uma sessão de digitação. Calculada como (teclas corretas / total de teclas) × 100.
+Consistência	Métrica que mede a regularidade da performance do usuário ao longo do tempo, indicando quão estável é sua velocidade de digitação.
+Sessão de Digitação	Período de tempo durante o qual o usuário realiza testes de digitação (coleta de dados, lição ou prática livre). Cada sessão gera dados que são salvos no sistema.
+Lição	Unidade de aprendizado estruturada que faz parte da jornada de aprendizado. Cada lição foca em aspectos específicos da digitação e deve ser completada com precisão mínima de 80%.
+Jornada de Aprendizado	Sequência progressiva de lições de digitação que o usuário completa para aprender ou melhorar suas habilidades de digitação à cega.
+Prática Livre	Modo de teste de digitação onde o usuário pode escolher o tipo de teste (palavras, tempo, texto customizado) e praticar sem seguir uma estrutura de lições.
+Token	Sequência de caracteres gerada pelo sistema para autenticar ou autorizar operações seguras, como recuperação de senha. Tokens têm tempo de expiração.
+Email Verificado	Status de uma conta de usuário que confirmou seu endereço de email através de um link de verificação enviado após o cadastro. Necessário para funcionalidades sensíveis.
+Rate Limiting	Mecanismo de segurança que limita o número de requisições que um usuário pode fazer ao sistema em um período de tempo, prevenindo abuso.
+JSON	Acrônimo para "JavaScript Object Notation". Formato de dados em texto usado para exportação de dados pessoais do usuário.
+CSV	Acrônimo para "Comma-Separated Values" (Valores Separados por Vírgula). Formato de dados em texto usado para exportação de dados pessoais do usuário.
+Supabase	Plataforma Backend as a Service (BaaS) utilizada no projeto para autenticação, banco de dados e outras funcionalidades de backend.
+React	Biblioteca JavaScript para construção de interfaces de usuário baseada em componentes, utilizada no desenvolvimento do front-end do BagreType.
+TypeScript	Superset tipado do JavaScript que adiciona verificação de tipos estáticos, utilizado no projeto para maior segurança e manutenibilidade do código.
+Custo de Digitação	Métrica que representa a dificuldade ou "custo" de digitar um caractere ou sequência de caracteres, calculada a partir dos tempos de reação coletados.
+Modelo de Custo de Digitação	Sistema que estima a dificuldade de digitar qualquer caractere ou sequência possível, baseado nos dados coletados de múltiplos usuários.
+Layout Universal	Layout de teclado otimizado para funcionar eficientemente em múltiplos idiomas simultaneamente.
+Layout Específico por Idioma	Layout de teclado otimizado para um idioma específico, utilizando dados linguísticos e frequências de caracteres daquele idioma.
+Layout Dinâmico	Layout de teclado otimizado para um texto ou dataset específico, como um "teclado Lorem Ipsum" ou teclado para código de programação.
+Questionário Inicial	Conjunto de perguntas respondidas pelo usuário antes da coleta de dados, incluindo tipo de teclado (Staggered/Ortholinear), habilidade de touch typing e consentimento para compartilhamento de dados.
+Dados Anonimizados	Dados de digitação que tiveram informações pessoais identificáveis removidas antes de serem utilizados pelo sistema de ML para pesquisa e otimização.
+Histórico de Sessões	Registro das últimas sessões de digitação do usuário, limitado a um número máximo (ex: 100 sessões) para exibição, embora dados mais antigos sejam mantidos no banco.
+Estatísticas do Perfil	Métricas agregadas do desempenho do usuário, incluindo velocidade média (WPM), precisão média e consistência, atualizadas automaticamente após cada sessão.
+Textos Customizados	Textos fornecidos pelo usuário para prática livre, que devem ter entre 10 e 10.000 caracteres para serem válidos.
+Timeout de Sessão	Mecanismo de segurança que encerra automaticamente sessões de usuário inativas por um período determinado (ex: 15 dias), exigindo novo login.
+Credenciais	Par de email e senha utilizado pelo usuário para autenticação no sistema. Devem ser válidas e corresponder a uma conta cadastrada.
+Força da Senha	Requisito de segurança que define o comprimento mínimo e complexidade necessária para uma senha válida (ex: mínimo 6 caracteres).
+

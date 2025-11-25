@@ -1,0 +1,714 @@
+Histórico - Revisão
+
+Data	Versão	Descrição	Autor(es)
+
+[DATA]	1	Regras de negócio identificadas no levantamento de requisitos – 1ª investigação.	[Seu Nome]
+
+			
+
+			
+
+			
+Histórico - Revisão
+Data	Versão	Descrição	Autor(es)
+15/03/2025	1	Regras de negócio identificadas no levantamento de requisitos – 1ª investigação.	João Pedro de Souza Letro
+			
+			
+			
+
+Nome da Regra de Negócio: 
+Email Único	Código: 
+RN01
+Descrição:
+Cada usuário deve cadastrar um e-mail único no sistema.
+Caso de Uso/Origem:
+UC01
+
+
+Nome da Regra de Negócio:
+Força Senha	Código:
+RN02
+Descrição:
+Senha deve ter no mínimo 8 caracteres, incluindo letras e números.
+
+Caso de Uso/Origem:
+UC01
+
+
+Nome da Regra de Negócio:
+Credenciais Válidas	Código:
+RN03
+Descrição:
+Somente e-mail e senha corretos permitem efetuar o login.
+Caso de Uso/Origem:
+UC02
+
+
+Nome da Regra de Negócio:
+Timeout Sessão	Código:
+RN04
+Descrição:
+Sessões inativas por mais de 15 dias são encerradas automaticamente.
+
+Caso de Uso/Origem:
+UC02
+
+
+
+
+
+Nome da Regra de Negócio:
+Salvar Progresso por Jogada	Código:
+RN05
+Descrição:
+A cada jogada válida, o progresso da partida é salvo automaticamente.
+Caso de Uso/Origem:
+UC05
+
+
+Nome da Regra de Negócio:
+Limitar Entradas Histórico	Código:
+RN06
+O histórico exibe no máximo as últimas 50 partidas por usuário.
+Caso de Uso/Origem:
+UC06
+
+
+Nome da Regra de Negócio:
+Intervalo Dificuldade	Código:
+RN07
+Descrição:
+Nível de dificuldade deve ficar entre 1 (fácil) e 10 (extremo).
+
+Caso de Uso/Origem:
+UC07
+
+
+Nome da Regra de Negócio:
+Validar Movimento Engine	Código:
+RN08
+Descrição:
+A Engine de Xadrez só executa movimentos válidos conforme as regras oficiais do jogo.
+
+Caso de Uso/Origem:
+UC03
+
+
+Nome da Regra de Negócio:
+Limite Consultas IA	Código:
+RN09
+Descrição:
+Cada usuário pode enviar até 10 consultas ao Chatbot de IA por minuto.
+
+Caso de Uso/Origem:
+UC04
+
+
+Nome da Regra de Negócio:
+Latência Máxima Feedback	Código:
+RN10
+Descrição:
+O feedback em tempo real deve chegar ao usuário em até 200 ms após o evento.
+Caso de Uso/Origem:
+UC01
+
+
+Nome da Regra de Negócio:
+Compatibilidade de Produtos	Código:
+RN11
+Descrição:
+O site deve fornecer informações detalhadas sobre a compatibilidade dos produtos, especialmente para componentes de hardware, garantindo que os clientes possam fazer compras com confiança, sabendo que os produtos funcionarão em seus sistemas.
+
+Caso de Uso/Origem:
+UC08
+
+
+
+Nome da Regra de Negócio:
+Expiração Token Recuperação		Código:
+RN12
+Descrição:
+Token de recuperação de senha expira 5 minutos após a solicitação.
+
+Caso de Uso/Origem:
+UC09
+
+
+Nome da Regra de Negócio:
+Logout ao Alterar Senha	Código:
+RN13
+Descrição:
+Ao alterar ou recuperar a senha, todas as sessões ativas do usuário são encerradas.
+
+Caso de Uso/Origem:
+UC09, UC11
+
+
+Nome da Regra de Negócio:
+Campos Editáveis Perfil	Código:
+RN14
+Descrição:
+Usuário só pode alterar nome, avatar e biografia em seu perfil.
+
+Caso de Uso/Origem:
+UC10
+
+
+Nome da Regra de Negócio:
+OptIn Notificações	Código:
+RN15
+Descrição:
+O usuário deve optar por receber notificações antes de começar a recebê-las.
+
+Caso de Uso/Origem:
+UC12
+
+
+Nome da Regra de Negócio:
+Email Verificado	Código:
+RN15
+Descrição:
+O usuário só pode realizar ações sensíveis (jogar, salvar progresso) e, principalmente, comunicar-se com o Chatbot após confirmar o e-mail via link de verificação.
+
+Caso de Uso/Origem:
+UC01
+
+
+
+
+Nome da Regra de Negócio: 
+
+Email Único	Código: 
+
+RN01
+
+Descrição:
+
+Cada usuário deve cadastrar um e-mail único no sistema. O sistema não permite cadastro de e-mails duplicados.
+
+Caso de Uso/Origem:
+
+UC01
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Força da Senha	Código:
+
+RN02
+
+Descrição:
+
+Senha deve ter no mínimo 6 caracteres e no máximo 100 caracteres. O sistema valida o comprimento da senha durante o cadastro.
+
+Caso de Uso/Origem:
+
+UC01
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Credenciais Válidas	Código:
+
+RN03
+
+Descrição:
+
+Somente e-mail e senha corretos permitem efetuar o login. O sistema valida as credenciais antes de autenticar o usuário.
+
+Caso de Uso/Origem:
+
+UC02
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Email Verificado para Funcionalidades Sensíveis	Código:
+
+RN04
+
+Descrição:
+
+O usuário só pode participar da coleta de dados, visualizar resultados, iniciar jornada de aprendizado e gerar layouts após confirmar o e-mail via link de verificação enviado após o cadastro.
+
+Caso de Uso/Origem:
+
+UC01, UC03, UC04, UC05, UC08
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Timeout de Sessão	Código:
+
+RN05
+
+Descrição:
+
+Sessões inativas por mais de 15 dias são encerradas automaticamente. O usuário precisará fazer login novamente.
+
+Caso de Uso/Origem:
+
+UC02
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Validação de Email	Código:
+
+RN06
+
+Descrição:
+
+O sistema valida o formato do e-mail durante o cadastro. E-mails temporários ou descartáveis podem ser bloqueados. O e-mail deve ter formato válido (exemplo: usuario@dominio.com).
+
+Caso de Uso/Origem:
+
+UC01
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Limite de Tentativas de Cadastro	Código:
+
+RN07
+
+Descrição:
+
+O sistema limita o número de tentativas de cadastro por período para prevenir abuso. Após muitas tentativas, o usuário deve aguardar antes de tentar novamente.
+
+Caso de Uso/Origem:
+
+UC01
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Expiração de Token de Recuperação	Código:
+
+RN08
+
+Descrição:
+
+Token de recuperação de senha expira após um período determinado. O usuário deve solicitar nova recuperação se o token expirar.
+
+Caso de Uso/Origem:
+
+UC11
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Logout ao Alterar Senha	Código:
+
+RN09
+
+Descrição:
+
+Ao alterar ou recuperar a senha, todas as sessões ativas do usuário são encerradas por segurança. O usuário precisará fazer login novamente.
+
+Caso de Uso/Origem:
+
+UC11
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Coleta de Dados Mínima	Código:
+
+RN10
+
+Descrição:
+
+Para participar da coleta de dados, o usuário deve completar o questionário inicial e realizar pelo menos uma sequência de teste de digitação. O sistema não permite visualizar resultados sem dados coletados.
+
+Caso de Uso/Origem:
+
+UC03, UC04
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Salvamento Automático de Progresso	Código:
+
+RN11
+
+Descrição:
+
+A cada sessão de digitação completada (coleta de dados, lição ou prática livre), o progresso é salvo automaticamente no banco de dados associado ao usuário autenticado.
+
+Caso de Uso/Origem:
+
+UC03, UC06, UC07, UC14
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Validação de Sequências de Digitação	Código:
+
+RN12
+
+Descrição:
+
+Durante a coleta de dados, o sistema registra apenas sequências válidas. Sequências com mais de 50% de erros são marcadas para análise, mas ainda são armazenadas para fins de pesquisa.
+
+Caso de Uso/Origem:
+
+UC03
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Limite de Sequências por Sessão	Código:
+
+RN13
+
+Descrição:
+
+Cada sessão de coleta de dados coleta um número determinado de sequências de caracteres. O usuário pode realizar múltiplas sessões para aumentar a quantidade de dados coletados.
+
+Caso de Uso/Origem:
+
+UC03
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Baseline Obrigatório para Aprendizado	Código:
+
+RN14
+
+Descrição:
+
+O usuário deve completar uma avaliação baseline (teste inicial) antes de iniciar a jornada de aprendizado. O baseline é usado para personalizar as lições conforme o nível do usuário.
+
+Caso de Uso/Origem:
+
+UC05
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Progressão Sequencial de Lições	Código:
+
+RN15
+
+Descrição:
+
+As lições devem ser completadas em ordem sequencial. O usuário só pode acessar a próxima lição após completar a anterior com precisão mínima de 80%.
+
+Caso de Uso/Origem:
+
+UC05, UC06
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Precisão Mínima para Conclusão de Lição	Código:
+
+RN16
+
+Descrição:
+
+Uma lição só é considerada concluída se o usuário atingir pelo menos 80% de precisão. Caso contrário, o usuário deve repetir a lição.
+
+Caso de Uso/Origem:
+
+UC06
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Limite de Histórico de Sessões	Código:
+
+RN17
+
+Descrição:
+
+O histórico de sessões de digitação exibe no máximo as últimas 100 sessões por usuário. Sessões mais antigas são mantidas no banco de dados mas não aparecem no histórico visual.
+
+Caso de Uso/Origem:
+
+UC04, UC10
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Dados Mínimos para Geração de Layout	Código:
+
+RN18
+
+Descrição:
+
+Para gerar um layout otimizado, o sistema requer que o usuário tenha coletado dados suficientes (mínimo de sequências de digitação) ou que existam dados agregados do sistema de ML baseados em outros usuários.
+
+Caso de Uso/Origem:
+
+UC08
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Idioma da Interface	Código:
+
+RN19
+
+Descrição:
+
+O sistema suporta dois idiomas: Português (pt-BR) e Inglês (en). O usuário pode alternar entre idiomas a qualquer momento. A preferência é salva no perfil do usuário.
+
+Caso de Uso/Origem:
+
+UC13
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Validação de Movimentos de Teclas	Código:
+
+RN20
+
+Descrição:
+
+Durante os testes de digitação, o sistema registra apenas teclas válidas pressionadas. Teclas de controle (ESC, Tab, etc.) são tratadas de forma especial e não contam como erros na sequência.
+
+Caso de Uso/Origem:
+
+UC03, UC06, UC07
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Tempo Máximo de Reação	Código:
+
+RN21
+
+Descrição:
+
+Tempos de reação superiores a 5 segundos para uma única tecla são considerados inválidos e descartados da análise, pois indicam que o usuário não estava prestando atenção ao teste.
+
+Caso de Uso/Origem:
+
+UC03
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Privacidade de Dados Compartilhados	Código:
+
+RN22
+
+Descrição:
+
+Dados compartilhados para pesquisa são sempre anonimizados. Informações pessoais identificáveis são removidas antes de serem utilizadas pelo sistema de ML para otimização de layouts.
+
+Caso de Uso/Origem:
+
+UC03
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Comparação de Layouts	Código:
+
+RN23
+
+Descrição:
+
+O usuário pode comparar diferentes layouts de teclado (QWERTY, Dvorak, Colemak, layouts gerados) apenas se tiver dados de digitação coletados suficientes para análise comparativa.
+
+Caso de Uso/Origem:
+
+UC09
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Atualização de Estatísticas	Código:
+
+RN24
+
+Descrição:
+
+As estatísticas do perfil são atualizadas automaticamente após cada sessão de digitação concluída. O cálculo considera velocidade média (WPM), precisão média e consistência.
+
+Caso de Uso/Origem:
+
+UC10, UC14
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Sessões de Prática Livre	Código:
+
+RN25
+
+Descrição:
+
+Sessões de prática livre podem ser realizadas sem autenticação, mas os resultados só são salvos se o usuário estiver autenticado. Usuários não autenticados podem praticar mas não têm histórico salvo.
+
+Caso de Uso/Origem:
+
+UC07
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Geração de Layout por Idioma	Código:
+
+RN26
+
+Descrição:
+
+Layouts otimizados podem ser gerados de forma universal (múltiplos idiomas) ou específica para um idioma. Layouts específicos requerem dados linguísticos do idioma selecionado.
+
+Caso de Uso/Origem:
+
+UC08
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Validação de Texto Customizado	Código:
+
+RN27
+
+Descrição:
+
+Textos customizados para prática livre devem ter no mínimo 10 caracteres e no máximo 10.000 caracteres. Textos muito curtos ou muito longos são rejeitados.
+
+Caso de Uso/Origem:
+
+UC07
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Rate Limiting de Requisições	Código:
+
+RN28
+
+Descrição:
+
+O sistema limita o número de requisições por minuto para prevenir abuso. Usuários autenticados têm limites mais altos que usuários não autenticados.
+
+Caso de Uso/Origem:
+
+UC08, UC09
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Exportação de Dados	Código:
+
+RN29
+
+Descrição:
+
+Usuários autenticados podem solicitar exportação de seus dados pessoais de digitação em formato JSON ou CSV. A exportação é processada e disponibilizada para download.
+
+Caso de Uso/Origem:
+
+UC10
+
+
+
+
+
+Nome da Regra de Negócio:
+
+Retenção de Dados	Código:
+
+RN30
+
+Descrição:
+
+Dados de digitação são mantidos no sistema por período indeterminado para fins de pesquisa e análise. Usuários podem solicitar exclusão de dados pessoais a qualquer momento.
+
+Caso de Uso/Origem:
+
+UC03, UC10
+

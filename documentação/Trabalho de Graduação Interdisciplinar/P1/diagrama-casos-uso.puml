@@ -1,0 +1,100 @@
+@startuml BagreType - Diagrama de Casos de Uso
+
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor<<GrupoConta>> #E3F2FD
+  BackgroundColor<<GrupoColeta>> #E8F5E9
+  BackgroundColor<<GrupoAprendizado>> #FFF3E0
+  BackgroundColor<<GrupoLayout>> #F3E5F5
+  BackgroundColor<<GrupoAdmin>> #ECEFF1
+  BorderColor #1976D2
+}
+
+' Ator principal centralizado
+actor "Usuário\n(AT01)" as Usuario #4A90E2
+
+' Atores secundários nas bordas
+actor "Sistema de ML\n(AT02)" as SistemaML #FF9800
+actor "Sistema\n(AT03)" as Sistema #9E9E9E
+actor "Administrador\n(AT04)" as Admin #607D8B
+
+' Agrupamento: Gerenciamento de Conta (topo)
+package "GERENCIAMENTO DE CONTA" <<GrupoConta>> {
+  usecase "Cadastro de Usuário\n(UC01)" as UC01
+  usecase "Login de Usuário\n(UC02)" as UC02
+  usecase "Recuperação de Senha\n(UC11)" as UC11
+  usecase "Logout do Usuário\n(UC12)" as UC12
+  usecase "Visualizar Perfil e Estatísticas\n(UC10)" as UC10
+  usecase "Trocar Idioma da Interface\n(UC13)" as UC13
+}
+
+' Agrupamento: Coleta e Análise de Dados (esquerda)
+package "COLETA E ANÁLISE DE DADOS" <<GrupoColeta>> {
+  usecase "Participar da Coleta de Dados\n(UC03)" as UC03
+  usecase "Visualizar Resultados da Coleta\n(UC04)" as UC04
+  usecase "Salvar Progresso de Sessão\n(UC14)" as UC14
+}
+
+' Agrupamento: Aprendizado e Prática (direita)
+package "APRENDIZADO E PRÁTICA" <<GrupoAprendizado>> {
+  usecase "Iniciar Jornada de Aprendizado\n(UC05)" as UC05
+  usecase "Realizar Lição de Digitação\n(UC06)" as UC06
+  usecase "Realizar Prática Livre\n(UC07)" as UC07
+}
+
+' Agrupamento: Otimização de Layouts (baixo)
+package "OTIMIZAÇÃO DE LAYOUTS" <<GrupoLayout>> {
+  usecase "Gerar Layout Otimizado\n(UC08)" as UC08
+  usecase "Comparar Layouts\n(UC09)" as UC09
+}
+
+' Agrupamento: Administração (canto)
+package "ADMINISTRAÇÃO" <<GrupoAdmin>> {
+  usecase "Gerenciar Sistema" as UCAdmin
+}
+
+' Relações do Usuário centralizado para todos os casos de uso
+Usuario --> UC01
+Usuario --> UC02
+Usuario --> UC11
+Usuario --> UC13
+Usuario --> UC03
+Usuario --> UC04
+Usuario --> UC05
+Usuario --> UC06
+Usuario --> UC07
+Usuario --> UC08
+Usuario --> UC09
+Usuario --> UC10
+
+' Login é pré-requisito para funcionalidades autenticadas
+UC02 ..> UC10 : <<include>>
+UC02 ..> UC12 : <<include>>
+UC02 ..> UC03 : <<include>>
+UC02 ..> UC04 : <<include>>
+UC02 ..> UC05 : <<include>>
+UC02 ..> UC06 : <<include>>
+UC02 ..> UC07 : <<include>>
+UC02 ..> UC08 : <<include>>
+UC02 ..> UC09 : <<include>>
+
+' Relações com Sistema de ML
+UC03 ..> SistemaML : utiliza
+UC08 ..> SistemaML : utiliza
+
+' Relações automáticas (salvamento)
+UC03 ..> UC14 : gera
+UC06 ..> UC14 : gera
+UC07 ..> UC14 : gera
+
+' Sistema executa salvamento automaticamente
+Sistema ..> UC14 : executa
+
+' Relações do Administrador
+Admin --> UCAdmin
+
+' Layout: Usuário centralizado com setas para todos os lados
+' Os grupos serão organizados automaticamente ao redor do usuário
+
+@enduml
+
