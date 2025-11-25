@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { format } from 'date-fns';
+import { format, subDays, subWeeks, subMonths, subYears } from 'date-fns';
 
 interface UserStats {
   totalLessonsCompleted: number;
@@ -61,6 +61,9 @@ interface ChartDataPoint {
   averageAccuracy: number;
 }
 
+type TimePeriod = 'day' | 'week' | 'month' | 'year' | 'alltime';
+type MaxDots = '10' | '25' | '50' | '100' | 'max';
+
 const Profile = () => {
   const { lang } = useParams();
   const { t } = useLocalization();
@@ -69,6 +72,8 @@ const Profile = () => {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [typingSessions, setTypingSessions] = useState<TypingSession[]>([]);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>('week');
+  const [maxDots, setMaxDots] = useState<MaxDots>('50');
 
   useEffect(() => {
     if (!user) {
@@ -209,15 +214,62 @@ const Profile = () => {
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
-    let cumulativeWPM = 0;
-    let cumulativeAccuracy = 0;
+    // Filter by time period
+    const now = new Date();
+    let filteredSessions: TypingSession[];
+    
+    if (timePeriod === 'alltime') {
+      filteredSessions = sortedSessions;
+    } else {
+      let cutoffDate: Date;
+      switch (timePeriod) {
+        case 'day':
+          cutoffDate = subDays(now, 1);
+          break;
+        case 'week':
+          cutoffDate = subWeeks(now, 1);
+          break;
+        case 'month':
+          cutoffDate = subMonths(now, 1);
+          break;
+        case 'year':
+          cutoffDate = subYears(now, 1);
+          break;
+        default:
+          cutoffDate = subWeeks(now, 1);
+      }
 
-    return sortedSessions.map((session, index) => {
+      filteredSessions = sortedSessions.filter(session => 
+        new Date(session.created_at) >= cutoffDate
+      );
+    }
+
+    if (filteredSessions.length === 0) return [];
+
+    // Determine max sessions based on selection
+    const maxSessions = maxDots === 'max' ? filteredSessions.length : parseInt(maxDots);
+    
+    // Get sessions to display (most recent N)
+    const sessionsToDisplay = filteredSessions.slice(-maxSessions);
+
+    // Calculate cumulative averages from all sessions before the displayed range
+    // (for accurate running average)
+    const allSessionsBeforeDisplay = sortedSessions.filter(session => {
+      const sessionDate = new Date(session.created_at);
+      return sessionDate < new Date(sessionsToDisplay[0]?.created_at || now);
+    });
+
+    let cumulativeWPM = allSessionsBeforeDisplay.reduce((sum, session) => sum + session.wpm, 0);
+    let cumulativeAccuracy = allSessionsBeforeDisplay.reduce((sum, session) => sum + session.accuracy, 0);
+    const startingIndex = allSessionsBeforeDisplay.length;
+
+    return sessionsToDisplay.map((session, index) => {
       cumulativeWPM += session.wpm;
       cumulativeAccuracy += session.accuracy;
       
-      const averageWPM = cumulativeWPM / (index + 1);
-      const averageAccuracy = cumulativeAccuracy / (index + 1);
+      const currentIndex = startingIndex + index + 1;
+      const averageWPM = cumulativeWPM / currentIndex;
+      const averageAccuracy = cumulativeAccuracy / currentIndex;
 
       const date = new Date(session.created_at);
       const dateLabel = format(date, 'MMM d, yyyy');
@@ -225,7 +277,7 @@ const Profile = () => {
 
       return {
         date: session.created_at,
-        dateLabel: sortedSessions.length > 10 ? shortDateLabel : dateLabel,
+        dateLabel: sessionsToDisplay.length > 10 ? shortDateLabel : dateLabel,
         wpm: session.wpm,
         accuracy: session.accuracy,
         averageWPM: Math.round(averageWPM * 10) / 10,
@@ -484,7 +536,10 @@ const Profile = () => {
                           return dataPoint ? format(new Date(dataPoint.date), 'MMM d, yyyy HH:mm') : value;
                         }}
                       />
-                      <ChartLegend content={<ChartLegendContent />} />
+                      <ChartLegend 
+                        content={<ChartLegendContent />}
+                        wrapperStyle={{ paddingTop: '0', paddingBottom: '0' }}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="wpm" 
@@ -505,6 +560,46 @@ const Profile = () => {
                       />
                     </LineChart>
                   </ChartContainer>
+                  <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-sm text-foreground/70">{t('profile.chartControls.time')}:</span>
+                      {(['day', 'week', 'month', 'year', 'alltime'] as TimePeriod[]).map((period) => (
+                        <button
+                          key={period}
+                          className={`text-sm transition-colors ${
+                            timePeriod === period
+                              ? "text-primary font-semibold"
+                              : "text-foreground/50 hover:text-foreground"
+                          }`}
+                          onClick={() => setTimePeriod(period)}
+                        >
+                          {period === 'alltime' 
+                            ? t('profile.chartControls.allTime')
+                            : t(`profile.chartControls.${period}` as any)
+                          }
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-[200px] flex justify-center">
+                      {/* Legend space */}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-sm text-foreground/70">{t('profile.chartControls.dots')}:</span>
+                      {(['10', '25', '50', '100', 'max'] as MaxDots[]).map((dots) => (
+                        <button
+                          key={dots}
+                          className={`text-sm transition-colors ${
+                            maxDots === dots
+                              ? "text-primary font-semibold"
+                              : "text-foreground/50 hover:text-foreground"
+                          }`}
+                          onClick={() => setMaxDots(dots)}
+                        >
+                          {dots}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -540,7 +635,10 @@ const Profile = () => {
                         }}
                         formatter={(value: number) => `${value.toFixed(1)}%`}
                       />
-                      <ChartLegend content={<ChartLegendContent />} />
+                      <ChartLegend 
+                        content={<ChartLegendContent />}
+                        wrapperStyle={{ paddingTop: '0', paddingBottom: '0' }}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="accuracy" 
@@ -561,6 +659,46 @@ const Profile = () => {
                       />
                     </LineChart>
                   </ChartContainer>
+                  <div className="mt-2 flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-sm text-foreground/70">{t('profile.chartControls.time')}:</span>
+                      {(['day', 'week', 'month', 'year', 'alltime'] as TimePeriod[]).map((period) => (
+                        <button
+                          key={period}
+                          className={`text-sm transition-colors ${
+                            timePeriod === period
+                              ? "text-primary font-semibold"
+                              : "text-foreground/50 hover:text-foreground"
+                          }`}
+                          onClick={() => setTimePeriod(period)}
+                        >
+                          {period === 'alltime' 
+                            ? t('profile.chartControls.allTime')
+                            : t(`profile.chartControls.${period}` as any)
+                          }
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex-1 min-w-[200px] flex justify-center">
+                      {/* Legend space */}
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-sm text-foreground/70">{t('profile.chartControls.dots')}:</span>
+                      {(['10', '25', '50', '100', 'max'] as MaxDots[]).map((dots) => (
+                        <button
+                          key={dots}
+                          className={`text-sm transition-colors ${
+                            maxDots === dots
+                              ? "text-primary font-semibold"
+                              : "text-foreground/50 hover:text-foreground"
+                          }`}
+                          onClick={() => setMaxDots(dots)}
+                        >
+                          {dots}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -603,3 +741,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

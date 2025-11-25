@@ -701,7 +701,16 @@
     "wpmOverTime": "WPM Over Time",
     "wpmOverTimeDescription": "Your typing speed progress with running average",
     "accuracyOverTime": "Accuracy Over Time",
-    "accuracyOverTimeDescription": "Your typing accuracy progress with running average"
+    "accuracyOverTimeDescription": "Your typing accuracy progress with running average",
+    "chartControls": {
+      "time": "Time",
+      "dots": "Dots",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "allTime": "All Time"
+    }
   },
   "language": {
     "select": "Select Language",

@@ -701,7 +701,16 @@
     "wpmOverTime": "PPM ao Longo do Tempo",
     "wpmOverTimeDescription": "Seu progresso de velocidade de digitação com média acumulada",
     "accuracyOverTime": "Precisão ao Longo do Tempo",
-    "accuracyOverTimeDescription": "Seu progresso de precisão de digitação com média acumulada"
+    "accuracyOverTimeDescription": "Seu progresso de precisão de digitação com média acumulada",
+    "chartControls": {
+      "time": "Tempo",
+      "dots": "Pontos",
+      "day": "Dia",
+      "week": "Semana",
+      "month": "Mês",
+      "year": "Ano",
+      "allTime": "Todo o Tempo"
+    }
   },
   "language": {
     "select": "Selecionar Idioma",
