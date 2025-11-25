@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { 
   User, 
   Trophy, 
@@ -24,6 +25,8 @@ import {
   Keyboard
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { format } from 'date-fns';
 
 interface UserStats {
   totalLessonsCompleted: number;
@@ -37,6 +40,27 @@ interface UserStats {
   baselineAccuracy: number;
 }
 
+interface TypingSession {
+  id: string;
+  user_id: string | null;
+  wpm: number;
+  raw_wpm: number;
+  accuracy: number;
+  consistency: number | null;
+  time_seconds: number;
+  mode: string;
+  created_at: string;
+}
+
+interface ChartDataPoint {
+  date: string;
+  dateLabel: string;
+  wpm: number;
+  accuracy: number;
+  averageWPM: number;
+  averageAccuracy: number;
+}
+
 const Profile = () => {
   const { lang } = useParams();
   const { t } = useLocalization();
@@ -44,6 +68,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [typingSessions, setTypingSessions] = useState<TypingSession[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -71,13 +96,19 @@ const Profile = () => {
       }
 
       // Load typing sessions
-      const { data: typingSessions, error: sessionsError } = await supabase
+      const { data: typingSessionsData, error: sessionsError } = await supabase
         .from('typing_sessions')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
 
       if (sessionsError) {
         console.error('Error loading typing sessions:', sessionsError);
+      }
+
+      // Store typing sessions for charts
+      if (typingSessionsData) {
+        setTypingSessions(typingSessionsData as TypingSession[]);
       }
 
       // Load user progress (baseline data)
@@ -96,15 +127,15 @@ const Profile = () => {
       const completedTests = completedLessons.filter(lp => lp.lesson_id.includes('test'));
       
       // Calculate WPM statistics from typing sessions
-      const allWPMs = typingSessions?.map(session => session.wpm).filter(wpm => wpm > 0) || [];
+      const allWPMs = typingSessionsData?.map(session => session.wpm).filter(wpm => wpm > 0) || [];
       const averageWPM = allWPMs.length > 0 ? allWPMs.reduce((sum, wpm) => sum + wpm, 0) / allWPMs.length : 0;
       const bestWPM = allWPMs.length > 0 ? Math.max(...allWPMs) : 0;
       
       // Calculate total time spent (in minutes)
-      const totalTimeSpent = typingSessions?.reduce((total, session) => total + (session.time_seconds || 0), 0) / 60 || 0;
+      const totalTimeSpent = typingSessionsData?.reduce((total, session) => total + (session.time_seconds || 0), 0) / 60 || 0;
       
       // Calculate current streak (simplified - consecutive days with activity)
-      const sessionDates = typingSessions?.map(session => new Date(session.created_at).toDateString()) || [];
+      const sessionDates = typingSessionsData?.map(session => new Date(session.created_at).toDateString()) || [];
       const uniqueDates = [...new Set(sessionDates)].sort();
       let currentStreak = 0;
       const today = new Date().toDateString();
@@ -168,6 +199,63 @@ const Profile = () => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return `${hours}h ${remainingMinutes}m`;
+  };
+
+  // Prepare chart data with running averages
+  const prepareChartData = (): ChartDataPoint[] => {
+    if (typingSessions.length === 0) return [];
+
+    const sortedSessions = [...typingSessions].sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    let cumulativeWPM = 0;
+    let cumulativeAccuracy = 0;
+
+    return sortedSessions.map((session, index) => {
+      cumulativeWPM += session.wpm;
+      cumulativeAccuracy += session.accuracy;
+      
+      const averageWPM = cumulativeWPM / (index + 1);
+      const averageAccuracy = cumulativeAccuracy / (index + 1);
+
+      const date = new Date(session.created_at);
+      const dateLabel = format(date, 'MMM d, yyyy');
+      const shortDateLabel = format(date, 'MMM d');
+
+      return {
+        date: session.created_at,
+        dateLabel: sortedSessions.length > 10 ? shortDateLabel : dateLabel,
+        wpm: session.wpm,
+        accuracy: session.accuracy,
+        averageWPM: Math.round(averageWPM * 10) / 10,
+        averageAccuracy: Math.round(averageAccuracy * 10) / 10,
+      };
+    });
+  };
+
+  const chartData = prepareChartData();
+
+  const wpmChartConfig = {
+    wpm: {
+      label: "WPM",
+      color: "hsl(var(--primary))",
+    },
+    averageWPM: {
+      label: "Average WPM",
+      color: "hsl(var(--accent))",
+    },
+  };
+
+  const accuracyChartConfig = {
+    accuracy: {
+      label: "Accuracy",
+      color: "hsl(var(--primary))",
+    },
+    averageAccuracy: {
+      label: "Average Accuracy",
+      color: "hsl(var(--accent))",
+    },
   };
 
   if (isLoading) {
@@ -362,6 +450,121 @@ const Profile = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Charts Section */}
+          {chartData.length > 0 && (
+            <div className="grid md:grid-cols-1 gap-6">
+              {/* WPM Over Time Chart */}
+              <Card className="bg-card/90 backdrop-blur-md border-border/50">
+                <CardHeader>
+                  <CardTitle>{t('profile.wpmOverTime')}</CardTitle>
+                  <CardDescription>
+                    {t('profile.wpmOverTimeDescription')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="w-full">
+                  <ChartContainer config={wpmChartConfig} className="!aspect-auto w-full h-[300px]">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="dateLabel" 
+                        tick={{ fontSize: 12 }}
+                        angle={chartData.length > 10 ? -45 : 0}
+                        textAnchor={chartData.length > 10 ? 'end' : 'middle'}
+                        height={chartData.length > 10 ? 60 : 30}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        label={{ value: 'WPM', angle: -90, position: 'insideLeft' }}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        labelFormatter={(value, payload) => {
+                          const dataPoint = payload?.[0]?.payload as ChartDataPoint | undefined;
+                          return dataPoint ? format(new Date(dataPoint.date), 'MMM d, yyyy HH:mm') : value;
+                        }}
+                      />
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="wpm" 
+                        stroke="var(--color-wpm)" 
+                        strokeWidth={2}
+                        dot={{ r: 4, fill: "var(--color-wpm)" }}
+                        activeDot={{ r: 6 }}
+                        name="wpm"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="averageWPM" 
+                        stroke="var(--color-averageWPM)" 
+                        strokeWidth={3}
+                        strokeDasharray="8 4"
+                        dot={false}
+                        name="averageWPM"
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+
+              {/* Accuracy Over Time Chart */}
+              <Card className="bg-card/90 backdrop-blur-md border-border/50">
+                <CardHeader>
+                  <CardTitle>{t('profile.accuracyOverTime')}</CardTitle>
+                  <CardDescription>
+                    {t('profile.accuracyOverTimeDescription')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="w-full">
+                  <ChartContainer config={accuracyChartConfig} className="!aspect-auto w-full h-[300px]">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="dateLabel" 
+                        tick={{ fontSize: 12 }}
+                        angle={chartData.length > 10 ? -45 : 0}
+                        textAnchor={chartData.length > 10 ? 'end' : 'middle'}
+                        height={chartData.length > 10 ? 60 : 30}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        domain={[0, 100]}
+                        label={{ value: 'Accuracy (%)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        labelFormatter={(value, payload) => {
+                          const dataPoint = payload?.[0]?.payload as ChartDataPoint | undefined;
+                          return dataPoint ? format(new Date(dataPoint.date), 'MMM d, yyyy HH:mm') : value;
+                        }}
+                        formatter={(value: number) => `${value.toFixed(1)}%`}
+                      />
+                      <ChartLegend content={<ChartLegendContent />} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="accuracy" 
+                        stroke="var(--color-accuracy)" 
+                        strokeWidth={2}
+                        dot={{ r: 4, fill: "var(--color-accuracy)" }}
+                        activeDot={{ r: 6 }}
+                        name="accuracy"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="averageAccuracy" 
+                        stroke="var(--color-averageAccuracy)" 
+                        strokeWidth={3}
+                        strokeDasharray="8 4"
+                        dot={false}
+                        name="averageAccuracy"
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-4 justify-center">

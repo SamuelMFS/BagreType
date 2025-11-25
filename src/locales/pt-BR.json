@@ -697,7 +697,11 @@
     "baselineAccuracy": "Precisão Base",
     "continueLearning": "Continuar Aprendendo",
     "practice": "Praticar",
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "wpmOverTime": "PPM ao Longo do Tempo",
+    "wpmOverTimeDescription": "Seu progresso de velocidade de digitação com média acumulada",
+    "accuracyOverTime": "Precisão ao Longo do Tempo",
+    "accuracyOverTimeDescription": "Seu progresso de precisão de digitação com média acumulada"
   },
   "language": {
     "select": "Selecionar Idioma",

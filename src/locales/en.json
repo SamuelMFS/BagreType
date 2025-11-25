@@ -697,7 +697,11 @@
     "baselineAccuracy": "Baseline Accuracy",
     "continueLearning": "Continue Learning",
     "practice": "Practice",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "wpmOverTime": "WPM Over Time",
+    "wpmOverTimeDescription": "Your typing speed progress with running average",
+    "accuracyOverTime": "Accuracy Over Time",
+    "accuracyOverTimeDescription": "Your typing accuracy progress with running average"
   },
   "language": {
     "select": "Select Language",
